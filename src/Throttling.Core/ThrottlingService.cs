@@ -94,7 +94,7 @@ namespace Throttling
                 case RetryAfterMode.HttpDate:
                     return reset.ToString("r");
                 case RetryAfterMode.DeltaSeconds:
-                    return (reset - _options.Clock.UtcNow).TotalSeconds.ToString(CultureInfo.InvariantCulture);
+                    return Convert.ToInt64((reset - _options.Clock.UtcNow).TotalSeconds).ToString(CultureInfo.InvariantCulture);
                 default:
                     return null;
             }
