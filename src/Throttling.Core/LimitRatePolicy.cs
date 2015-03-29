@@ -43,11 +43,13 @@ namespace Throttling
                 };
             }
 
-            result.Reset = rate.Reset;
+            var reset = _sliding ? _options.Clock.UtcNow.Add(_window) : rate.Reset;
+            result.Reset = reset;
             AddRateLimitHeaders(rate, result.RateLimitHeaders);
             result.LimitReached = rate.Remaining <= 0;
 
             rate.Remaining = rate.Remaining - 1;
+            rate.Reset = reset;
 
             await _options.RateStore.SetRemainingRateAsync(Category, key, rate);
 
