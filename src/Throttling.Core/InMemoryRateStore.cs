@@ -22,6 +22,7 @@ namespace Throttling
                 if (_clock.UtcNow > value.Reset)
                 {
                     _store.TryRemove(computedKey, out value);
+                    value = null;
                 }
             }
             
