@@ -47,7 +47,7 @@ namespace Throttling
             AddRateLimitHeaders(rate, result.RateLimitHeaders);
             result.LimitReached = rate.Remaining <= 0;
 
-            rate.Remaining = rate.Remaining - 1;
+            rate.Remaining = Math.Max(rate.Remaining - 1, 0);
             rate.Reset = reset;
 
             await _options.RateStore.SetRemainingRateAsync(Category, key, rate);
