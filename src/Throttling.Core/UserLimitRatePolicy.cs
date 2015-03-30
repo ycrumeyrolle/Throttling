@@ -9,18 +9,11 @@ namespace Throttling
     {
         private readonly IPLimitRatePolicy _fallbackPolicy;
 
-        public override string Category
-        {
-            get
-            {
-                return "user";
-            }
-        }
-
         public UserLimitRatePolicy(long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding)
             : base(authenticatedLimit, authenticatedWindow, sliding)
         {
             _fallbackPolicy = new IPLimitRatePolicy(unauthenticatedLimit, unauthenticatedWindow, sliding);
+            Category = "user";
         }
 
         public override string GetKey([NotNull]HttpContext context)

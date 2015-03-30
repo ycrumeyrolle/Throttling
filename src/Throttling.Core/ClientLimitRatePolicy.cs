@@ -7,17 +7,10 @@ namespace Throttling
 {
     public class ClientLimitRatePolicy : LimitRatePolicy
     {
-        public override string Category
-        {
-            get
-            {
-                return "client";
-            }
-        }
-
         public ClientLimitRatePolicy(long limit, TimeSpan window, bool sliding)
             : base(limit, window, sliding)
         {
+            Category = "client";
         }
 
         public override string GetKey([NotNull] HttpContext context)

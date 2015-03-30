@@ -127,38 +127,39 @@ namespace Throttling
         {
             return _policy;
         }
+    }
 
-        private sealed class ThrottlingPolicy : IThrottlingPolicy
+    public sealed class ThrottlingPolicy : IThrottlingPolicy
+    {
+        private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
+
+        public string Category { get; set; }
+
+        public void AddPolicy([NotNull] IThrottlingPolicy policy)
         {
-            private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
+            _policies.Add(policy);
+            policy.Category = Category + "_" + policy.Category + "_" + _policies.Count;
+        }
 
-            public string Category { get; set; }
-
-            public void AddPolicy([NotNull] IThrottlingPolicy policy)
+        public void Configure(ThrottlingOptions options)
+        {
+            for (int i = 0; i < _policies.Count; i++)
             {
-                _policies.Add(policy);
+                _policies[i].Configure(options);
+            }
+        }
+
+        public async Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context)
+        {
+            IEnumerable<ThrottlingResult> results = new List<ThrottlingResult>();
+            for (int i = 0; i < _policies.Count; i++)
+            {
+                var policy = _policies[i];
+                var policyResult = await policy.EvaluateAsync(context);
+                results = results.Concat(policyResult);
             }
 
-            public void Configure(ThrottlingOptions options)
-            {
-                for (int i = 0; i < _policies.Count; i++)
-                {
-                    _policies[i].Configure(options);
-                }
-            }
-
-            public async Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context)
-            {
-                IEnumerable<ThrottlingResult> results = new List<ThrottlingResult>();
-                for (int i = 0; i < _policies.Count; i++)
-                {
-                    var policy = _policies[i];
-                    var policyResult = await policy.EvaluateAsync(context);
-                    results = results.Concat(policyResult);
-                }
-
-                return results;
-            }
+            return results;
         }
     }
 }

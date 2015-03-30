@@ -7,7 +7,7 @@ namespace Throttling
 {
     public interface IThrottlingPolicy
     {
-        string Category { get; }
+        string Category { get; set; }
 
         Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context);
 

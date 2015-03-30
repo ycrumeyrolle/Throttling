@@ -47,6 +47,7 @@ namespace Throttling
 
         public virtual Task<IEnumerable<ThrottlingResult>> EvaluatePolicyAsync([NotNull] HttpContext context, [NotNull] IThrottlingPolicy policy)
         {
+            policy.Configure(_options);
             return policy.EvaluateAsync(context);
         }
 

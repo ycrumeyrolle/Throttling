@@ -52,16 +52,16 @@ namespace Throttling.Mvc
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
         {
-            // If this filter is not closest to the action, it is not applicable.
-            if (!IsClosestToAction(context.Filters))
-            {
-                return;
-            }
+            //// If this filter is not closest to the action, it is not applicable.
+            //if (!IsClosestToAction(context.Filters))
+            //{
+            //    return;
+            //}
 
             var httpContext = context.HttpContext;
             var request = httpContext.Request;
 
-            var throttlingPolicy = await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(httpContext, PolicyName);
+            var throttlingPolicy = Policy ?? await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(httpContext, PolicyName);
             if (throttlingPolicy != null)
             {
                 var throttlingResults = await _throttlingService.EvaluatePolicyAsync(httpContext, throttlingPolicy);

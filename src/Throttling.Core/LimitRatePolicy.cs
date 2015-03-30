@@ -13,7 +13,7 @@ namespace Throttling
         protected readonly bool _sliding;
         protected ThrottlingOptions _options;
 
-        public abstract string Category { get; }
+        public string Category { get; set; }
 
         public LimitRatePolicy(long limit, TimeSpan window, bool sliding)
         {

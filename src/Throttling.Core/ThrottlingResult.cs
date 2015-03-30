@@ -11,7 +11,7 @@ namespace Throttling
 
         public DateTimeOffset? Reset { get; set; }
 
-        public IDictionary<string, string> RateLimitHeaders { get; } = new Dictionary<string, string>();
+        public IDictionary<string, string> RateLimitHeaders { get; } = new SortedList<string, string>();
 
     }
 }

@@ -10,14 +10,7 @@ namespace Throttling
         public IPLimitRatePolicy(long limit, TimeSpan window, bool sliding)
             : base(limit, window, sliding)
         {
-        }
-
-        public override string Category
-        {
-            get
-            {
-                return "ip";
-            }
+            Category = "ip";
         }
 
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)
