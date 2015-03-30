@@ -27,6 +27,8 @@ namespace Throttling
             {
                 _options = options.Options;
             }
+
+            _options.ConfigurePolicies();
         }
 
 
@@ -99,20 +101,5 @@ namespace Throttling
                     return null;
             }
         }
-    }
-
-
-
-
-
-
-
-
-
-    public class RemainingRate
-    {
-        public DateTimeOffset Reset { get; set; }
-
-        public long Remaining { get; set; }
     }
 }
