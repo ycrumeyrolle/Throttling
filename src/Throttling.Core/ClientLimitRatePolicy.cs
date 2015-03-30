@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.Http;
+using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
@@ -15,7 +15,7 @@ namespace Throttling
 
         public override string GetKey([NotNull] HttpContext context)
         {
-            return "??";
+            return _options.ClientKeyProvider.GetKey(context);
         }
 
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)

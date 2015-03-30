@@ -12,8 +12,9 @@ namespace Throttling
         public UserLimitRatePolicy(long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding)
             : base(authenticatedLimit, authenticatedWindow, sliding)
         {
-            _fallbackPolicy = new IPLimitRatePolicy(unauthenticatedLimit, unauthenticatedWindow, sliding);
             Category = "user";
+            _fallbackPolicy = new IPLimitRatePolicy(unauthenticatedLimit, unauthenticatedWindow, sliding);
+            _fallbackPolicy.Category = Category + "_" + _fallbackPolicy.Category;
         }
 
         public override string GetKey([NotNull]HttpContext context)

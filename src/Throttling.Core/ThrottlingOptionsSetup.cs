@@ -17,7 +17,7 @@ namespace Throttling
         public override void Configure([NotNull] ThrottlingOptions options, string name = "")
         {
             options.RateStore = this._store;
-            options.Clock = this._clock;            
+            options.Clock = this._clock;                        
             base.Configure(options, name);
         }
         /// <summary>
@@ -26,6 +26,7 @@ namespace Throttling
         public static void ConfigureMessageOptions(ThrottlingOptions options)
         {
             options.RetryAfterMode = RetryAfterMode.DeltaSeconds;
+            options.ClientKeyProvider = new ClientKeyProvider();
         }
     }
 }

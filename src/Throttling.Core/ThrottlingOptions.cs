@@ -33,6 +33,8 @@ namespace Throttling
 
         public ISystemClock Clock { get; set; }
 
+        public IClientKeyProvider ClientKeyProvider { get; set; }
+
         internal void ConfigurePolicies()
         {
             foreach (var policy in PolicyMap.Values)
