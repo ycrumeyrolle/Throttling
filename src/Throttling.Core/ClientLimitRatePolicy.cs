@@ -15,8 +15,8 @@ namespace Throttling
             }
         }
 
-        public ClientLimitRatePolicy(ThrottlingOptions options, long limit, TimeSpan window, bool sliding)
-            : base(options, limit, window, sliding)
+        public ClientLimitRatePolicy(long limit, TimeSpan window, bool sliding)
+            : base(limit, window, sliding)
         {
         }
 
@@ -27,7 +27,7 @@ namespace Throttling
 
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)
         {
-            rateLimitHeaders.Add("X-RateLimit-ClientLimit", this._limit.ToString());
+            rateLimitHeaders.Add("X-RateLimit-ClientLimit", _limit.ToString());
             rateLimitHeaders.Add("X-RateLimit-ClientRemaining", rate.Remaining.ToString());
         }
     }

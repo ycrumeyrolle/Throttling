@@ -12,6 +12,8 @@ namespace Throttling.Mvc
     /// </summary>
     public interface IThrottlingAuthorizationFilter : IAsyncAuthorizationFilter, IOrderedFilter
     {
+        IThrottlingPolicy Policy { get; set; }
+
         string PolicyName { get; set; }
     }
 }

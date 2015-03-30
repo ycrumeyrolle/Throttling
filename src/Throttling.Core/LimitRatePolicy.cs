@@ -11,16 +11,15 @@ namespace Throttling
         protected readonly TimeSpan _window;
         protected readonly long _limit;
         protected readonly bool _sliding;
-        protected readonly ThrottlingOptions _options;
+        protected ThrottlingOptions _options;
 
         public abstract string Category { get; }
 
-        public LimitRatePolicy(ThrottlingOptions options, long limit, TimeSpan window, bool sliding)
+        public LimitRatePolicy(long limit, TimeSpan window, bool sliding)
         {
             _limit = limit;
             _window = window;
             _sliding = sliding;
-            _options = options;
         }
 
         public virtual async Task<IEnumerable<ThrottlingResult>> EvaluateAsync(HttpContext context)
@@ -54,6 +53,11 @@ namespace Throttling
             await _options.RateStore.SetRemainingRateAsync(Category, key, rate);
 
             return new[] { result };
+        }
+
+        public virtual void Configure(ThrottlingOptions options)
+        {
+            _options = options;
         }
 
         public abstract void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders);

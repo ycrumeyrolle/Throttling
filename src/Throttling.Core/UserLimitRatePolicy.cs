@@ -17,10 +17,10 @@ namespace Throttling
             }
         }
 
-        public UserLimitRatePolicy(ThrottlingOptions options, long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding)
-            : base(options, authenticatedLimit, authenticatedWindow, sliding)
+        public UserLimitRatePolicy(long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding)
+            : base(authenticatedLimit, authenticatedWindow, sliding)
         {
-            _fallbackPolicy = new IPLimitRatePolicy(options, unauthenticatedLimit, unauthenticatedWindow, sliding);
+            _fallbackPolicy = new IPLimitRatePolicy(unauthenticatedLimit, unauthenticatedWindow, sliding);
         }
 
         public override string GetKey([NotNull]HttpContext context)

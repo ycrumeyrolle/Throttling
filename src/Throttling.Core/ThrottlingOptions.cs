@@ -33,12 +33,21 @@ namespace Throttling
 
         public ISystemClock Clock { get; set; }
 
+        internal void ConfigurePolicies()
+        {
+            foreach (var policy in PolicyMap.Values)
+            {
+                policy.Configure(this);
+            }
+        }
+
+
         /// <summary>
         /// Adds a new policy.
         /// </summary>
         /// <param name="name">The name of the policy.</param>
-        /// <param name="policy">The <see cref="ThrottlingPolicy"/> policy to be added.</param>
-        public void AddPolicy([NotNull] string name, [NotNull] ThrottlingPolicy policy)
+        /// <param name="policy">The <see cref="IThrottlingPolicy"/> policy to be added.</param>
+        public void AddPolicy([NotNull] string name, [NotNull] IThrottlingPolicy policy)
         {
             PolicyMap[name] = policy;
         }
@@ -50,7 +59,7 @@ namespace Throttling
         /// <param name="configurePolicy">A delegate which can use a policy builder to build a policy.</param>
         public void AddPolicy([NotNull] string name, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            var policyBuilder = new ThrottlingPolicyBuilder(this);
+            var policyBuilder = new ThrottlingPolicyBuilder();
             configurePolicy(policyBuilder);
             PolicyMap[name] = policyBuilder.Build();
         }

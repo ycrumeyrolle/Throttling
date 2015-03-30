@@ -15,7 +15,7 @@ namespace Throttling
         private readonly RequestDelegate _next;
         private readonly IThrottlingService _throttlingService;
         private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
-        private readonly ThrottlingPolicy _policy;
+        private readonly IThrottlingPolicy _policy;
         private readonly ILogger _logger;
         private readonly string _policyName;
 
@@ -24,7 +24,7 @@ namespace Throttling
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="ThrottlingService">An instance of <see cref="IThrottlingService"/>.</param>
-        /// <param name="policyProvider">A policy provider which can get an <see cref="ThrottlingPolicy"/>.</param>
+        /// <param name="policyProvider">A policy provider which can get an <see cref="IThrottlingPolicy"/>.</param>
         /// <param name="policyName">An optional name of the policy to be fetched.</param>
      	public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicyProvider policyProvider, [NotNull] string policyName)
         {
@@ -40,7 +40,7 @@ namespace Throttling
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="throttlingService">An instance of <see cref="T:Throttling.IThrottlingService" />.</param>
         /// <param name="policy">An instance of the <see cref="T:Throttling.ThrottlingPolicy" /> which can be applied.</param>
-        public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] ThrottlingPolicy policy)
+        public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicy policy)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<ThrottlingMiddleware>();

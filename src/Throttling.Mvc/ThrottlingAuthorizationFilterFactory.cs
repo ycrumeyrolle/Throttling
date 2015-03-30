@@ -18,13 +18,23 @@ namespace Throttling.Mvc
     {
         private readonly string _policyName;
 
+        private readonly IThrottlingPolicy _policy;
+
         /// <summary>
-        /// Creates a new insntace of <see cref="ThrottlingAuthorizationFilterFactory"/>.
+        /// Creates a new instance of <see cref="ThrottlingAuthorizationFilterFactory"/>.
         /// </summary>
         /// <param name="policyName"></param>
         public ThrottlingAuthorizationFilterFactory(string policyName)
         {
             _policyName = policyName;
+        }
+        /// <summary>
+        /// Creates a new instance of <see cref="ThrottlingAuthorizationFilterFactory"/>.
+        /// </summary>
+        /// <param name="policy"></param>
+        public ThrottlingAuthorizationFilterFactory(IThrottlingPolicy policy)
+        {
+            _policy = policy;
         }
 
         /// <inheritdoc />
@@ -40,6 +50,7 @@ namespace Throttling.Mvc
         {
             var filter = serviceProvider.GetRequiredService<IThrottlingAuthorizationFilter>();
             filter.PolicyName = _policyName;
+            filter.Policy = _policy;
             return filter;
         }
     }

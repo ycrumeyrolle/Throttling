@@ -7,8 +7,8 @@ namespace Throttling
 {
     public class IPLimitRatePolicy : LimitRatePolicy
     {
-        public IPLimitRatePolicy(ThrottlingOptions options, long limit, TimeSpan window, bool sliding)
-            : base(options, limit, window, sliding)
+        public IPLimitRatePolicy(long limit, TimeSpan window, bool sliding)
+            : base(limit, window, sliding)
         {
         }
 

@@ -35,6 +35,11 @@ namespace Throttling.Mvc
         /// </summary>
         public string PolicyName { get; set; }
 
+        /// <summary>
+        /// The policy.
+        /// </summary>
+        public IThrottlingPolicy Policy { get; set; }
+
         /// <inheritdoc />
         public int Order
         {

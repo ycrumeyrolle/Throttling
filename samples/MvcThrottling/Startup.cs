@@ -16,9 +16,13 @@ namespace MvcThrottling
             services.AddThrottling();
             services.ConfigureThrottling(options =>
             {
-                options.AddPolicy("Test", builder =>
+                options.AddPolicy("5 requests per 10 seconds, sliding reset", builder =>
                 {
-                    builder.AddIPLimitRatePerHour(5);
+                    builder.AddUserLimitRate(5, System.TimeSpan.FromSeconds(10), true);
+                });
+                options.AddPolicy("5 requests per 10 seconds, fixed reset", builder =>
+                {
+                    builder.AddUserLimitRate(5, System.TimeSpan.FromSeconds(10));
                 });
             });
 

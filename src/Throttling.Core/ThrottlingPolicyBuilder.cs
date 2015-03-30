@@ -9,15 +9,8 @@ namespace Throttling
 {
     public class ThrottlingPolicyBuilder
     {
-        private ThrottlingOptions _options;
-
         private readonly ThrottlingPolicy _policy = new ThrottlingPolicy();
-
-        public ThrottlingPolicyBuilder(ThrottlingOptions options)
-        {
-            _options = options;
-        }
-
+        
         /// <summary>
         /// Adds the specified <paramref name="headers"/> to the policy.
         /// </summary>
@@ -35,7 +28,7 @@ namespace Throttling
         /// <returns>The current policy builder</returns>
         public ThrottlingPolicyBuilder AddUserLimitRate(long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding = false)
         {
-            return AddPolicy(new UserLimitRatePolicy(_options, authenticatedLimit, authenticatedWindow, unauthenticatedLimit, unauthenticatedWindow, sliding));
+            return AddPolicy(new UserLimitRatePolicy(authenticatedLimit, authenticatedWindow, unauthenticatedLimit, unauthenticatedWindow, sliding));
         }
 
         /// <summary>
@@ -65,7 +58,7 @@ namespace Throttling
         /// <returns>The current policy builder</returns>
         public ThrottlingPolicyBuilder AddIPLimitRate(long limit, TimeSpan window, bool sliding = false)
         {
-            return AddPolicy(new IPLimitRatePolicy(_options, limit, window, sliding));
+            return AddPolicy(new IPLimitRatePolicy(limit, window, sliding));
         }
 
         /// <summary>
@@ -95,7 +88,7 @@ namespace Throttling
         /// <returns>The current policy builder</returns>
         public ThrottlingPolicyBuilder AddClientLimitRate(long limit, TimeSpan window, bool sliding = false)
         {
-            return AddPolicy(new ClientLimitRatePolicy(_options, limit, window, sliding));
+            return AddPolicy(new ClientLimitRatePolicy(limit, window, sliding));
         }
 
         /// <summary>
@@ -134,30 +127,38 @@ namespace Throttling
         {
             return _policy;
         }
-    }
-    
-    public class ThrottlingPolicy : IThrottlingPolicy
-    {
-        private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
 
-        public string Category { get; set; }
-
-        public void AddPolicy([NotNull] IThrottlingPolicy policy)
+        private sealed class ThrottlingPolicy : IThrottlingPolicy
         {
-            _policies.Add(policy);
-        }
+            private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
 
-        public virtual async Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context)
-        {
-            IEnumerable<ThrottlingResult> results = new List<ThrottlingResult>();
-            for (int i = 0; i < _policies.Count; i++)
+            public string Category { get; set; }
+
+            public void AddPolicy([NotNull] IThrottlingPolicy policy)
             {
-                var policy = _policies[i];
-                var policyResult = await policy.EvaluateAsync(context);
-                results = results.Concat(policyResult);
+                _policies.Add(policy);
             }
 
-            return results;
+            public void Configure(ThrottlingOptions options)
+            {
+                for (int i = 0; i < _policies.Count; i++)
+                {
+                    _policies[i].Configure(options);
+                }
+            }
+
+            public async Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context)
+            {
+                IEnumerable<ThrottlingResult> results = new List<ThrottlingResult>();
+                for (int i = 0; i < _policies.Count; i++)
+                {
+                    var policy = _policies[i];
+                    var policyResult = await policy.EvaluateAsync(context);
+                    results = results.Concat(policyResult);
+                }
+
+                return results;
+            }
         }
     }
 }
