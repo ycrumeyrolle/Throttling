@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.OptionsModel;
@@ -21,7 +22,9 @@ namespace Throttling
         /// <inheritdoc />
         public virtual Task<IThrottlingPolicy> GetThrottlingPolicyAsync(HttpContext context, string policyName)
         {
-            return Task.FromResult(_options.GetPolicy(policyName ?? _options.DefaultPolicyName));
+            var policy = _options.Routes.Route(context.Request);
+            
+            return Task.FromResult(policy);
         }
     }
 }

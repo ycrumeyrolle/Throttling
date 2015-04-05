@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-using System;
+﻿using System;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 using Throttling;
@@ -33,12 +30,14 @@ namespace Microsoft.Framework.DependencyInjection
         /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
         public static IServiceCollection AddThrottling(this IServiceCollection serviceCollection)
         {
-            OptionsServiceCollectionExtensions.AddOptions(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IThrottlingPolicyProvider, DefaultThrottlingPolicyProvider>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IRateStore, InMemoryRateStore>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<ISystemClock, SystemClock>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IThrottlingService, ThrottlingService>(serviceCollection);
+            serviceCollection.AddOptions();
+            serviceCollection.AddTransient<IThrottlingPolicyProvider, DefaultThrottlingPolicyProvider>();
+            serviceCollection.AddTransient<IRateStore, CacheRateStore>();
+            serviceCollection.AddTransient<ISystemClock, SystemClock>();
+            serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();
+            serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
+            serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
+
             return serviceCollection;
         }
     }

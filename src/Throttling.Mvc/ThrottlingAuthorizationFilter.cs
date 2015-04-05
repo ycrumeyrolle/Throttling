@@ -8,6 +8,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
+using Microsoft.Framework.OptionsModel;
 
 namespace Throttling.Mvc
 {
@@ -16,29 +17,21 @@ namespace Throttling.Mvc
     /// </summary>
     public class ThrottlingAuthorizationFilter : IThrottlingAuthorizationFilter
     {
-        private IThrottlingService _throttlingService;
-        private IThrottlingPolicyProvider _throttlingPolicyProvider;
-
+        private readonly IThrottlingService _throttlingService;
+        private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
+        private readonly ThrottlingOptions _options;
+        
         /// <summary>
         /// Creates a new instace of <see cref="ThrottlingAuthorizationFilter"/>.
         /// </summary>
         /// <param name="ThrottlingService">The <see cref="IThrottlingService"/>.</param>
         /// <param name="policyProvider">The <see cref="IThrottlingPolicyProvider"/>.</param>
-        public ThrottlingAuthorizationFilter(IThrottlingService ThrottlingService, IThrottlingPolicyProvider policyProvider)
+        public ThrottlingAuthorizationFilter(IOptions<ThrottlingOptions> optionsAccessor, IThrottlingService ThrottlingService, IThrottlingPolicyProvider policyProvider)
         {
             _throttlingService = ThrottlingService;
             _throttlingPolicyProvider = policyProvider;
+            _options = optionsAccessor.Options;
         }
-
-        /// <summary>
-        /// The policy name used to fetch a <see cref="ThrottlingPolicy"/>.
-        /// </summary>
-        public string PolicyName { get; set; }
-
-        /// <summary>
-        /// The policy.
-        /// </summary>
-        public IThrottlingPolicy Policy { get; set; }
 
         /// <inheritdoc />
         public int Order
@@ -61,7 +54,7 @@ namespace Throttling.Mvc
             var httpContext = context.HttpContext;
             var request = httpContext.Request;
 
-            var throttlingPolicy = Policy ?? await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(httpContext, PolicyName);
+            var throttlingPolicy = await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(httpContext, null);
             if (throttlingPolicy != null)
             {
                 var throttlingResults = await _throttlingService.EvaluatePolicyAsync(httpContext, throttlingPolicy);

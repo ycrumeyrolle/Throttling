@@ -10,15 +10,15 @@ namespace Throttling
     public class ThrottlingPolicyBuilder
     {
         private readonly ThrottlingPolicy _policy = new ThrottlingPolicy();
-        
+
         /// <summary>
         /// Adds the specified <paramref name="headers"/> to the policy.
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddUserLimitRate(long authenticatedLimit, TimeSpan authenticatedWindow, bool sliding = false)
+        public ThrottlingPolicyBuilder AddUserLimitRate(long authenticatedLimit, TimeSpan authenticatedRenewalPeriod, bool sliding = false)
         {
-            return AddUserLimitRate(authenticatedLimit, authenticatedWindow, 0, authenticatedWindow, sliding);
+            return AddUserLimitRate(authenticatedLimit, authenticatedRenewalPeriod, 0, authenticatedRenewalPeriod, sliding);
         }
 
         /// <summary>
@@ -26,9 +26,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddUserLimitRate(long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding = false)
+        public ThrottlingPolicyBuilder AddUserLimitRate(long authenticatedLimit, TimeSpan authenticatedRenewalPeriod, long unauthenticatedLimit, TimeSpan unauthenticatedRenewalPeriod, bool sliding = false)
         {
-            return AddPolicy(new UserLimitRatePolicy(authenticatedLimit, authenticatedWindow, unauthenticatedLimit, unauthenticatedWindow, sliding));
+            return AddPolicy(new UserLimitRatePolicy(authenticatedLimit, authenticatedRenewalPeriod, unauthenticatedLimit, unauthenticatedRenewalPeriod, sliding));
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddUserLimitRatePerHour(long limit)
+        public ThrottlingPolicyBuilder AddUserLimitRatePerHour(long calls)
         {
-            return AddUserLimitRate(limit, TimeSpan.FromHours(1), false);
+            return AddUserLimitRate(calls, TimeSpan.FromHours(1), false);
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddUserLimitRatePerDay(long limit)
+        public ThrottlingPolicyBuilder AddUserLimitRatePerDay(long calls)
         {
-            return AddUserLimitRate(limit, TimeSpan.FromDays(1), false);
+            return AddUserLimitRate(calls, TimeSpan.FromDays(1), false);
         }
 
         /// <summary>
@@ -56,9 +56,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddIPLimitRate(long limit, TimeSpan window, bool sliding = false)
+        public ThrottlingPolicyBuilder AddIPLimitRate(long calls, TimeSpan renewalPeriod, bool sliding = false)
         {
-            return AddPolicy(new IPLimitRatePolicy(limit, window, sliding));
+            return AddPolicy(new IPLimitRatePolicy(calls, renewalPeriod, sliding));
         }
 
         /// <summary>
@@ -66,9 +66,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddIPLimitRatePerHour(long limit)
+        public ThrottlingPolicyBuilder AddIPLimitRatePerHour(long calls)
         {
-            return AddIPLimitRate(limit, TimeSpan.FromHours(1), false);
+            return AddIPLimitRate(calls, TimeSpan.FromHours(1), false);
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddIPLimitRatePerDay(long limit)
+        public ThrottlingPolicyBuilder AddIPLimitRatePerDay(long calls)
         {
-            return AddIPLimitRate(limit, TimeSpan.FromDays(1), false);
+            return AddIPLimitRate(calls, TimeSpan.FromDays(1), false);
         }
 
         /// <summary>
@@ -86,9 +86,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddClientLimitRate(long limit, TimeSpan window, bool sliding = false)
+        public ThrottlingPolicyBuilder AddClientLimitRate(long calls, TimeSpan renewalPeriod, bool sliding = false)
         {
-            return AddPolicy(new ClientLimitRatePolicy(limit, window, sliding));
+            return AddPolicy(new ClientLimitRatePolicy(calls, renewalPeriod, sliding));
         }
 
         /// <summary>
@@ -96,9 +96,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddClientLimitRatePerHour(long limit, TimeSpan window)
+        public ThrottlingPolicyBuilder AddClientLimitRatePerHour(long calls, TimeSpan renewalPeriod)
         {
-            return AddIPLimitRate(limit, TimeSpan.FromHours(1), false);
+            return AddIPLimitRate(calls, TimeSpan.FromHours(1), false);
         }
 
         /// <summary>
@@ -106,9 +106,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddClientLimitRatePerDay(long limit, TimeSpan window)
+        public ThrottlingPolicyBuilder AddClientLimitRatePerDay(long calls, TimeSpan renewalPeriod)
         {
-            return AddIPLimitRate(limit, TimeSpan.FromDays(1), false);
+            return AddIPLimitRate(calls, TimeSpan.FromDays(1), false);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Throttling
     public sealed class ThrottlingPolicy : IThrottlingPolicy
     {
         private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
-
+        
         public string Category { get; set; }
 
         public void AddPolicy([NotNull] IThrottlingPolicy policy)

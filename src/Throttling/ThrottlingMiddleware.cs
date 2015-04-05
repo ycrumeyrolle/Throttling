@@ -4,6 +4,7 @@ using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Builder;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
@@ -19,33 +20,34 @@ namespace Throttling
         private readonly ILogger _logger;
         private readonly string _policyName;
 
-        /// <summary>
-        /// Instantiates a new <see cref="ThrottlingMiddleware"/>.
-        /// </summary>
-        /// <param name="next">The next middleware in the pipeline.</param>
-        /// <param name="ThrottlingService">An instance of <see cref="IThrottlingService"/>.</param>
-        /// <param name="policyProvider">A policy provider which can get an <see cref="IThrottlingPolicy"/>.</param>
-        /// <param name="policyName">An optional name of the policy to be fetched.</param>
-     	public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicyProvider policyProvider, [NotNull] string policyName)
-        {
-            _next = next;
-            _logger = LoggerFactoryExtensions.CreateLogger<ThrottlingMiddleware>(loggerFactory);
-            _throttlingService = throttlingService;
-            _throttlingPolicyProvider = policyProvider;
-            _policyName = policyName;
-        }
+        //  /// <summary>
+        //  /// Instantiates a new <see cref="ThrottlingMiddleware"/>.
+        //  /// </summary>
+        //  /// <param name="next">The next middleware in the pipeline.</param>
+        //  /// <param name="ThrottlingService">An instance of <see cref="IThrottlingService"/>.</param>
+        //  /// <param name="policyProvider">A policy provider which can get an <see cref="IThrottlingPolicy"/>.</param>
+        //  /// <param name="policyName">An optional name of the policy to be fetched.</param>
+        //public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicyProvider policyProvider, [NotNull] string policyName)
+        //  {
+        //      _next = next;
+        //      _logger = loggerFactory.CreateLogger<ThrottlingMiddleware>();
+        //      _throttlingService = throttlingService;
+        //      _throttlingPolicyProvider = policyProvider;
+        //      _policyName = policyName;
+        //  }
+
         /// <summary>
         /// Instantiates a new <see cref="T:Throttling.ThrottlingMiddleware" />.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="throttlingService">An instance of <see cref="T:Throttling.IThrottlingService" />.</param>
         /// <param name="policy">An instance of the <see cref="T:Throttling.ThrottlingPolicy" /> which can be applied.</param>
-        public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicy policy)
+        public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicyProvider policyProvider, [NotNull] IOptions<ThrottlingOptions> options, ConfigureOptions<ThrottlingOptions> configureOptions = null)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<ThrottlingMiddleware>();
             _throttlingService = throttlingService;
-            _policy = policy;
+            _throttlingPolicyProvider = policyProvider;
         }
 
         /// <inheritdoc />

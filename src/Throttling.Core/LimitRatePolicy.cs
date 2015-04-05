@@ -6,19 +6,21 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class LimitRatePolicy : IThrottlingPolicy
+    public abstract class RateLimitPolicy : IThrottlingPolicy
     {
-        protected readonly TimeSpan _window;
-        protected readonly long _limit;
+        protected readonly TimeSpan _renewalPeriod;
+        protected readonly long _calls;
         protected readonly bool _sliding;
         protected ThrottlingOptions _options;
 
         public string Category { get; set; }
 
-        public LimitRatePolicy(long limit, TimeSpan window, bool sliding)
+        public IEnumerable<string> HttpMethods { get; set; }
+
+        public RateLimitPolicy(long calls, TimeSpan renewalPeriod, bool sliding)
         {
-            _limit = limit;
-            _window = window;
+            _calls = calls;
+            _renewalPeriod = renewalPeriod;
             _sliding = sliding;
         }
 
@@ -37,12 +39,12 @@ namespace Throttling
             {
                 rate = new RemainingRate
                 {
-                    Reset = _options.Clock.UtcNow.Add(_window),
-                    Remaining = _limit
+                    Reset = _options.Clock.UtcNow.Add(_renewalPeriod),
+                    Remaining = _calls
                 };
             }
 
-            var reset = _sliding ? _options.Clock.UtcNow.Add(_window) : rate.Reset;
+            var reset = _sliding ? _options.Clock.UtcNow.Add(_renewalPeriod) : rate.Reset;
             result.Reset = reset;
             AddRateLimitHeaders(rate, result.RateLimitHeaders);
             result.LimitReached = rate.Remaining <= 0;

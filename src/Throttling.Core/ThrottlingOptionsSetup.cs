@@ -8,18 +8,24 @@ namespace Throttling
     {
         private readonly ISystemClock _clock;
         private readonly IRateStore _store;
-        public ThrottlingOptionsSetup([NotNull] IRateStore store, [NotNull] ISystemClock clock) 
+        private readonly IThrottlingRouter _router;
+
+        public ThrottlingOptionsSetup([NotNull] IRateStore store, [NotNull] ISystemClock clock, [NotNull] IThrottlingRouter router) 
             : base(new Action<ThrottlingOptions>(ThrottlingOptionsSetup.ConfigureMessageOptions))
         {
-            this._store = store;
-            this._clock = clock;
+            _store = store;
+            _clock = clock;
+            _router = router;
         }
+
         public override void Configure([NotNull] ThrottlingOptions options, string name = "")
         {
-            options.RateStore = this._store;
-            options.Clock = this._clock;                        
+            options.RateStore = _store;
+            options.Clock = _clock;
+            options.Routes = _router;                 
             base.Configure(options, name);
         }
+
         /// <summary>
         /// Set the default options
         /// </summary>

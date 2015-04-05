@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class UserLimitRatePolicy : LimitRatePolicy
+    public class UserLimitRatePolicy : RateLimitPolicy
     {
         private readonly IPLimitRatePolicy _fallbackPolicy;
 
-        public UserLimitRatePolicy(long authenticatedLimit, TimeSpan authenticatedWindow, long unauthenticatedLimit, TimeSpan unauthenticatedWindow, bool sliding)
-            : base(authenticatedLimit, authenticatedWindow, sliding)
+        public UserLimitRatePolicy(long authenticatedCalls, TimeSpan authenticatedRenewalPeriod, long unauthenticatedCalls, TimeSpan unauthenticatedRenewalPeriod, bool sliding)
+            : base(authenticatedCalls, authenticatedRenewalPeriod, sliding)
         {
             Category = "user";
-            _fallbackPolicy = new IPLimitRatePolicy(unauthenticatedLimit, unauthenticatedWindow, sliding);
+            _fallbackPolicy = new IPLimitRatePolicy(unauthenticatedCalls, unauthenticatedRenewalPeriod, sliding);
             _fallbackPolicy.Category = Category + "_" + _fallbackPolicy.Category;
         }
 
@@ -29,9 +30,9 @@ namespace Throttling
 
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)
         {
-            rateLimitHeaders.Add("X-RateLimit-UserLimit", _limit.ToString());
-            rateLimitHeaders.Add("X-RateLimit-UserRemaining", rate.Remaining.ToString());
-            rateLimitHeaders.Add("X-RateLimit-UserReset", ThrottlingService.ConvertToEpoch(rate.Reset).ToString());
+            rateLimitHeaders.Add("X-RateLimit-UserLimit", _calls.ToString(CultureInfo.InvariantCulture));
+            rateLimitHeaders.Add("X-RateLimit-UserRemaining", rate.Remaining.ToString(CultureInfo.InvariantCulture));
+            rateLimitHeaders.Add("X-RateLimit-UserReset", ThrottlingService.ConvertToEpoch(rate.Reset).ToString(CultureInfo.InvariantCulture));
         }
     }
 }

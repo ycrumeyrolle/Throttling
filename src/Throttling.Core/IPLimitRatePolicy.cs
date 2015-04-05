@@ -5,10 +5,10 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class IPLimitRatePolicy : LimitRatePolicy
+    public class IPLimitRatePolicy : RateLimitPolicy
     {
-        public IPLimitRatePolicy(long limit, TimeSpan window, bool sliding)
-            : base(limit, window, sliding)
+        public IPLimitRatePolicy(long calls, TimeSpan renewalPeriod, bool sliding)
+            : base(calls, renewalPeriod, sliding)
         {
             Category = "ip";
         }

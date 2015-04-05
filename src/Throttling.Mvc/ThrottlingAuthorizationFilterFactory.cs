@@ -49,8 +49,6 @@ namespace Throttling.Mvc
         public IFilter CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
             var filter = serviceProvider.GetRequiredService<IThrottlingAuthorizationFilter>();
-            filter.PolicyName = _policyName;
-            filter.Policy = _policy;
             return filter;
         }
     }

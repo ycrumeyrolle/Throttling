@@ -91,6 +91,7 @@ namespace Throttling.Mvc
             ThrottlingPolicy policy;
             if (!model.Properties.TryGetValue("Throttling.Policy", out policyObj))
             {
+                // TODO : httpMoethods
                 policy = new ThrottlingPolicy();
                 model.Properties.Add("Throttling.Policy", policy);
                 model.Filters.Add(new ThrottlingAuthorizationFilterFactory(policy));
