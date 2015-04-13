@@ -12,6 +12,6 @@ namespace Throttling
         /// <param name="context">The <see cref="HttpContext"/> associated with this call.</param>
         /// <param name="policyName">An optional policy name to look for.</param>
         /// <returns>A <see cref="IThrottlingPolicy"/></returns>
-        Task<IThrottlingPolicy> GetThrottlingPolicyAsync([NotNull] HttpContext context, string policyName);
+        Task<ThrottlingStrategy> GetThrottlingStrategyAsync([NotNull] HttpContext context, string policyName);
     }
 }

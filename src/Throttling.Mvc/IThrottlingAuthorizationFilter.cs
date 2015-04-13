@@ -12,5 +12,6 @@ namespace Throttling.Mvc
     /// </summary>
     public interface IThrottlingAuthorizationFilter : IAsyncAuthorizationFilter, IOrderedFilter
     {
+        ThrottlingRoute Route { get; set; }
     }
 }

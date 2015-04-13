@@ -8,6 +8,8 @@
         "Microsoft.AspNet.Http.Interfaces": "1.0.0-*",
         "Microsoft.Framework.Caching.Memory":  "1.0.0-*",
         "Microsoft.AspNet.Routing": "1.0.0-*",
+        "Microsoft.AspNet.WebUtilities": "1.0.0-*",
+        "Microsoft.Framework.Logging": "1.0.0-*",
         "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-*", "type": "build" }
     },
 

@@ -12,23 +12,23 @@ namespace Throttling
             _cache = cache;
         }
 
-        public Task<RemainingRate> GetRemainingRateAsync(string category, string key)
+        public Task<RemainingRate> GetRemainingRateAsync(string category, string endpoint, string key)
         {
             RemainingRate value;
-            var computedKey = category + ":" + key;
+            var computedKey = category + ":" + endpoint + ":" + key;
 
             value = _cache.Get<RemainingRate>(computedKey);
 
             return Task.FromResult(value);
         }
 
-        public Task SetRemainingRateAsync(string category, string key, RemainingRate remaining)
+        public Task SetRemainingRateAsync(string category, string endpoint, string key, RemainingRate remaining)
         {
-            _cache.Set(category + ":" + key, remaining, ctx =>
-            {
-                ctx.SetAbsoluteExpiration(remaining.Reset);
-                return ctx.State;
-            });
+            _cache.Set(category + ":" + endpoint + ":" + key, remaining, ctx =>
+           {
+               ctx.SetAbsoluteExpiration(remaining.Reset);
+               return ctx.State;
+           });
             return Constants.CompletedTask;
         }
     }

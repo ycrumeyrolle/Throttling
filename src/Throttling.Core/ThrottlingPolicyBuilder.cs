@@ -10,6 +10,12 @@ namespace Throttling
     public class ThrottlingPolicyBuilder
     {
         private readonly ThrottlingPolicy _policy = new ThrottlingPolicy();
+        private readonly string _policyName;
+     
+        public ThrottlingPolicyBuilder(string policyName)
+        {
+            _policyName = policyName;
+        }
 
         /// <summary>
         /// Adds the specified <paramref name="headers"/> to the policy.
@@ -36,9 +42,9 @@ namespace Throttling
         /// </summary>
         /// <param name="headers">The headers which need to be allowed in the request.</param>
         /// <returns>The current policy builder</returns>
-        public ThrottlingPolicyBuilder AddUserLimitRatePerHour(long calls)
+        public ThrottlingPolicyBuilder AddUserLimitRatePerHour(long calls, bool sliding = false)
         {
-            return AddUserLimitRate(calls, TimeSpan.FromHours(1), false);
+            return AddUserLimitRate(calls, TimeSpan.FromHours(1), sliding);
         }
 
         /// <summary>
@@ -125,41 +131,8 @@ namespace Throttling
 
         public IThrottlingPolicy Build()
         {
+            _policy.Name = _policyName;
             return _policy;
-        }
-    }
-
-    public sealed class ThrottlingPolicy : IThrottlingPolicy
-    {
-        private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
-        
-        public string Category { get; set; }
-
-        public void AddPolicy([NotNull] IThrottlingPolicy policy)
-        {
-            _policies.Add(policy);
-            policy.Category = Category + "_" + policy.Category + "_" + _policies.Count;
-        }
-
-        public void Configure(ThrottlingOptions options)
-        {
-            for (int i = 0; i < _policies.Count; i++)
-            {
-                _policies[i].Configure(options);
-            }
-        }
-
-        public async Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context)
-        {
-            IEnumerable<ThrottlingResult> results = new List<ThrottlingResult>();
-            for (int i = 0; i < _policies.Count; i++)
-            {
-                var policy = _policies[i];
-                var policyResult = await policy.EvaluateAsync(context);
-                results = results.Concat(policyResult);
-            }
-
-            return results;
         }
     }
 }

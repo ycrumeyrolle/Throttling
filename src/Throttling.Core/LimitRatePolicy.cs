@@ -13,10 +13,10 @@ namespace Throttling
         protected readonly bool _sliding;
         protected ThrottlingOptions _options;
 
+        public string Name { get; set; }
+
         public string Category { get; set; }
-
-        public IEnumerable<string> HttpMethods { get; set; }
-
+        
         public RateLimitPolicy(long calls, TimeSpan renewalPeriod, bool sliding)
         {
             _calls = calls;
@@ -24,7 +24,7 @@ namespace Throttling
             _sliding = sliding;
         }
 
-        public virtual async Task<IEnumerable<ThrottlingResult>> EvaluateAsync(HttpContext context)
+        public virtual async Task<IEnumerable<ThrottlingResult>> EvaluateAsync(HttpContext context, string routeTemplate)
         {
             var result = new ThrottlingResult();
             var key = GetKey(context);
@@ -34,25 +34,30 @@ namespace Throttling
                 throw new InvalidOperationException("The current policy do not provide a key for the current context.");
             }
 
-            var rate = await _options.RateStore.GetRemainingRateAsync(Category, key);
+            var rate = await _options.RateStore.GetRemainingRateAsync(Category, routeTemplate, key);
             if (rate == null)
             {
                 rate = new RemainingRate
                 {
                     Reset = _options.Clock.UtcNow.Add(_renewalPeriod),
-                    Remaining = _calls
+                    RemainingCalls = _calls
                 };
             }
 
             var reset = _sliding ? _options.Clock.UtcNow.Add(_renewalPeriod) : rate.Reset;
-            result.Reset = reset;
-            AddRateLimitHeaders(rate, result.RateLimitHeaders);
-            result.LimitReached = rate.Remaining <= 0;
-
-            rate.Remaining = Math.Max(rate.Remaining - 1, 0);
+            rate.RemainingCalls = rate.RemainingCalls - 1;
             rate.Reset = reset;
+            AddRateLimitHeaders(rate, result.RateLimitHeaders);
 
-            await _options.RateStore.SetRemainingRateAsync(Category, key, rate);
+            result.LimitReached = rate.RemainingCalls < 0;
+            result.Reset = reset;
+            result.Rate = rate;
+            result.Category = Category;
+            result.Endpoint = routeTemplate;
+            result.Key = key;
+
+            // TODO : need differents properties : before & after
+            rate.RemainingCalls = Math.Max(rate.RemainingCalls, 0);
 
             return new[] { result };
         }

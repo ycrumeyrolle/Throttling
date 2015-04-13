@@ -5,8 +5,8 @@ namespace Throttling
 {
     public interface IRateStore
     {
-        Task<RemainingRate> GetRemainingRateAsync([NotNull] string category, [NotNull] string key);
+        Task<RemainingRate> GetRemainingRateAsync([NotNull] string category, [NotNull] string endpoint, [NotNull] string key);
 
-        Task SetRemainingRateAsync([NotNull] string category, [NotNull] string key, [NotNull]  RemainingRate remaining);
+        Task SetRemainingRateAsync([NotNull] string category, [NotNull] string endpoint, [NotNull] string key, [NotNull]  RemainingRate remaining);
     }
 }

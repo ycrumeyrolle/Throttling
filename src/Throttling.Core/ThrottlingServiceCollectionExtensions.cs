@@ -37,6 +37,7 @@ namespace Microsoft.Framework.DependencyInjection
             serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();
             serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
             serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
+            serviceCollection.AddTransient<IClientKeyProvider, ClientKeyProvider>();
 
             return serviceCollection;
         }

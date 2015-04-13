@@ -3,7 +3,7 @@ using Microsoft.AspNet.Mvc;
 using Throttling.Mvc;
 using Microsoft.AspNet.Mvc.Description;
 
-namespace ThrottlingSample
+namespace MvcThrottling
 {
     public class TestController : Controller
     {        
@@ -13,17 +13,24 @@ namespace ThrottlingSample
 
         }
 
-        [HttpGet("test/action/{value}")]
-        [Throttling("5 requests per 10 seconds, sliding reset")]
-        public string Action1(int value)
+        [HttpGet("Sliding/{value}")]
+        [Throttling("10 requests per hour, sliding reset")]
+        public string Sliding(int value)
         {
-            return "OK " + value;
+            return "Value : " + value;
         }
 
-        [HttpGet("test/action2")]
-        [Throttling("5 requests per 10 seconds, fixed reset")]
-        public string Action2()
+        [HttpGet("Sliding2/{value}")]
+        [Throttling("10 requests per hour, sliding reset")]
+        public string Sliding2(int value)
         {
+            return "Value2 : " + value;
+        }
+
+        [HttpGet("Fixed")]
+        [Throttling("10 requests per 10 seconds, fixed reset")]
+        public string Fixed()
+        {   
             return "OK";
         }
 
@@ -32,7 +39,7 @@ namespace ThrottlingSample
             return "OK";
         }
 
-        [HttpGet("test/MutliThrottling")]
+        [HttpGet("MutliThrottling")]
         [UserThrottling(10, 10)]
         [UserThrottling(100, 60)]
         [IPThrottling(10, 10)]

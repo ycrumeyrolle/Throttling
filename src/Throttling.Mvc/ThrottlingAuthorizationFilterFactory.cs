@@ -18,23 +18,30 @@ namespace Throttling.Mvc
     {
         private readonly string _policyName;
 
-        private readonly IThrottlingPolicy _policy;
-
+        private readonly ThrottlingPolicyBuilder _builder;
+        private readonly string _routeTemplate;
+        private readonly IEnumerable<string> _httpMethods;
+        
         /// <summary>
         /// Creates a new instance of <see cref="ThrottlingAuthorizationFilterFactory"/>.
         /// </summary>
         /// <param name="policyName"></param>
-        public ThrottlingAuthorizationFilterFactory(string policyName)
+        public ThrottlingAuthorizationFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, string policyName)
         {
             _policyName = policyName;
+            _httpMethods = httpMethods;
+            _routeTemplate = routeTemplate;
         }
+
         /// <summary>
         /// Creates a new instance of <see cref="ThrottlingAuthorizationFilterFactory"/>.
         /// </summary>
         /// <param name="policy"></param>
-        public ThrottlingAuthorizationFilterFactory(IThrottlingPolicy policy)
+        public ThrottlingAuthorizationFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, ThrottlingPolicyBuilder builder)
         {
-            _policy = policy;
+            _builder = builder;
+            _httpMethods = httpMethods;
+            _routeTemplate = routeTemplate;
         }
 
         /// <inheritdoc />
@@ -49,6 +56,15 @@ namespace Throttling.Mvc
         public IFilter CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
             var filter = serviceProvider.GetRequiredService<IThrottlingAuthorizationFilter>();
+            if (_policyName == null)
+            {
+                filter.Route = new UnnamedThrottlingRoute(_httpMethods, _routeTemplate, _builder.Build());
+            }
+            else
+            {
+                filter.Route = new NamedThrottlingRoute(_httpMethods, _routeTemplate, _policyName);
+            }
+
             return filter;
         }
     }

@@ -22,7 +22,7 @@ namespace Throttling
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)
         {
             rateLimitHeaders.Add("X-RateLimit-ClientLimit", _calls.ToString(CultureInfo.InvariantCulture));
-            rateLimitHeaders.Add("X-RateLimit-ClientRemaining", rate.Remaining.ToString(CultureInfo.InvariantCulture));
+            rateLimitHeaders.Add("X-RateLimit-ClientRemaining", rate.RemainingCalls.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

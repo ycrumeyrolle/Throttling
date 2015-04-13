@@ -15,6 +15,7 @@ namespace Throttling
 
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)
         {
+            rateLimitHeaders.Add("IpRate", rate.RemainingCalls.ToString());
         }
 
         public override string GetKey([NotNull]HttpContext context)

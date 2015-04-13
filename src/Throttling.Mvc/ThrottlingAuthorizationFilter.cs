@@ -20,7 +20,7 @@ namespace Throttling.Mvc
         private readonly IThrottlingService _throttlingService;
         private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
         private readonly ThrottlingOptions _options;
-        
+
         /// <summary>
         /// Creates a new instace of <see cref="ThrottlingAuthorizationFilter"/>.
         /// </summary>
@@ -42,6 +42,10 @@ namespace Throttling.Mvc
             }
         }
 
+        public string PolicyName { get; set; }
+
+        public ThrottlingRoute Route { get; set; }
+
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
         {
@@ -54,13 +58,26 @@ namespace Throttling.Mvc
             var httpContext = context.HttpContext;
             var request = httpContext.Request;
 
-            var throttlingPolicy = await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(httpContext, null);
-            if (throttlingPolicy != null)
+            var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(httpContext, PolicyName);
+            if (strategy == null && Route.Match(request))
             {
-                var throttlingResults = await _throttlingService.EvaluatePolicyAsync(httpContext, throttlingPolicy);
+                strategy = new ThrottlingStrategy
+                {
+                    Policy = Route.GetPolicy(httpContext.Request, _options),
+                    RouteTemplate = Route.RouteTemplate
+                };
+            }
+
+            if (strategy != null)
+            {
+                var throttlingResults = await _throttlingService.EvaluateStrategyAsync(httpContext, strategy);
                 if (_throttlingService.ApplyResult(httpContext, throttlingResults))
                 {
                     context.Result = new HttpStatusCodeResult(429);
+                }
+                else
+                {
+                    await _throttlingService.ApplyLimitAsync(throttlingResults);
                 }
             }
         }

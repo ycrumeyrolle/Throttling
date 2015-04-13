@@ -31,8 +31,8 @@ namespace Throttling
         public override void AddRateLimitHeaders(RemainingRate rate, IDictionary<string, string> rateLimitHeaders)
         {
             rateLimitHeaders.Add("X-RateLimit-UserLimit", _calls.ToString(CultureInfo.InvariantCulture));
-            rateLimitHeaders.Add("X-RateLimit-UserRemaining", rate.Remaining.ToString(CultureInfo.InvariantCulture));
-            rateLimitHeaders.Add("X-RateLimit-UserReset", ThrottlingService.ConvertToEpoch(rate.Reset).ToString(CultureInfo.InvariantCulture));
+            rateLimitHeaders.Add("X-RateLimit-UserRemaining", rate.RemainingCalls.ToString(CultureInfo.InvariantCulture));
+            rateLimitHeaders.Add("X-RateLimit-UserReset", rate.Reset.ToEpoch().ToString(CultureInfo.InvariantCulture));
         }
     }
 }
