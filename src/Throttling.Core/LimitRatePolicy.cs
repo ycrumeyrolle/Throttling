@@ -47,7 +47,6 @@ namespace Throttling
             var reset = _sliding ? _options.Clock.UtcNow.Add(_renewalPeriod) : rate.Reset;
             rate.RemainingCalls = rate.RemainingCalls - 1;
             rate.Reset = reset;
-            AddRateLimitHeaders(rate, result.RateLimitHeaders);
 
             result.LimitReached = rate.RemainingCalls < 0;
             result.Reset = reset;
@@ -58,6 +57,7 @@ namespace Throttling
 
             // TODO : need differents properties : before & after
             rate.RemainingCalls = Math.Max(rate.RemainingCalls, 0);
+            AddRateLimitHeaders(rate, result.RateLimitHeaders);
 
             return new[] { result };
         }

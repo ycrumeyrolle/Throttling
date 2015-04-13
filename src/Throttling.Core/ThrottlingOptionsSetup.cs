@@ -11,7 +11,11 @@ namespace Throttling
         private readonly IThrottlingRouter _router;
         private readonly IClientKeyProvider _clientKeyProvider;
 
-        public ThrottlingOptionsSetup([NotNull] IRateStore store, [NotNull] ISystemClock clock, [NotNull] IThrottlingRouter router, [NotNull] IClientKeyProvider clientKeyProvider) 
+        public ThrottlingOptionsSetup(
+            [NotNull] IRateStore store, 
+            [NotNull] ISystemClock clock, 
+            [NotNull] IThrottlingRouter router, 
+            [NotNull] IClientKeyProvider clientKeyProvider) 
             : base(new Action<ThrottlingOptions>(ThrottlingOptionsSetup.ConfigureMessageOptions))
         {
             _store = store;

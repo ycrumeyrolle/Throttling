@@ -8,6 +8,7 @@ using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
 using System.Runtime.Versioning;
+using Moq;
 
 namespace Throttling.Tests
 {
@@ -116,9 +117,8 @@ namespace Throttling.Tests
             hostingEnvironment.Initialize(applicationBasePath, environmentName: null);
             services.AddInstance<IHostingEnvironment>(hostingEnvironment);
 
-            //// Injecting a custom assembly provider. Overrides AddMvc() because that uses TryAdd().
-            //var assemblyProvider = CreateAssemblyProvider(applicationWebSiteName);
-            //services.AddInstance(assemblyProvider);
+            var clock = CreateClock();
+            services.AddInstance(clock);
 
             if (configureServices != null)
             {
@@ -135,6 +135,15 @@ namespace Throttling.Tests
             // Mvc/test/WebSites/applicationWebSiteName
             return Path.GetFullPath(
                 Path.Combine(appEnvironment.ApplicationBasePath, websitePath, applicationWebSiteName));
+        }
+
+        private static ISystemClock CreateClock()
+        {
+            Mock<ISystemClock> clock = new Mock<ISystemClock>();
+            clock.Setup(c => c.UtcNow)
+                .Returns(new DateTimeOffset(2000, 01, 01, 00, 00, 00, TimeSpan.Zero));
+
+            return clock.Object;
         }
     }
 
