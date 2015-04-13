@@ -16,25 +16,7 @@ namespace Throttling
         private readonly RequestDelegate _next;
         private readonly IThrottlingService _throttlingService;
         private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
-        private readonly IThrottlingPolicy _policy;
         private readonly ILogger _logger;
-        private readonly string _policyName;
-
-        //  /// <summary>
-        //  /// Instantiates a new <see cref="ThrottlingMiddleware"/>.
-        //  /// </summary>
-        //  /// <param name="next">The next middleware in the pipeline.</param>
-        //  /// <param name="ThrottlingService">An instance of <see cref="IThrottlingService"/>.</param>
-        //  /// <param name="policyProvider">A policy provider which can get an <see cref="IThrottlingPolicy"/>.</param>
-        //  /// <param name="policyName">An optional name of the policy to be fetched.</param>
-        //public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicyProvider policyProvider, [NotNull] string policyName)
-        //  {
-        //      _next = next;
-        //      _logger = loggerFactory.CreateLogger<ThrottlingMiddleware>();
-        //      _throttlingService = throttlingService;
-        //      _throttlingPolicyProvider = policyProvider;
-        //      _policyName = policyName;
-        //  }
 
         /// <summary>
         /// Instantiates a new <see cref="T:Throttling.ThrottlingMiddleware" />.
@@ -53,14 +35,27 @@ namespace Throttling
         /// <inheritdoc />
         public async Task Invoke(HttpContext context)
         {
-            var throttlingPolicy = _policy ?? await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(context, _policyName);
-            if (throttlingPolicy != null)
+            var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(context, null);
+            if (strategy != null)
             {
-                var throttlingResults = await _throttlingService.EvaluatePolicyAsync(context, throttlingPolicy);
+                var throttlingResults = await _throttlingService.EvaluateStrategyAsync(context, strategy);
                 if (!_throttlingService.ApplyResult(context, throttlingResults))
                 {
                     await _next(context);
+
+                    if (context.Response.StatusCode > 99 && context.Response.StatusCode < 300)
+                    {
+                        await _throttlingService.ApplyLimitAsync(throttlingResults);
+                    }
                 }
+                else
+                {
+                    await _throttlingService.ApplyLimitAsync(throttlingResults);
+                }
+            }
+            else
+            {
+                await _next(context);
             }
         }
     }

@@ -65,7 +65,7 @@ namespace Throttling
         /// <param name="configurePolicy">A delegate which can use a policy builder to build a policy.</param>
         public void AddPolicy([NotNull] string name, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            var policyBuilder = new ThrottlingPolicyBuilder();
+            var policyBuilder = new ThrottlingPolicyBuilder(name);
             configurePolicy(policyBuilder);
             PolicyMap[name] = policyBuilder.Build();
         }
@@ -82,12 +82,19 @@ namespace Throttling
 
         public IThrottlingRouter Routes { get; set; }
 
-        public void ApplyStrategy([NotNull] string routeTemplate, [NotNull] IThrottlingPolicy policy, IEnumerable<string> httpMethods = null)
+        public void ApplyStrategy(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] IThrottlingPolicy policy)
         {
-            Routes.Add(new ThrottlingRoute(httpMethods, routeTemplate, policy));
+            Routes.Add(new UnnamedThrottlingRoute(httpMethods, routeTemplate, policy));
         }
 
-        public void ApplyStrategy([NotNull] string routeTemplate, [NotNull] string policyName, IEnumerable<string> httpMethods = null)
+        public void ApplyStrategy(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
+        {
+            var policyBuilder = new ThrottlingPolicyBuilder(policyName);
+            configurePolicy(policyBuilder);
+            ApplyStrategy(httpMethods, routeTemplate, policyBuilder.Build());
+        }
+
+        public void ApplyStrategy(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] string policyName)
         {
             IThrottlingPolicy policy;
             if (!PolicyMap.TryGetValue(policyName, out policy))
@@ -95,88 +102,36 @@ namespace Throttling
                 throw new InvalidOperationException("Not policy named '" + policyName + "'");
             }
 
-            ApplyStrategy(routeTemplate, policy);
+            ApplyStrategy(httpMethods, routeTemplate, policy);
         }
 
-        // TODO : see how to avoid an optionnal parameter after an Action<>.
-        public void ApplyStrategy([NotNull] string routeTemplate, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy, IEnumerable<string> httpMethods = null)
+        public void ApplyStrategy([NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] IThrottlingPolicy policy)
         {
-            var policyBuilder = new ThrottlingPolicyBuilder();
-            configurePolicy(policyBuilder);
-            ApplyStrategy(routeTemplate, policyBuilder.Build());
+            ApplyStrategy(new[] { httpMethod }, routeTemplate, policy);
         }
-    }
 
-    public class ThrottlingRoute
-    {
-        private static readonly IReadOnlyDictionary<string, object> EmptyRouteValues = new RouteValueDictionary();
-
-        private readonly IEnumerable<string> _httpMethods;
-
-        private readonly TemplateMatcher _matcher;
-
-        public ThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, IThrottlingPolicy policy)
+        public void ApplyStrategy([NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            _httpMethods = httpMethods;
-
-            var route = TemplateParser.Parse(routeTemplate);
-            _matcher = new TemplateMatcher(route, EmptyRouteValues);
-            Policy = policy;
+            ApplyStrategy(new[] { httpMethod }, routeTemplate, policyName, configurePolicy);
         }
-        public ThrottlingRoute(string routeTemplate, IThrottlingPolicy policy)
-            : this(null, routeTemplate, policy)
+
+        public void ApplyStrategy([NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] string policyName)
         {
+            ApplyStrategy(new[] { httpMethod }, routeTemplate, policyName);
         }
 
-        public IThrottlingPolicy Policy { get; set; }
-
-        public bool Match([NotNull] HttpRequest request)
+        public void ApplyStrategy([NotNull] string routeTemplate, [NotNull] IThrottlingPolicy policy)
         {
-            if (_httpMethods == null || _httpMethods.Contains(request.Method))
-            {
-                var requestPath = request.Path.Value;
-
-                if (!string.IsNullOrEmpty(requestPath) && requestPath[0] == '/')
-                {
-                    requestPath = requestPath.Substring(1);
-                }
-
-                return _matcher.Match(requestPath) != null;
-            }
-
-            return false;
+            ApplyStrategy((IEnumerable<string>)null, routeTemplate, policy);
         }
-    }
-
-    public class ThrottlingRouteCollection : IThrottlingRouter
-    {
-        private readonly List<ThrottlingRoute> _routes = new List<ThrottlingRoute>();
-
-        public void Add(ThrottlingRoute route)
+        public void ApplyStrategy([NotNull] string routeTemplate, [NotNull] string policyName)
         {
-            _routes.Add(route);
+            ApplyStrategy((IEnumerable<string>)null, routeTemplate, policyName);
         }
 
-        public IThrottlingPolicy Route([NotNull] HttpRequest request)
+        public void ApplyStrategy([NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            for (var i = 0; i < _routes.Count; i++)
-            {
-                var route = _routes[i];
-
-                if (route.Match(request))
-                {
-                    return route.Policy;
-                }
-            }
-
-            return null;
+            ApplyStrategy((IEnumerable<string>)null, routeTemplate, policyName, configurePolicy);
         }
-    }
-
-    public interface IThrottlingRouter
-    {
-        void Add(ThrottlingRoute route);
-
-        IThrottlingPolicy Route([NotNull] HttpRequest request);
     }
 }

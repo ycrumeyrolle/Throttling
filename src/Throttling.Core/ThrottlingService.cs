@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
+using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
     public class ThrottlingService : IThrottlingService
     {
-        private static DateTimeOffset epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
         private readonly ThrottlingOptions _options;
+        private readonly ILogger _logger;
 
-        public ThrottlingService([NotNull] IOptions<ThrottlingOptions> options, ConfigureOptions<ThrottlingOptions> configureOptions = null)
+        public ThrottlingService([NotNull] ILoggerFactory loggerFactory, [NotNull] IOptions<ThrottlingOptions> options, ConfigureOptions<ThrottlingOptions> configureOptions = null)
         {
             if (configureOptions != null)
             {
@@ -29,8 +29,8 @@ namespace Throttling
             }
 
             _options.ConfigurePolicies();
+            _logger = loggerFactory.CreateLogger<ThrottlingService>();
         }
-
 
         /// <summary>
         /// Looks up a policy using the <paramref name="policyName"/> and then evaluates the policy using the passed in
@@ -39,16 +39,11 @@ namespace Throttling
         /// <param name="requestContext"></param>
         /// <param name="policyName"></param>
         /// <returns>A <see cref="ThrottlingResult"/> which contains the result of policy evaluation.</returns>
-        public Task<IEnumerable<ThrottlingResult>> EvaluatePolicyAsync([NotNull] HttpContext context, [NotNull] string policyName)
+        public virtual Task<IEnumerable<ThrottlingResult>> EvaluateStrategyAsync([NotNull] HttpContext context, [NotNull] ThrottlingStrategy strategy)
         {
-            var policy = _options.GetPolicy(policyName);
-            return policy.EvaluateAsync(context);
-        }
-
-        public virtual Task<IEnumerable<ThrottlingResult>> EvaluatePolicyAsync([NotNull] HttpContext context, [NotNull] IThrottlingPolicy policy)
-        {
-            policy.Configure(_options);
-            return policy.EvaluateAsync(context);
+            strategy.Policy.Configure(_options);
+            _logger.LogVerbose(new ThrottlingPolicyLogValues(strategy.Policy));
+            return strategy.Policy.EvaluateAsync(context, strategy.RouteTemplate);
         }
 
         /// <inheritsdocs />
@@ -64,7 +59,8 @@ namespace Throttling
                 context.Response.StatusCode = Constants.Status429TooManyRequests;
 
                 // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
-                context.Response.Headers.Set("Cache-Control", "no-cache");
+                context.Response.Headers.Set("Cache-Control", "no-store");
+                context.Response.Headers.Append("Cache-Control", "no-cache");
                 context.Response.Headers.Set("Pragma", "no-cache");
                 context.Response.Headers.Set("Expires", "-1");
 
@@ -79,15 +75,11 @@ namespace Throttling
                     }
                 }
 
+                _logger.LogVerbose(new ThrottlingResultLogValues(reset));
                 return true;
             }
 
             return false;
-        }
-
-        public static long ConvertToEpoch(DateTimeOffset dateTime)
-        {
-            return (dateTime.Ticks - epoch.Ticks) / TimeSpan.TicksPerSecond;
         }
 
         private string GetRetryAfterValue(RetryAfterMode mode, DateTimeOffset reset)
@@ -100,6 +92,14 @@ namespace Throttling
                     return Convert.ToInt64((reset - _options.Clock.UtcNow).TotalSeconds).ToString(CultureInfo.InvariantCulture);
                 default:
                     return null;
+            }
+        }
+
+        public async Task ApplyLimitAsync(IEnumerable<ThrottlingResult> results)
+        {
+            foreach (var result in results)
+            {
+                await _options.RateStore.SetRemainingRateAsync(result.Category, result.Endpoint, result.Key, result.Rate);
             }
         }
     }

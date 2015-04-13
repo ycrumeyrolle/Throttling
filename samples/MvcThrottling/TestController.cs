@@ -1,18 +1,26 @@
 ﻿using System;
 using Microsoft.AspNet.Mvc;
 using Throttling.Mvc;
+using Microsoft.AspNet.Mvc.Description;
 
-namespace MvcThrottling
+namespace ThrottlingSample
 {
     public class TestController : Controller
-    {
+    {        
+
+        public TestController(IApiDescriptionGroupCollectionProvider explorer)
+        {
+
+        }
+
         [HttpGet("test/action/{value}")]
-        //[Throttling("5 requests per 10 seconds, sliding reset")]
+        [Throttling("5 requests per 10 seconds, sliding reset")]
         public string Action1(int value)
         {
             return "OK " + value;
         }
 
+        [HttpGet("test/action2")]
         [Throttling("5 requests per 10 seconds, fixed reset")]
         public string Action2()
         {
@@ -24,6 +32,7 @@ namespace MvcThrottling
             return "OK";
         }
 
+        [HttpGet("test/MutliThrottling")]
         [UserThrottling(10, 10)]
         [UserThrottling(100, 60)]
         [IPThrottling(10, 10)]

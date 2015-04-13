@@ -20,11 +20,21 @@ namespace Throttling
         }
 
         /// <inheritdoc />
-        public virtual Task<IThrottlingPolicy> GetThrottlingPolicyAsync(HttpContext context, string policyName)
+        public virtual Task<ThrottlingStrategy> GetThrottlingStrategyAsync(HttpContext context, string policyName)
         {
-            var policy = _options.Routes.Route(context.Request);
-            
-            return Task.FromResult(policy);
+            IThrottlingPolicy policy;
+            if (policyName != null)
+            {
+                policy = _options.GetPolicy(policyName);
+                if (policy != null)
+                {
+                    return Task.FromResult(new ThrottlingStrategy { Policy = policy, RouteTemplate = "*" });
+                }
+            }
+
+            ThrottlingStrategy strategy = _options.Routes.GetThrottlingStrategyAsync(context, _options);
+
+            return Task.FromResult(strategy);
         }
     }
 }

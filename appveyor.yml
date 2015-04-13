@@ -5,3 +5,6 @@ build_script:
 clone_depth: 1
 test: off
 deploy: off
+nuget:
+  account_feed: true
+  project_feed: true
