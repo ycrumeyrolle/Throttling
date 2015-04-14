@@ -5,6 +5,7 @@ using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.Routing.Template;
+using Throttling.IPRanges;
 
 namespace Throttling
 {
@@ -16,12 +17,13 @@ namespace Throttling
 
         private readonly TemplateMatcher _matcher;
 
-        public ThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate)
+        public ThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, IPWhitelist whitelist = null)
         {
             _httpMethods = httpMethods;
             RouteTemplate = routeTemplate;
             var route = TemplateParser.Parse(routeTemplate);
             _matcher = new TemplateMatcher(route, EmptyRouteValues);
+            Whitelist = whitelist;
         }
 
         public ThrottlingRoute(string routeTemplate)
@@ -29,7 +31,9 @@ namespace Throttling
         {
         }
 
-        public string RouteTemplate { get; set; }
+        public string RouteTemplate { get; private set; }
+
+        public IPWhitelist Whitelist { get; private set; }
 
         public abstract IThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options);
 

@@ -13,6 +13,8 @@ namespace Throttling
 {
     public class ThrottlingService : IThrottlingService
     {
+        private static readonly Task<IEnumerable<ThrottlingResult>> EmptyResultsTask = Task.FromResult<IEnumerable<ThrottlingResult>>(new ThrottlingResult[0]);
+
         private readonly ThrottlingOptions _options;
         private readonly ILogger _logger;
 
@@ -43,6 +45,20 @@ namespace Throttling
         {
             strategy.Policy.Configure(_options);
             _logger.LogVerbose(new ThrottlingPolicyLogValues(strategy.Policy));
+            if (strategy.Whitelist != null)
+            {
+                //string xForwadedFor = context.Request.Headers["X-Forwarded-For"];
+                //if (xForwadedFor != null)
+                //{
+                //    var indexOfComma = xForwadedFor.IndexOf(',');
+                //}
+                IHttpConnectionFeature  connection = context.GetFeature<IHttpConnectionFeature>();
+                if (strategy.Whitelist.Contains(connection.RemoteIpAddress))
+                {
+                    return EmptyResultsTask;
+                }
+            }
+
             return strategy.Policy.EvaluateAsync(context, strategy.RouteTemplate);
         }
 

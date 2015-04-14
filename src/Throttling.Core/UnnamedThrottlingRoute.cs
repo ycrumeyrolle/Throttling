@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Http;
+using Throttling.IPRanges;
 
 namespace Throttling
 {
@@ -8,14 +9,14 @@ namespace Throttling
     {
         private readonly IThrottlingPolicy _policy;
 
-        public UnnamedThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, IThrottlingPolicy policy)
-            : base(httpMethods, routeTemplate)
+        public UnnamedThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, IThrottlingPolicy policy, IPWhitelist whitelist = null)
+            : base(httpMethods, routeTemplate, whitelist)
         {
             _policy = policy;
         }
 
-        public UnnamedThrottlingRoute(string routeTemplate, IThrottlingPolicy policy)
-            : base(null, routeTemplate)
+        public UnnamedThrottlingRoute(string routeTemplate, IThrottlingPolicy policy, IPWhitelist whitelist = null)
+            : base(null, routeTemplate, whitelist)
         {
             _policy = policy;
         }

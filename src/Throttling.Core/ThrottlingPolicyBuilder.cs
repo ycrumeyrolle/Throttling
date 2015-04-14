@@ -116,7 +116,7 @@ namespace Throttling
         {
             return AddIPLimitRate(calls, TimeSpan.FromDays(1), false);
         }
-
+        
         /// <summary>
         /// Adds the specified <paramref name="headers"/> to the policy.
         /// </summary>

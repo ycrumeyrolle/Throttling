@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Throttling.IPRanges;
 
 namespace Throttling
 {
@@ -7,5 +7,7 @@ namespace Throttling
         public IThrottlingPolicy Policy { get; set; }
 
         public string RouteTemplate { get; set; }
+
+        public IPWhitelist Whitelist { get; set; }
     }
 }
