@@ -20,9 +20,9 @@ namespace Throttling.Tests
         private readonly Action<IServiceCollection> _configureServices = new Startup().ConfigureServices;
 
         [Theory]
-        [InlineData(1)]
-        [InlineData(10)]
-        public async Task ResourceWithSimplePolicy_BellowLimits_Returns200(int tries)
+        [InlineData(1, "9")]
+        [InlineData(10, "0")]
+        public async Task ResourceWithSimplePolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
             var server = TestHelper.CreateServer(_app, SiteName, _configureServices);
@@ -39,11 +39,13 @@ namespace Throttling.Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
         }
 
         [Theory]
-        [InlineData(11)]
-        public async Task ResourceWithSimplePolicy_BeyondLimits_Returns429(int tries)
+        [InlineData(11, "0")]
+        public async Task ResourceWithSimplePolicy_BeyondLimits_Returns429(int tries, string userRemaining)
         {
             // Arrange
             var server = TestHelper.CreateServer(_app, SiteName, _configureServices);
@@ -61,12 +63,21 @@ namespace Throttling.Tests
             // Assert
             // TODO : assertions for http headers
             Assert.Equal((HttpStatusCode)429, response.StatusCode);
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
+
+            // TODO : Fix the ISystemClock
+            // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").Single());
+
+            Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
+            Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
+            Assert.Single(response.Headers.GetValues("Retry-After"), "86400");
         }
 
         [Theory]
-        [InlineData(1)]
-        [InlineData(10)]
-        public async Task TwoResourcesWithSamePolicy_BellowLimits_Returns200(int tries)
+        [InlineData(1, "9")]
+        [InlineData(10, "0")]
+        public async Task TwoResourcesWithSamePolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
             var server = TestHelper.CreateServer(_app, SiteName, _configureServices);
@@ -86,12 +97,16 @@ namespace Throttling.Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var responseHeaders = response.Headers;
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
+
+            // TODO : Fix the ISystemClock
+            // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
         }
 
         [Theory]
-        [InlineData(11)]
-        public async Task TwoResourcesWithSamePolicy_BeyondLimits_Returns429(int tries)
+        [InlineData(11, "0")]
+        public async Task TwoResourcesWithSamePolicy_BeyondLimits_Returns429(int tries, string userRemaining)
         {
             // Arrange
             var server = TestHelper.CreateServer(_app, SiteName, _configureServices);
@@ -111,7 +126,13 @@ namespace Throttling.Tests
 
             // Assert
             Assert.Equal((HttpStatusCode)429, response.StatusCode);
-            var responseHeaders = response.Headers;
+
+            // TODO : Fix the ISystemClock
+            // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
+
+            Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
+            Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
+            Assert.Single(response.Headers.GetValues("Retry-After"), "86400");
         }
     }
 }

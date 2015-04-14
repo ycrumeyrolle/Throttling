@@ -78,7 +78,6 @@ namespace Throttling
                 context.Response.Headers.Set("Cache-Control", "no-store");
                 context.Response.Headers.Append("Cache-Control", "no-cache");
                 context.Response.Headers.Set("Pragma", "no-cache");
-                context.Response.Headers.Set("Expires", "-1");
 
                 // rfc6585 section 4 : The response [...] MAY include a Retry-After header indicating how long to wait before making a new request.
                 var reset = results.Where(r => r.Reset.HasValue).Max(r => r.Reset);

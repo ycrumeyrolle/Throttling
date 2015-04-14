@@ -40,8 +40,8 @@ namespace Throttling.Tests
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            Assert.Equal("10", response.Headers.GetValues("X-RateLimit-UserLimit").Single());
-            Assert.Equal(userRemaining, response.Headers.GetValues("X-RateLimit-UserRemaining").Single());
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
 
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
@@ -67,11 +67,15 @@ namespace Throttling.Tests
             // Assert
             Assert.Equal((HttpStatusCode)429, response.StatusCode);
 
-            Assert.Equal("10", response.Headers.GetValues("X-RateLimit-UserLimit").Single());
-            Assert.Equal(userRemaining, response.Headers.GetValues("X-RateLimit-UserRemaining").Single());
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
 
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").Single());
+
+            Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
+            Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
+            Assert.Single(response.Headers.GetValues("Retry-After"), "86400");
         }
 
         [Theory]
@@ -97,10 +101,9 @@ namespace Throttling.Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var responseHeaders = response.Headers;
 
-            Assert.Equal("10", response.Headers.GetValues("X-RateLimit-UserLimit").Single());
-            Assert.Equal(userRemaining, response.Headers.GetValues("X-RateLimit-UserRemaining").Single());
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
 
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
@@ -130,11 +133,15 @@ namespace Throttling.Tests
             Assert.Equal((HttpStatusCode)429, response.StatusCode);
             var responseHeaders = response.Headers;
 
-            Assert.Equal("10", response.Headers.GetValues("X-RateLimit-UserLimit").Single());
-            Assert.Equal(userRemaining, response.Headers.GetValues("X-RateLimit-UserRemaining").Single());
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
 
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
+
+            Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
+            Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
+            Assert.Single(response.Headers.GetValues("Retry-After"), "86400");
         }
     }
 }
