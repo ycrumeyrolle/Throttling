@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Xunit;
 using Throttling;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Core;
 using Microsoft.AspNet.Builder;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
@@ -14,6 +13,8 @@ using System.Net;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Framework.Internal;
+using Microsoft.AspNet.Http.Internal;
 
 namespace Throttling.Tests
 {
@@ -23,7 +24,6 @@ namespace Throttling.Tests
         {
             return new MemoryCache(new MemoryCacheOptions()
             {
-                ListenForMemoryPressure = false,
             });
         }
         private ISystemClock CreateClock()
@@ -47,7 +47,7 @@ namespace Throttling.Tests
         {
             // Arrange
             var clock = CreateClock();
-            ThrottlingOptionsSetup setup = new ThrottlingOptionsSetup(new CacheRateStore(CreateCache()), clock, new ThrottlingRouteCollection(), new RouteKeyProvider("{apiKey}", "apiKey"));
+            ThrottlingOptionsSetup setup = new ThrottlingOptionsSetup(new CacheRateStore(CreateCache()), clock, new ThrottlingRouteCollection(), new RouteClientKeyProvider("{apiKey}", "apiKey"));
             var optionsAccessor = new OptionsManager<ThrottlingOptions>(new[] { setup });
             optionsAccessor.Configure();
             RateLimitPolicy policy = new RateLimitPolicyStub(calls, TimeSpan.FromDays(1), false);
@@ -82,7 +82,7 @@ namespace Throttling.Tests
             {
             }
 
-            public override string GetKey(HttpContext context)
+            public override string GetKey([NotNull] HttpContext context)
             {
                 return "key";
             }

@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Cors.Core;
-using Microsoft.Framework.Logging;
 using Microsoft.Framework.DependencyInjection;
-using Xunit;
 using SimpleThrottling;
-using Moq;
+using Xunit;
 
 namespace Throttling.Tests
 {

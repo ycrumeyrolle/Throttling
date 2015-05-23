@@ -8,6 +8,7 @@ using Microsoft.Framework.Logging;
 using Throttling;
 using System.Net;
 using Microsoft.Framework.Caching.Memory;
+using Microsoft.AspNet.Http.Features;
 
 namespace SimpleThrottling
 {
@@ -22,7 +23,7 @@ namespace SimpleThrottling
             services.ConfigureThrottling(options =>
             {
                 //System.Threading.Thread.Sleep(10000);
-                options.ClientKeyProvider = new RouteKeyProvider("{api}", "api");
+                options.ClientKeyProvider = new RouteClientKeyProvider("{api}", "api");
                 options.AddPolicy("10 requests per hour, sliding reset", builder =>
                 {
                     builder

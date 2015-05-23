@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Logging;
 using Throttling;
 using Throttling.Mvc;
 using System.Net;
+using Microsoft.AspNet.Http.Features;
 
 namespace MvcThrottling
 {

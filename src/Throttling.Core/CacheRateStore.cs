@@ -24,11 +24,7 @@ namespace Throttling
 
         public Task SetRemainingRateAsync(string category, string endpoint, string key, RemainingRate remaining)
         {
-            _cache.Set(category + ":" + endpoint + ":" + key, remaining, ctx =>
-           {
-               ctx.SetAbsoluteExpiration(remaining.Reset);
-               return ctx.State;
-           });
+            _cache.Set(category + ":" + endpoint + ":" + key, remaining, new MemoryCacheEntryOptions { AbsoluteExpiration = remaining.Reset });
             return Constants.CompletedTask;
         }
     }

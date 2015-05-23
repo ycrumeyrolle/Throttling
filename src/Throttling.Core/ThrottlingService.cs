@@ -8,6 +8,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNet.Http.Features;
 
 namespace Throttling
 {

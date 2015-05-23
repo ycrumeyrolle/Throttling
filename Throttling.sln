@@ -1,32 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22609.0
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4B90CED-E4DB-4D13-9654-03B34F6550F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF8D0658-8337-4AE5-9EA3-7F111ED99CCA}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
+		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{47783C5F-EA66-4046-A0EF-60FE8EAF7C42}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{FB462F21-F44D-4A2A-9EE6-B370A836F157}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Core", "src\Throttling.Core\Throttling.Core.kproj", "{D77FB763-D9DE-4D14-B620-BF065DFAE5F0}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Core", "src\Throttling.Core\Throttling.Core.xproj", "{D77FB763-D9DE-4D14-B620-BF065DFAE5F0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling", "src\Throttling\Throttling.kproj", "{7035C779-7699-4161-AB76-B0A25F3897C8}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling", "src\Throttling\Throttling.xproj", "{7035C779-7699-4161-AB76-B0A25F3897C8}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ThrottlingSample", "samples\MvcThrottling\ThrottlingSample.kproj", "{7895D216-3692-433D-A23B-E7D2C6A3123C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ThrottlingSample", "samples\MvcThrottling\ThrottlingSample.xproj", "{7895D216-3692-433D-A23B-E7D2C6A3123C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Mvc", "src\Throttling.Mvc\Throttling.Mvc.kproj", "{90CB2628-8AEA-49D1-8AB4-8648D07A7B42}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Mvc", "src\Throttling.Mvc\Throttling.Mvc.xproj", "{90CB2628-8AEA-49D1-8AB4-8648D07A7B42}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Tests", "test\Throttling.Tests\Throttling.Tests.kproj", "{FCA92DFC-F6C9-4A9A-A7A4-1D1B63E1DFDA}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Tests", "test\Throttling.Tests\Throttling.Tests.xproj", "{FCA92DFC-F6C9-4A9A-A7A4-1D1B63E1DFDA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MvcThrottling", "test\WebSites\MvcThrottling\MvcThrottling.kproj", "{C8D2A6E5-D86B-41C2-855A-93CA1CDDE187}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MvcThrottling", "test\WebSites\MvcThrottling\MvcThrottling.xproj", "{C8D2A6E5-D86B-41C2-855A-93CA1CDDE187}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SimpleThrottling", "test\WebSites\SimpleThrottling\SimpleThrottling.kproj", "{E271BD71-419B-4607-AFB5-80B5676C33E5}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SimpleThrottling", "test\WebSites\SimpleThrottling\SimpleThrottling.xproj", "{E271BD71-419B-4607-AFB5-80B5676C33E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
