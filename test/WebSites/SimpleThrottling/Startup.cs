@@ -36,7 +36,7 @@ namespace SimpleThrottling
                         .AddUserLimitRatePerHour(10)
                         .AddIPLimitRatePerDay(10);
                 });
-                options.Routes.ApplyStrategy("{apikey}/test/action/{id?}", "10 requests  per hour, fixed reset");
+                options.Routes.ApplyStrategy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
                 options.Routes.ApplyStrategy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
             });
         }
