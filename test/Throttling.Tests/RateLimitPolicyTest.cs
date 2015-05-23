@@ -26,6 +26,7 @@ namespace Throttling.Tests
             {
             });
         }
+
         private ISystemClock CreateClock()
         {
             Mock<ISystemClock> clock = new Mock<ISystemClock>();
@@ -34,11 +35,7 @@ namespace Throttling.Tests
 
             return clock.Object;
         }
-
-        public RateLimitPolicyTest()
-        {
-        }
-
+        
         [Theory]
         [InlineData(false, 9, 10)]
         [InlineData(true, 0, 0)]

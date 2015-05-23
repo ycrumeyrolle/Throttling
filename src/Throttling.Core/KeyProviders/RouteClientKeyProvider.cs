@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Framework.Internal;
+using System.Linq;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.Routing.Template;
-using System.Linq;
+using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class RouteKeyProvider : IClientKeyProvider
+    public class RouteClientKeyProvider : IClientKeyProvider
     {
         private static readonly IReadOnlyDictionary<string, object> EmptyRouteValues = new RouteValueDictionary();
 
@@ -16,7 +16,7 @@ namespace Throttling
         private TemplateMatcher _matcher;
         private readonly string _routeTemplate;
 
-        public RouteKeyProvider([NotNull] string routeTemplate, [NotNull] string apiKeyName)
+        public RouteClientKeyProvider([NotNull] string routeTemplate, [NotNull] string apiKeyName)
         {
             var route = TemplateParser.Parse(routeTemplate);
             if (!route.Parameters.Any(p => p.Name == apiKeyName))
@@ -41,7 +41,7 @@ namespace Throttling
             var match = _matcher.Match(requestPath);
             if (match == null)
             {
-                throw new InvalidOperationException("Invalid ");
+                return null;
             }
 
             return (string)match[_apiKeyName];

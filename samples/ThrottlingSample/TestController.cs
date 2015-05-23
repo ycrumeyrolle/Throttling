@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNet.Mvc;
 using Throttling.Mvc;
-using Microsoft.AspNet.Mvc.Description;
+using Microsoft.AspNet.Mvc.ApiExplorer;
 
 namespace ThrottlingSample
 {

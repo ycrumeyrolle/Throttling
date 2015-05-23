@@ -19,7 +19,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Core", "src\Thro
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling", "src\Throttling\Throttling.xproj", "{7035C779-7699-4161-AB76-B0A25F3897C8}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ThrottlingSample", "samples\MvcThrottling\ThrottlingSample.xproj", "{7895D216-3692-433D-A23B-E7D2C6A3123C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ThrottlingSample", "samples\ThrottlingSample\ThrottlingSample.xproj", "{7895D216-3692-433D-A23B-E7D2C6A3123C}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Throttling.Mvc", "src\Throttling.Mvc\Throttling.Mvc.xproj", "{90CB2628-8AEA-49D1-8AB4-8648D07A7B42}"
 EndProject

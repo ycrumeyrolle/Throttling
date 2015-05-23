@@ -23,7 +23,7 @@ namespace SimpleThrottling
             services.ConfigureThrottling(options =>
             {
                 //System.Threading.Thread.Sleep(10000);
-                options.ClientKeyProvider = new RouteClientKeyProvider("{api}", "api");
+                options.ClientKeyProvider = new RouteClientKeyProvider("{apikey}/{*remaining}", "apikey");
                 options.AddPolicy("10 requests per hour, sliding reset", builder =>
                 {
                     builder
@@ -36,8 +36,8 @@ namespace SimpleThrottling
                         .AddUserLimitRatePerHour(10)
                         .AddIPLimitRatePerDay(10);
                 });
-                options.Routes.ApplyStrategy("{api}/test/action/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyStrategy("{api}/test/action2/{id?}", "10 requests per hour, fixed reset");
+                options.Routes.ApplyStrategy("{apikey}/test/action/{id?}", "10 requests  per hour, fixed reset");
+                options.Routes.ApplyStrategy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
             });
         }
 
