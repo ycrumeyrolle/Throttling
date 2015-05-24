@@ -1,19 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNet.Http.Features.Internal;
 using Microsoft.AspNet.Http.Internal;
 using Xunit;
 
 namespace Throttling.Tests
 {
-    public class HeaderClientKeyProviderTest
+    public class QueryStringClientKeyProviderTest
     {
         [Theory]
         [MemberData("Parameters")]
-        public void GetKey_ReturnsFirstKey(string[] values)
+        public void GetKey_ReturnsFirstKey1(string[] values)
         {
             // Arrange
-            var keyProvider = new HeaderClientKeyProvider("apikey");
+            var keyProvider = new QueryStringClientKeyProvider("apikey");
+            var queryFeature = new QueryFeature(new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) { { "apikey", values } });
             var context = new DefaultHttpContext();
-            context.Request.Headers.SetValues("apikey", values);
+            context.SetFeature<IQueryFeature>(queryFeature);
 
             // Act
             var result = keyProvider.GetKey(context);
