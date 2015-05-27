@@ -14,7 +14,7 @@ namespace Throttling.Tests
         private const string SiteName = nameof(MvcThrottling);
         private readonly Action<IApplicationBuilder> _app = new Startup().Configure;
         private readonly Action<IServiceCollection> _configureServices = new Startup().ConfigureServices;
-
+        
         [Theory]
         [InlineData(1, "9")]
         [InlineData(10, "0")]
@@ -75,8 +75,8 @@ namespace Throttling.Tests
         }
 
         [Theory]
-        [InlineData(1, "9")]
-        [InlineData(10, "0")]
+        [InlineData(1, "8")]
+        [InlineData(5, "0")]
         public async Task TwoResourcesWithSamePolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
@@ -91,7 +91,7 @@ namespace Throttling.Tests
                     .CreateRequest("http://localhost/apikey/test/action2/" + i);
 
                 // Act
-                response = await requestBuilder1.SendAsync("GET");
+                await requestBuilder1.SendAsync("GET");
                 response = await requestBuilder2.SendAsync("GET");
             }
 

@@ -3,16 +3,16 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class FormClientKeyProvider : IClientKeyProvider
+    public class FormApiKeyProvider : IApiKeyProvider
     {
         private readonly string _parameter;
 
-        public FormClientKeyProvider([NotNull] string parameter)
+        public FormApiKeyProvider([NotNull] string parameter)
         {
             _parameter = parameter;
         }
 
-        public string GetKey([NotNull] HttpContext context)
+        public string GetApiKey([NotNull] HttpContext context)
         {
             var apiKeys = context.Request.Form.GetValues(_parameter);
 

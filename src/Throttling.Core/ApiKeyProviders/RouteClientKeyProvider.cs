@@ -8,7 +8,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class RouteClientKeyProvider : IClientKeyProvider
+    public class RouteApiKeyProvider : IApiKeyProvider
     {
         private static readonly IReadOnlyDictionary<string, object> EmptyRouteValues = new RouteValueDictionary();
 
@@ -16,7 +16,7 @@ namespace Throttling
         private TemplateMatcher _matcher;
         private readonly string _routeTemplate;
 
-        public RouteClientKeyProvider([NotNull] string routeTemplate, [NotNull] string apiKeyName)
+        public RouteApiKeyProvider([NotNull] string routeTemplate, [NotNull] string apiKeyName)
         {
             var route = TemplateParser.Parse(routeTemplate);
             if (!route.Parameters.Any(p => p.Name == apiKeyName))
@@ -29,7 +29,7 @@ namespace Throttling
             _apiKeyName = apiKeyName;
         }
 
-        public string GetKey([NotNull] HttpContext context)
+        public string GetApiKey([NotNull] HttpContext context)
         {
             var requestPath = context.Request.Path.Value;
 

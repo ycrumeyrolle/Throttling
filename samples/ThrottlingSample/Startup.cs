@@ -25,14 +25,14 @@ namespace ThrottlingSample
                 options.AddPolicy("5 requests per 10 seconds, sliding reset", builder =>
                 {
                     builder
-                        .AddUserLimitRate(5, TimeSpan.FromSeconds(10), true)
-                        .AddIPLimitRatePerDay(10);
+                        .LimitAuthenticatedUserRate(5, TimeSpan.FromSeconds(10), true)
+                        .LimitIPRate(10, TimeSpan.FromDays(1));
                 });
                 options.AddPolicy("5 requests per 10 seconds, fixed reset", builder =>
                 {
                     builder
-                        .AddUserLimitRate(5, TimeSpan.FromSeconds(10))
-                        .AddIPLimitRatePerDay(10);
+                        .LimitAuthenticatedUserRate(5, TimeSpan.FromSeconds(10))
+                        .LimitIPRate(10, TimeSpan.FromDays(1));
                 });
 
                 options.Routes.ApplyStrategy("test/action/{id?}", "5 requests per 10 seconds, fixed reset");

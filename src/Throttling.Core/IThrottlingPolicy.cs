@@ -5,14 +5,14 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public interface IThrottlingPolicy
-    {
-        string Name { get; set; }
+    //public interface IThrottlingPolicy
+    //{
+    //    string Name { get; set; }
 
-        string Category { get; set; }
+    //    string Category { get; set; }
        
-        Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context, string routeTemplate);
+    //    Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context, string routeTemplate);
 
-        void Configure(ThrottlingOptions options);
-    }
+    //    void Configure(ThrottlingOptions options);
+    //}
 }

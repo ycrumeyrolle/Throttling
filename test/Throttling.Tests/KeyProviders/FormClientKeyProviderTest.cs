@@ -6,21 +6,21 @@ using Xunit;
 
 namespace Throttling.Tests
 {
-    public class FormClientKeyProviderTest
+    public class FormApiKeyProviderTest
     {
         [Theory]
         [MemberData("Parameters")]
         public void GetKey_ReturnsFirstKey1(string[] values)
         {
             // Arrange
-            var keyProvider = new FormClientKeyProvider("apikey");
+            var keyProvider = new FormApiKeyProvider("apikey");
             IFormFeature formFeature = new FormFeature(new FormCollection(new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) { { "apikey", values } }));
             var context = new DefaultHttpContext();
             context.Request.ContentType = "application/x-www-form-urlencoded";
             context.SetFeature(formFeature);
 
             // Act
-            var result = keyProvider.GetKey(context);
+            var result = keyProvider.GetApiKey(context);
 
             // Assert
             Assert.NotNull(result);

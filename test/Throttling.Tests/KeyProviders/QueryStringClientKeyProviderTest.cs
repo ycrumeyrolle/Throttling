@@ -6,20 +6,20 @@ using Xunit;
 
 namespace Throttling.Tests
 {
-    public class QueryStringClientKeyProviderTest
+    public class QueryStringApiKeyProviderTest
     {
         [Theory]
         [MemberData("Parameters")]
         public void GetKey_ReturnsFirstKey1(string[] values)
         {
             // Arrange
-            var keyProvider = new QueryStringClientKeyProvider("apikey");
+            var keyProvider = new QueryStringApiKeyProvider("apikey");
             var queryFeature = new QueryFeature(new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) { { "apikey", values } });
             var context = new DefaultHttpContext();
             context.SetFeature<IQueryFeature>(queryFeature);
 
             // Act
-            var result = keyProvider.GetKey(context);
+            var result = keyProvider.GetApiKey(context);
 
             // Assert
             Assert.NotNull(result);

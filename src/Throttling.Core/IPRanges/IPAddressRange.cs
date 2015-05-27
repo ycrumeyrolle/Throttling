@@ -19,7 +19,11 @@
 
         public IPAddressRange([NotNull] string range)
         {
-            _validator = Parse(range);
+            _validator = ParseCore(range);
+        }
+        public IPAddressRange([NotNull] IIPAddressRangeValidator rangeValidator)
+        {
+            _validator = rangeValidator;
         }
 
         public bool Contains([NotNull] IPAddress address)
@@ -32,18 +36,42 @@
             return _validator.Contains(IPAddress.Parse(address));
         }
 
-        public static IIPAddressRangeValidator Parse([NotNull] string range)
+        public static IPAddressRange Parse([NotNull] string range)
         {
-            IIPAddressRangeValidator rangeValidator;
-            if (!TryParse(range, out rangeValidator))
+            IPAddressRange addressRange;
+            if (!TryParse(range, out addressRange))
             {
                 throw new FormatException("Unknown IP range string.");
             }
 
-            return rangeValidator;
+            return addressRange;
         }
 
-        public static bool TryParse([NotNull] string range, out IIPAddressRangeValidator rangeValidator)
+        private static IIPAddressRangeValidator ParseCore([NotNull] string range)
+        {
+            IIPAddressRangeValidator addressRangeValidator;
+            if (!TryParseCore(range, out addressRangeValidator))
+            {
+                throw new FormatException("Unknown IP range string.");
+            }
+
+            return addressRangeValidator;
+        }
+
+        public static bool TryParse([NotNull] string range, out IPAddressRange addressRange)
+        {
+            IIPAddressRangeValidator rangeValidator;
+            if (TryParseCore(range, out rangeValidator))
+            {
+                addressRange = new IPAddressRange(rangeValidator);
+                return true;
+            }
+
+            addressRange = null;
+            return false;
+        }
+
+        private static bool TryParseCore(string range, out IIPAddressRangeValidator rangeValidator)
         {
             // remove all spaces.
             range = range.Replace(" ", string.Empty);

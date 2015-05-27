@@ -22,13 +22,13 @@ namespace Throttling
         /// <inheritdoc />
         public virtual Task<ThrottlingStrategy> GetThrottlingStrategyAsync(HttpContext context, string policyName)
         {
-            IThrottlingPolicy policy;
+            ThrottlingPolicy policy;
             if (policyName != null)
             {
                 policy = _options.GetPolicy(policyName);
                 if (policy != null)
                 {
-                    return Task.FromResult(new ThrottlingStrategy { Policy = policy, RouteTemplate = "*" });
+                    return Task.FromResult(new ThrottlingStrategy { Policy = policy, RouteTemplate = "{*any}" });
                 }
             }
 

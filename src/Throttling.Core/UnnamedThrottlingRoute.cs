@@ -7,21 +7,21 @@ namespace Throttling
 {
     public class UnnamedThrottlingRoute : ThrottlingRoute
     {
-        private readonly IThrottlingPolicy _policy;
+        private readonly ThrottlingPolicy _policy;
 
-        public UnnamedThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, IThrottlingPolicy policy, IPWhitelist whitelist = null)
+        public UnnamedThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, ThrottlingPolicy policy, IPWhitelist whitelist = null)
             : base(httpMethods, routeTemplate, whitelist)
         {
             _policy = policy;
         }
 
-        public UnnamedThrottlingRoute(string routeTemplate, IThrottlingPolicy policy, IPWhitelist whitelist = null)
+        public UnnamedThrottlingRoute(string routeTemplate, ThrottlingPolicy policy, IPWhitelist whitelist = null)
             : base(null, routeTemplate, whitelist)
         {
             _policy = policy;
         }
 
-        public override IThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options)
+        public override ThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options)
         {
             return _policy;
         }

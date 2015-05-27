@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.Routing.Template;
+using Microsoft.Framework.Internal;
 using Throttling.IPRanges;
 
 namespace Throttling
@@ -35,7 +34,7 @@ namespace Throttling
 
         public IPWhitelist Whitelist { get; private set; }
 
-        public abstract IThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options);
+        public abstract ThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options);
 
         public bool Match([NotNull] HttpRequest request)
         {

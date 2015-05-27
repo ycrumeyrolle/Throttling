@@ -1,45 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.Framework.Internal;
-using Microsoft.AspNet.Http;
+using Throttling.IPRanges;
 
 namespace Throttling
 {
-    public sealed class ThrottlingPolicy : IThrottlingPolicy
+    public sealed class ThrottlingPolicy
     {
-        private readonly List<IThrottlingPolicy> _policies = new List<IThrottlingPolicy>();
+        public ThrottlingPolicy([NotNull] IEnumerable<IThrottlingRequirement> requirements, [NotNull] IEnumerable<IPAddressRange> whitelist, [NotNull] string policyName)
+        {
+            if (requirements.Count() == 0)
+            {
+                throw new ArgumentException("The argument cannot be empty.", nameof(requirements));
+            }
+
+            Requirements = new List<IThrottlingRequirement>(requirements).AsReadOnly();
+            Whitelist = new IPWhitelist(whitelist);
+            Name = policyName;
+        }
 
         public string Name { get; set; }
 
-        public string Category { get; set; }
 
-        public void AddPolicy([NotNull] IThrottlingPolicy policy)
-        {
-            _policies.Add(policy);
-            policy.Category = Category + "_" + policy.Category + "_" + _policies.Count;
-            policy.Name = Name;
-        }
+        public IReadOnlyList<IThrottlingRequirement> Requirements { get; private set; }
 
-        public void Configure(ThrottlingOptions options)
-        {
-            for (int i = 0; i < _policies.Count; i++)
-            {
-                _policies[i].Configure(options);
-            }
-        }
 
-        public async Task<IEnumerable<ThrottlingResult>> EvaluateAsync([NotNull] HttpContext context, string routeTemplate)
-        {
-            List<ThrottlingResult> results = new List<ThrottlingResult>();
-            for (int i = 0; i < _policies.Count; i++)
-            {
-                var policy = _policies[i];
-                var policyResult = await policy.EvaluateAsync(context, routeTemplate);
-                results.AddRange(policyResult);
-            }
-
-            return results;
-        }
+        public IPWhitelist Whitelist { get; private set; }
     }
 }

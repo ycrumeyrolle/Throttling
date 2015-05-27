@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.Framework.Internal;
 

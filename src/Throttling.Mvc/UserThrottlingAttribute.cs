@@ -26,7 +26,7 @@ namespace Throttling.Mvc
 
         protected override void ApplyCore(ActionModel model, ThrottlingPolicyBuilder builder)
         {
-            builder.AddUserLimitRate(Calls, TimeSpan.FromSeconds(RenewalPeriod), _unauthenticatedCalls, TimeSpan.FromSeconds(_unauthenticatedRenewalPeriod), Sliding);
+            builder.LimitUserRate(Calls, TimeSpan.FromSeconds(RenewalPeriod), _unauthenticatedCalls, TimeSpan.FromSeconds(_unauthenticatedRenewalPeriod), Sliding);
         }
     }
 }

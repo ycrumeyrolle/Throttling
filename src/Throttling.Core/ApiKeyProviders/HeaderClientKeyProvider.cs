@@ -1,19 +1,18 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNet.Http;
+﻿using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class HeaderClientKeyProvider
+    public class HeaderApiKeyProvider : IApiKeyProvider
     {
         private readonly string _parameter;
 
-        public HeaderClientKeyProvider([NotNull] string parameter)
+        public HeaderApiKeyProvider([NotNull] string parameter)
         {
             _parameter = parameter;
         }
 
-        public string GetKey([NotNull] HttpContext context)
+        public string GetApiKey([NotNull] HttpContext context)
         {
             string[] apiKeys;
             if (context.Request.Headers.TryGetValue(_parameter, out apiKeys) && apiKeys.Length > 0)

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Http;
-using System;
+using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
@@ -25,8 +24,7 @@ namespace Throttling
                     return new ThrottlingStrategy
                     {
                         Policy = route.GetPolicy(context.Request, options),
-                        RouteTemplate = route.RouteTemplate,
-                        Whitelist = route.Whitelist
+                        RouteTemplate = route.RouteTemplate
                     };
                 }
             }
@@ -36,6 +34,6 @@ namespace Throttling
 
         public int Count { get { return _routes.Count; } }
         
-        public IDictionary<string, IThrottlingPolicy> PolicyMap { get; } = new Dictionary<string, IThrottlingPolicy>();
+        public IDictionary<string, ThrottlingPolicy> PolicyMap { get; } = new Dictionary<string, ThrottlingPolicy>();
     }
 }

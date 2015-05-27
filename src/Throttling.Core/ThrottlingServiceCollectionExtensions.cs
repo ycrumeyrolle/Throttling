@@ -37,7 +37,13 @@ namespace Microsoft.Framework.DependencyInjection
             serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();
             serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
             serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
-            serviceCollection.AddTransient<IClientKeyProvider, ClientKeyProvider>();
+            serviceCollection.AddTransient<IApiKeyProvider, ApiKeyProvider>();
+            serviceCollection.AddTransient<IThrottlingHandler, FormApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, HeaderApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, QueryStringApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, RouteApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, UserLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, IPLimitRateHandler>();
 
             return serviceCollection;
         }

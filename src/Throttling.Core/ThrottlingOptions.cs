@@ -32,28 +32,13 @@ namespace Throttling
         }
 
         public RetryAfterMode RetryAfterMode { get; set; }
-
-        public IRateStore RateStore { get; set; }
-
-        public ISystemClock Clock { get; set; }
-
-        public IClientKeyProvider ClientKeyProvider { get; set; }
-
-        internal void ConfigurePolicies()
-        {
-            foreach (var policy in Routes.PolicyMap.Values)
-            {
-                policy.Configure(this);
-            }
-        }
-
-
+                
         /// <summary>
         /// Adds a new policy.
         /// </summary>
         /// <param name="name">The name of the policy.</param>
         /// <param name="policy">The <see cref="IThrottlingPolicy"/> policy to be added.</param>
-        public void AddPolicy([NotNull] string name, [NotNull] IThrottlingPolicy policy)
+        public void AddPolicy([NotNull] string name, [NotNull] ThrottlingPolicy policy)
         {
             Routes.PolicyMap[name] = policy;
         }
@@ -75,7 +60,7 @@ namespace Throttling
         /// </summary>
         /// <param name="name">The name of the policy to lookup.</param>
         /// <returns>The <see cref="ThrottlingPolicy"/> if the policy was added.<c>null</c> otherwise.</returns>
-        public IThrottlingPolicy GetPolicy([NotNull] string name)
+        public ThrottlingPolicy GetPolicy([NotNull] string name)
         {
             return Routes.PolicyMap.ContainsKey(name) ? Routes.PolicyMap[name] : null;
         }

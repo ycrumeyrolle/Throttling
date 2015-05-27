@@ -13,16 +13,6 @@ namespace Throttling
         /// <param name="context">The <see cref="T:Microsoft.AspNet.Http.HttpContext" /> associated with the call.</param>
         /// <param name="policy">The <see cref="T:Throttling.IThrottlingPolicy" /> which needs to be evaluated.</param>
         /// <returns>A <see cref="T:Throttling.ThrottlingResult" /> which contains the result of policy evaluation.</returns>
-        Task<IEnumerable<ThrottlingResult>> EvaluateStrategyAsync(HttpContext context, ThrottlingStrategy strategy);
-       
-        /// <summary>
-        /// Apply result to the given <paramref name="response" />.
-        /// </summary>
-        /// <param name="response">The <see cref="T:Microsoft.AspNet.Http.HttpResponse" /> associated with the current call.</param>
-        /// <param name="result">The <see cref="T:Throttling.ThrottlingResult" /> used to read the allowed values.</param>
-        /// <returns><c>true</c> if the result implies a "Too many requests" response; <c>false otherwise</c>.</returns>
-        bool ApplyResult([NotNull] HttpContext context, [NotNull] IEnumerable<ThrottlingResult> result);
-
-        Task ApplyLimitAsync(IEnumerable<ThrottlingResult> results);
+        Task<ThrottlingContext> EvaluateAsync([NotNull] HttpContext context, [NotNull] ThrottlingStrategy strategy);
     }
 }

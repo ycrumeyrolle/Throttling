@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Throttling.Tests
 {
-    public class RouteClientKeyProviderTest
+    public class RouteApiKeyProviderTest
     {
         [Theory]
         [InlineData("{apikeyA}", "apikeyB")]
@@ -16,7 +16,7 @@ namespace Throttling.Tests
         public void Ctor_IncorrectApiKeyName_ThrowsException(string routeTemplate, string apiKeyName)
         {
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new RouteClientKeyProvider(routeTemplate, apiKeyName));
+            Assert.Throws<ArgumentException>(() => new RouteApiKeyProvider(routeTemplate, apiKeyName));
         }
 
         [Theory]
@@ -27,12 +27,12 @@ namespace Throttling.Tests
         public void GetKey_ReturnsKey(string routeTemplate, string path, string expectedKey)
         {
             // Arrange
-            var keyProvider = new RouteClientKeyProvider(routeTemplate, "apikey");
+            var keyProvider = new RouteApiKeyProvider(routeTemplate, "apikey");
             var context = new DefaultHttpContext();
             context.Request.Path = new PathString(path);
 
             // Act 
-            var result = keyProvider.GetKey(context);
+            var result = keyProvider.GetApiKey(context);
 
             // Assert
             Assert.NotNull(result);
@@ -45,12 +45,12 @@ namespace Throttling.Tests
         public void GetKey_InvalidRoute_ReturnsNull(string routeTemplate, string path)
         {
             // Arrange
-            var keyProvider = new RouteClientKeyProvider(routeTemplate, "apikey");
+            var keyProvider = new RouteApiKeyProvider(routeTemplate, "apikey");
             var context = new DefaultHttpContext();
             context.Request.Path = new PathString(path);
 
             // Act
-            var result = keyProvider.GetKey(context);
+            var result = keyProvider.GetApiKey(context);
 
             // Assert
             Assert.Null(result);

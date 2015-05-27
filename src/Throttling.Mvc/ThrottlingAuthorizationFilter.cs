@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Throttling;
 using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.WebUtilities;
-using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
@@ -20,17 +14,20 @@ namespace Throttling.Mvc
         private readonly IThrottlingService _throttlingService;
         private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
         private readonly ThrottlingOptions _options;
+        private readonly ISystemClock _clock;
+
 
         /// <summary>
         /// Creates a new instace of <see cref="ThrottlingAuthorizationFilter"/>.
         /// </summary>
         /// <param name="ThrottlingService">The <see cref="IThrottlingService"/>.</param>
         /// <param name="policyProvider">The <see cref="IThrottlingPolicyProvider"/>.</param>
-        public ThrottlingAuthorizationFilter(IOptions<ThrottlingOptions> optionsAccessor, IThrottlingService ThrottlingService, IThrottlingPolicyProvider policyProvider)
+        public ThrottlingAuthorizationFilter(IOptions<ThrottlingOptions> optionsAccessor, IThrottlingService ThrottlingService, IThrottlingPolicyProvider policyProvider, ISystemClock clock)
         {
             _throttlingService = ThrottlingService;
             _throttlingPolicyProvider = policyProvider;
             _options = optionsAccessor.Options;
+            _clock = clock;
         }
 
         /// <inheritdoc />
@@ -49,12 +46,6 @@ namespace Throttling.Mvc
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
         {
-            //// If this filter is not closest to the action, it is not applicable.
-            //if (!IsClosestToAction(context.Filters))
-            //{
-            //    return;
-            //}
-
             var httpContext = context.HttpContext;
             var request = httpContext.Request;
 
@@ -70,25 +61,18 @@ namespace Throttling.Mvc
 
             if (strategy != null)
             {
-                var throttlingResults = await _throttlingService.EvaluateStrategyAsync(httpContext, strategy);
-                if (_throttlingService.ApplyResult(httpContext, throttlingResults))
+                var throttlingContext = await _throttlingService.EvaluateAsync(httpContext, strategy);
+                foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
                 {
-                    context.Result = new HttpStatusCodeResult(429);
+                    context.HttpContext.Response.Headers.SetValues(header.Key, header.Value);
                 }
-                else
+
+                if (throttlingContext.HasFailed)
                 {
-                    await _throttlingService.ApplyLimitAsync(throttlingResults);
+                    string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
+                    context.Result = new TooManyRequestResult(throttlingContext.Headers, retryAfter);
                 }
             }
-        }
-
-        private bool IsClosestToAction(IEnumerable<IFilter> filters)
-        {
-            // If there are multiple IThrottlingAuthorizationFilter which are defined at the class and
-            // at the action level, the one closest to the action overrides the others. 
-            // Since filterdescriptor collection is ordered (the last filter is the one closest to the action),
-            // we apply this constraint only if there is no IThrottlingAuthorizationFilter after this.
-            return filters.Last(filter => filter is IThrottlingAuthorizationFilter) == this;
         }
     }
 }

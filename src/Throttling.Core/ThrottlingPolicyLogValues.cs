@@ -9,10 +9,9 @@ namespace Throttling
 
         string Category { get; set; }
 
-        public ThrottlingPolicyLogValues([NotNull] IThrottlingPolicy inner)
+        public ThrottlingPolicyLogValues([NotNull] ThrottlingPolicy inner)
         {
             Name = inner.Name;
-            Category = inner.Category;
         }
     }
 }

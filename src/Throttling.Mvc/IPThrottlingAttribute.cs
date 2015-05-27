@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 
 namespace Throttling.Mvc
@@ -14,7 +13,7 @@ namespace Throttling.Mvc
 
         protected override void ApplyCore(ActionModel model, ThrottlingPolicyBuilder builder)
         {
-            builder.AddIPLimitRate(Calls, TimeSpan.FromSeconds(RenewalPeriod), Sliding);
+            builder.LimitIPRate(Calls, TimeSpan.FromSeconds(RenewalPeriod), Sliding);
         }
     }
 }

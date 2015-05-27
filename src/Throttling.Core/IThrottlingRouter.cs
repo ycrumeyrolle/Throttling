@@ -12,6 +12,6 @@ namespace Throttling
 
         int Count { get; }
 
-        IDictionary<string, IThrottlingPolicy> PolicyMap { get; }
+        IDictionary<string, ThrottlingPolicy> PolicyMap { get; }
     }
 }

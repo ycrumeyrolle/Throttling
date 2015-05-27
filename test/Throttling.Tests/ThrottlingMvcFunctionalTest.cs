@@ -75,8 +75,8 @@ namespace Throttling.Tests
         }
 
         [Theory]
-        [InlineData(1, "9")]
-        [InlineData(10, "0")]
+        [InlineData(1, "8")]
+        [InlineData(5, "0")]
         public async Task TwoResourcesWithSamePolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
