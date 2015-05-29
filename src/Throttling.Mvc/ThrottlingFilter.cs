@@ -9,20 +9,20 @@ namespace Throttling.Mvc
     /// <summary>
     /// A filter which applies the given <see cref="ThrottlingPolicy"/> and adds appropriate response headers.
     /// </summary>
-    public class ThrottlingAuthorizationFilter : IThrottlingAuthorizationFilter
+    public class ThrottlingFilter : IThrottlingFilter
     {
         private readonly IThrottlingService _throttlingService;
-        private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
+        private readonly IThrottlingStrategyProvider _throttlingPolicyProvider;
         private readonly ThrottlingOptions _options;
         private readonly ISystemClock _clock;
 
 
         /// <summary>
-        /// Creates a new instace of <see cref="ThrottlingAuthorizationFilter"/>.
+        /// Creates a new instace of <see cref="ThrottlingFilter"/>.
         /// </summary>
         /// <param name="ThrottlingService">The <see cref="IThrottlingService"/>.</param>
-        /// <param name="policyProvider">The <see cref="IThrottlingPolicyProvider"/>.</param>
-        public ThrottlingAuthorizationFilter(IOptions<ThrottlingOptions> optionsAccessor, IThrottlingService ThrottlingService, IThrottlingPolicyProvider policyProvider, ISystemClock clock)
+        /// <param name="policyProvider">The <see cref="IThrottlingStrategyProvider"/>.</param>
+        public ThrottlingFilter(IOptions<ThrottlingOptions> optionsAccessor, IThrottlingService ThrottlingService, IThrottlingStrategyProvider policyProvider, ISystemClock clock)
         {
             _throttlingService = ThrottlingService;
             _throttlingPolicyProvider = policyProvider;

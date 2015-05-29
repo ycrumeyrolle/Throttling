@@ -4,7 +4,7 @@ using Microsoft.AspNet.Mvc.ApplicationModels;
 namespace Throttling.Mvc
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class IPThrottlingAttribute : ThrottlingLimitRateAttribute
+    public class IPThrottlingAttribute : LimitRateAttribute
     {
         public IPThrottlingAttribute(long calls, long renewalPeriod)
             : base(calls, renewalPeriod)

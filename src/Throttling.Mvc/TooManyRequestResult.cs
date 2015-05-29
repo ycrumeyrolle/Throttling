@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Microsoft.AspNet.Http;
+﻿using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 
 namespace Throttling.Mvc

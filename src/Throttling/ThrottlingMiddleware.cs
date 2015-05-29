@@ -1,11 +1,10 @@
-﻿using System;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Framework.Internal;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.Http;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
-using System.Linq;
 
 namespace Throttling
 {
@@ -16,7 +15,7 @@ namespace Throttling
     {
         private readonly RequestDelegate _next;
         private readonly IThrottlingService _throttlingService;
-        private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
+        private readonly IThrottlingStrategyProvider _throttlingPolicyProvider;
         private readonly ILogger _logger;
         private readonly ISystemClock _clock;
         private readonly ThrottlingOptions _options;
@@ -31,7 +30,7 @@ namespace Throttling
             [NotNull] RequestDelegate next, 
             [NotNull] ILoggerFactory loggerFactory, 
             [NotNull] IThrottlingService throttlingService, 
-            [NotNull] IThrottlingPolicyProvider policyProvider, 
+            [NotNull] IThrottlingStrategyProvider policyProvider, 
             [NotNull] ISystemClock clock, 
             [NotNull] IOptions<ThrottlingOptions> options)
         {

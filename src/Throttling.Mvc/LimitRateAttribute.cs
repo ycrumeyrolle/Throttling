@@ -1,17 +1,16 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 
 namespace Throttling.Mvc
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class ThrottlingLimitRateAttribute : ThrottlingConventionAttribute
+    public abstract class LimitRateAttribute : ThrottlingConventionAttribute
     {
         protected long Calls { get; }
 
         protected long RenewalPeriod { get; }
 
-        public ThrottlingLimitRateAttribute(long calls, long renewalPeriod)
+        public LimitRateAttribute(long calls, long renewalPeriod)
         {
             Calls = calls;
             RenewalPeriod = renewalPeriod;

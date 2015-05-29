@@ -15,7 +15,7 @@ namespace Throttling.Mvc
             {
                 builder = new ThrottlingPolicyBuilder(policyName);
                 model.Properties.Add("Throttling.PolicyBuilder", builder);
-                model.Filters.Add(new ThrottlingAuthorizationFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, builder));
+                model.Filters.Add(new ThrottlingFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, builder));
             }
             else
             {

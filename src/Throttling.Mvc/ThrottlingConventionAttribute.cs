@@ -2,7 +2,6 @@
 {
     using System;
     using System.Globalization;
-    using Microsoft.AspNet.Mvc;
     using Microsoft.AspNet.Mvc.ApplicationModels;
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]

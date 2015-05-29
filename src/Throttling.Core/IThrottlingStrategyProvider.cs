@@ -4,7 +4,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public interface IThrottlingPolicyProvider
+    public interface IThrottlingStrategyProvider
     {
         /// <summary>
         /// Selects a throttling policy to apply for the given request.

@@ -17,7 +17,7 @@ namespace MvcThrottling
         [Throttling("10 requests per hour, sliding reset")]
         public string Sliding(int value)
         {
-            return "Value : " + value;
+            return "Value : " + value; 
         }
 
         [HttpGet("Sliding2/{value}")]

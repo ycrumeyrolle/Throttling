@@ -13,7 +13,7 @@ namespace Throttling
         private bool _tooManyRequestCalled;
         private bool _succeedCalled;
 
-        public ThrottlingContext([NotNull] HttpContext httpContext, [NotNull]  ThrottlingStrategy strategy)
+        public ThrottlingContext([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
         {
             Headers = new HeaderDictionary();
             HttpContext = httpContext;
@@ -41,21 +41,22 @@ namespace Throttling
         }
 
         public DateTimeOffset? RetryAfter { get; set; }
+
         public IHeaderDictionary Headers { get; private set; }
 
-        public void Succeed(IThrottlingRequirement requirement)
+        public void Succeed([NotNull] IThrottlingRequirement requirement)
         {
             _succeedCalled = true;
             _pendingRequirements.Remove(requirement);
         }
 
-        public void TooManyRequest<TRequirement>(TRequirement requirement, DateTimeOffset retryAfter) where TRequirement : LimitRateRequirement
+        public void TooManyRequest<TRequirement>([NotNull] TRequirement requirement, DateTimeOffset retryAfter) where TRequirement : LimitRateRequirement
         {
             _tooManyRequestCalled = true;
             if (!RetryAfter.HasValue || RetryAfter.Value < retryAfter)
             {
                 RetryAfter = retryAfter;
-            }            
+            }
         }
     }
 }

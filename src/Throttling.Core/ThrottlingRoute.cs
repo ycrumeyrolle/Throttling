@@ -16,7 +16,7 @@ namespace Throttling
 
         private readonly TemplateMatcher _matcher;
 
-        public ThrottlingRoute(IEnumerable<string> httpMethods, string routeTemplate, IPWhitelist whitelist = null)
+        public ThrottlingRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, IPWhitelist whitelist = null)
         {
             _httpMethods = httpMethods;
             RouteTemplate = routeTemplate;

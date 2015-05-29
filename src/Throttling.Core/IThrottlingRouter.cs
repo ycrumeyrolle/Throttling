@@ -6,7 +6,7 @@ namespace Throttling
 {
     public interface IThrottlingRouter
     {
-        void Add(ThrottlingRoute route);
+        void Add([NotNull] ThrottlingRoute route);
 
         ThrottlingStrategy GetThrottlingStrategyAsync([NotNull] HttpContext context, [NotNull] ThrottlingOptions options);
 

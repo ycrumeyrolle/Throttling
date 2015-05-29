@@ -1,26 +1,25 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
-    public class DefaultThrottlingPolicyProvider : IThrottlingPolicyProvider
+    public class DefaultThrottlingStrategyProvider : IThrottlingStrategyProvider
     {
         private readonly ThrottlingOptions _options;
 
         /// <summary>
-        /// Creates a new instance of <see cref="DefaultThrottlingPolicyProvider"/>.
+        /// Creates a new instance of <see cref="DefaultThrottlingStrategyProvider"/>.
         /// </summary>
         /// <param name="options">The options configured for the application.</param>
-        public DefaultThrottlingPolicyProvider(IOptions<ThrottlingOptions> options)
+        public DefaultThrottlingStrategyProvider([NotNull] IOptions<ThrottlingOptions> options)
         {
             _options = options.Options;
         }
 
         /// <inheritdoc />
-        public virtual Task<ThrottlingStrategy> GetThrottlingStrategyAsync(HttpContext context, string policyName)
+        public virtual Task<ThrottlingStrategy> GetThrottlingStrategyAsync([NotNull] HttpContext context, string policyName)
         {
             ThrottlingPolicy policy;
             if (policyName != null)

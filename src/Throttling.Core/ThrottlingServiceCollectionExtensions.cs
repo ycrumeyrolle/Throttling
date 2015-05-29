@@ -16,9 +16,7 @@ namespace Microsoft.Framework.DependencyInjection
         /// <param name="serviceCollection">The service collection which needs to be configured.</param>
         /// <param name="configure">A delegate which is run to configure the services.</param>
         /// <returns></returns>
-        public static IServiceCollection ConfigureThrottling(
-            [NotNull] this IServiceCollection serviceCollection,
-            [NotNull] Action<ThrottlingOptions> configure)
+        public static IServiceCollection ConfigureThrottling([NotNull] this IServiceCollection serviceCollection, [NotNull] Action<ThrottlingOptions> configure)
         {
             return serviceCollection.Configure(configure);
         }
@@ -28,10 +26,10 @@ namespace Microsoft.Framework.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The service collection to which Throttling services are added.</param>
         /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddThrottling(this IServiceCollection serviceCollection)
+        public static IServiceCollection AddThrottling([NotNull] this IServiceCollection serviceCollection)
         {
             serviceCollection.AddOptions();
-            serviceCollection.AddTransient<IThrottlingPolicyProvider, DefaultThrottlingPolicyProvider>();
+            serviceCollection.AddTransient<IThrottlingStrategyProvider, DefaultThrottlingStrategyProvider>();
             serviceCollection.AddTransient<IRateStore, CacheRateStore>();
             serviceCollection.AddTransient<ISystemClock, SystemClock>();
             serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Framework.Internal;
 using Throttling.IPRanges;
 
 namespace Throttling
@@ -114,7 +115,7 @@ namespace Throttling
         /// </summary>
         /// <param name="range"></param>
         /// <returns></returns>
-        public ThrottlingPolicyBuilder IgnoreIPAddressRange(string range)
+        public ThrottlingPolicyBuilder IgnoreIPAddressRange([NotNull] string range)
         {            
             var addressRange = IPAddressRange.Parse(range);
             WhiteList.Add(addressRange);

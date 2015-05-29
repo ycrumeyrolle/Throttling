@@ -45,11 +45,6 @@ namespace Throttling
             var throttlingContext = new ThrottlingContext(context, strategy);
             if (strategy.Policy.Whitelist != null)
             {
-                //string xForwadedFor = context.Request.Headers["X-Forwarded-For"];
-                //if (xForwadedFor != null)
-                //{
-                //    var indexOfComma = xForwadedFor.IndexOf(',');
-                //}
                 IHttpConnectionFeature connection = context.GetFeature<IHttpConnectionFeature>();
                 if (strategy.Policy.Whitelist.Contains(connection.RemoteIpAddress))
                 {

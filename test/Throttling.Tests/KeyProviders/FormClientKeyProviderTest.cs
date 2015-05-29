@@ -25,6 +25,7 @@ namespace Throttling.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(values[0], result);
+            var x = new FormApiKeyProvider(null);
         }
 
         public static IEnumerable<object[]> Parameters

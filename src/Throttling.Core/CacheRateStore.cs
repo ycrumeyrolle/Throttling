@@ -15,7 +15,7 @@ namespace Throttling
             _clock = clock;
         }
 
-        public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, LimitRateRequirement requirement, long decrementValue)
+        public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] LimitRateRequirement requirement, long decrementValue)
         {
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)

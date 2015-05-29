@@ -8,8 +8,7 @@ namespace Throttling
     {
         private readonly IThrottlingRouter _router;
 
-        public ThrottlingOptionsSetup(
-            [NotNull] IThrottlingRouter router) 
+        public ThrottlingOptionsSetup([NotNull] IThrottlingRouter router)
             : base(new Action<ThrottlingOptions>(ThrottlingOptionsSetup.ConfigureMessageOptions))
         {
             _router = router;
@@ -24,7 +23,7 @@ namespace Throttling
         /// <summary>
         /// Set the default options
         /// </summary>
-        public static void ConfigureMessageOptions(ThrottlingOptions options)
+        public static void ConfigureMessageOptions([NotNull] ThrottlingOptions options)
         {
             options.RetryAfterMode = RetryAfterMode.DeltaSeconds;
         }

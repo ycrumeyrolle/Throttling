@@ -6,7 +6,7 @@ namespace Throttling
 {
     public static class RetryAfterHelper
     {
-        public static string GetRetryAfterValue(ISystemClock clock, RetryAfterMode mode, DateTimeOffset? reset)
+        public static string GetRetryAfterValue([NotNull] ISystemClock clock, RetryAfterMode mode, DateTimeOffset? reset)
         {
             if (!reset.HasValue)
             {

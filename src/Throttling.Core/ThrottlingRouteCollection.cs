@@ -8,7 +8,7 @@ namespace Throttling
     {
         private readonly List<ThrottlingRoute> _routes = new List<ThrottlingRoute>();
 
-        public void Add(ThrottlingRoute route)
+        public void Add([NotNull] ThrottlingRoute route)
         {
             _routes.Add(route);
         }

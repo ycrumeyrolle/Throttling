@@ -15,7 +15,7 @@ namespace Microsoft.Framework.DependencyInjection
         public static IServiceCollection AddMvcThrottling(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddThrottling();
-            serviceCollection.AddTransient<IThrottlingAuthorizationFilter, ThrottlingAuthorizationFilter>();
+            serviceCollection.AddTransient<IThrottlingFilter, ThrottlingFilter>();
 
             return serviceCollection;
         }

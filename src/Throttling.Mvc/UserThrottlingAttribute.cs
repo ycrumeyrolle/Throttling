@@ -1,12 +1,11 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 
 namespace Throttling.Mvc
 {
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class UserThrottlingAttribute : ThrottlingLimitRateAttribute
+    public class UserThrottlingAttribute : LimitRateAttribute
     {
         private readonly long _unauthenticatedCalls;
 
@@ -19,8 +18,8 @@ namespace Throttling.Mvc
             _unauthenticatedRenewalPeriod = unauthenticatedRenewalPeriod;
         }
 
-        public UserThrottlingAttribute(long authenticatedLimit, long authenticatedWindow)
-            : this(authenticatedLimit, authenticatedWindow, 0L, 0L)
+        public UserThrottlingAttribute(long authenticatedCalls, long authenticatedRenewalPeriod)
+            : this(authenticatedCalls, authenticatedRenewalPeriod, 0L, 0L)
         {
         }
 
