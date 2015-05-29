@@ -23,16 +23,9 @@ namespace Throttling
         /// <param name="builder"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app, Action<ThrottlingOptions> configureOptions = null)
+        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app)
         {
-            var setup = new ConfigureOptions<ThrottlingOptions>(options => 
-            {
-                if (configureOptions != null)
-                {
-                    configureOptions(options);
-                }
-            });
-            return app.UseMiddleware<ThrottlingMiddleware>(setup);
+            return app.UseMiddleware<ThrottlingMiddleware>();
         }
     }
 }

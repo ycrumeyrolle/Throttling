@@ -6,24 +6,24 @@ namespace Throttling
 {
     public class ThrottlingOptionsSetup : ConfigureOptions<ThrottlingOptions>
     {
-        private readonly ISystemClock _clock;
-        private readonly IRateStore _store;
-        public ThrottlingOptionsSetup([NotNull] IRateStore store, [NotNull] ISystemClock clock) 
+        private readonly IThrottlingRouter _router;
+
+        public ThrottlingOptionsSetup([NotNull] IThrottlingRouter router)
             : base(new Action<ThrottlingOptions>(ThrottlingOptionsSetup.ConfigureMessageOptions))
         {
-            this._store = store;
-            this._clock = clock;
+            _router = router;
         }
+
         public override void Configure([NotNull] ThrottlingOptions options, string name = "")
         {
-            options.RateStore = this._store;
-            options.Clock = this._clock;            
+            options.Routes = _router;
             base.Configure(options, name);
         }
+
         /// <summary>
         /// Set the default options
         /// </summary>
-        public static void ConfigureMessageOptions(ThrottlingOptions options)
+        public static void ConfigureMessageOptions([NotNull] ThrottlingOptions options)
         {
             options.RetryAfterMode = RetryAfterMode.DeltaSeconds;
         }

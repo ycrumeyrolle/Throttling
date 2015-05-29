@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-using System;
+﻿using System;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 using Throttling;
@@ -19,9 +16,7 @@ namespace Microsoft.Framework.DependencyInjection
         /// <param name="serviceCollection">The service collection which needs to be configured.</param>
         /// <param name="configure">A delegate which is run to configure the services.</param>
         /// <returns></returns>
-        public static IServiceCollection ConfigureThrottling(
-            [NotNull] this IServiceCollection serviceCollection,
-            [NotNull] Action<ThrottlingOptions> configure)
+        public static IServiceCollection ConfigureThrottling([NotNull] this IServiceCollection serviceCollection, [NotNull] Action<ThrottlingOptions> configure)
         {
             return serviceCollection.Configure(configure);
         }
@@ -31,14 +26,23 @@ namespace Microsoft.Framework.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The service collection to which Throttling services are added.</param>
         /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddThrottling(this IServiceCollection serviceCollection)
+        public static IServiceCollection AddThrottling([NotNull] this IServiceCollection serviceCollection)
         {
-            OptionsServiceCollectionExtensions.AddOptions(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IThrottlingPolicyProvider, DefaultThrottlingPolicyProvider>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IRateStore, InMemoryRateStore>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<ISystemClock, SystemClock>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>(serviceCollection);
-            ServiceCollectionExtensions.AddTransient<IThrottlingService, ThrottlingService>(serviceCollection);
+            serviceCollection.AddOptions();
+            serviceCollection.AddTransient<IThrottlingStrategyProvider, DefaultThrottlingStrategyProvider>();
+            serviceCollection.AddTransient<IRateStore, CacheRateStore>();
+            serviceCollection.AddTransient<ISystemClock, SystemClock>();
+            serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();
+            serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
+            serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
+            serviceCollection.AddTransient<IApiKeyProvider, ApiKeyProvider>();
+            serviceCollection.AddTransient<IThrottlingHandler, FormApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, HeaderApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, QueryStringApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, RouteApiKeyLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, UserLimitRateHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, IPLimitRateHandler>();
+
             return serviceCollection;
         }
     }

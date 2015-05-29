@@ -1,9 +1,10 @@
-﻿using System;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Framework.Internal;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.Http;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
@@ -14,52 +15,68 @@ namespace Throttling
     {
         private readonly RequestDelegate _next;
         private readonly IThrottlingService _throttlingService;
-        private readonly IThrottlingPolicyProvider _throttlingPolicyProvider;
-        private readonly ThrottlingPolicy _policy;
+        private readonly IThrottlingStrategyProvider _throttlingPolicyProvider;
         private readonly ILogger _logger;
-        private readonly string _policyName;
-
-        /// <summary>
-        /// Instantiates a new <see cref="ThrottlingMiddleware"/>.
-        /// </summary>
-        /// <param name="next">The next middleware in the pipeline.</param>
-        /// <param name="ThrottlingService">An instance of <see cref="IThrottlingService"/>.</param>
-        /// <param name="policyProvider">A policy provider which can get an <see cref="ThrottlingPolicy"/>.</param>
-        /// <param name="policyName">An optional name of the policy to be fetched.</param>
-     	public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] IThrottlingPolicyProvider policyProvider, [NotNull] string policyName)
-        {
-            _next = next;
-            _logger = LoggerFactoryExtensions.CreateLogger<ThrottlingMiddleware>(loggerFactory);
-            _throttlingService = throttlingService;
-            _throttlingPolicyProvider = policyProvider;
-            _policyName = policyName;
-        }
+        private readonly ISystemClock _clock;
+        private readonly ThrottlingOptions _options;
+        
         /// <summary>
         /// Instantiates a new <see cref="T:Throttling.ThrottlingMiddleware" />.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="throttlingService">An instance of <see cref="T:Throttling.IThrottlingService" />.</param>
         /// <param name="policy">An instance of the <see cref="T:Throttling.ThrottlingPolicy" /> which can be applied.</param>
-        public ThrottlingMiddleware([NotNull] RequestDelegate next, [NotNull] ILoggerFactory loggerFactory, [NotNull] IThrottlingService throttlingService, [NotNull] ThrottlingPolicy policy)
+        public ThrottlingMiddleware(
+            [NotNull] RequestDelegate next, 
+            [NotNull] ILoggerFactory loggerFactory, 
+            [NotNull] IThrottlingService throttlingService, 
+            [NotNull] IThrottlingStrategyProvider policyProvider, 
+            [NotNull] ISystemClock clock, 
+            [NotNull] IOptions<ThrottlingOptions> options)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<ThrottlingMiddleware>();
             _throttlingService = throttlingService;
-            _policy = policy;
+            _throttlingPolicyProvider = policyProvider;
+            _clock = clock;
+            _options = options.Options;
         }
 
         /// <inheritdoc />
         public async Task Invoke(HttpContext context)
         {
-            var throttlingPolicy = _policy ?? await _throttlingPolicyProvider?.GetThrottlingPolicyAsync(context, _policyName);
-            if (throttlingPolicy != null)
+            var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(context, null);
+            if (strategy != null)
             {
-                var throttlingResults = await _throttlingService.EvaluatePolicyAsync(context, throttlingPolicy);
-                if (!_throttlingService.ApplyResult(context, throttlingResults))
+                var throttlingContext = await _throttlingService.EvaluateAsync(context, strategy);
+                var response = context.Response;
+                foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
                 {
-                    await _next(context);
+                    response.Headers.SetValues(header.Key, header.Value);
+                }
+
+                if (throttlingContext.HasFailed)
+                {
+                    string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
+                  
+
+                    response.StatusCode = 429;
+
+                    // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
+                    response.Headers.SetValues("Cache-Control", "no-store", "no-cache");
+                    response.Headers.Set("Pragma", "no-cache");
+
+                    // rfc6585 section 4 : The response [...] MAY include a Retry-After header indicating how long to wait before making a new request.
+                    if (retryAfter != null)
+                    {
+                        response.Headers.Set("Retry-After", retryAfter);
+                    }
+
+                    return;
                 }
             }
+
+            await _next(context);
         }
     }
 }

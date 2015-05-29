@@ -1,21 +1,21 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 
 namespace Throttling.Mvc
 {
-    public class ThrottlingAttribute : Attribute, IActionModelConvention
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public class ThrottlingAttribute : ThrottlingConventionAttribute
     {
-        private readonly string _policyName;
-
         public ThrottlingAttribute(string policyName)
         {
-            _policyName = policyName;
+            PolicyName = policyName;
         }
 
-        public void Apply(ActionModel model)
+        public string PolicyName { get; }
+
+        protected override void ApplyCore(ActionModel model)
         {
-            model.Filters.Add(new ThrottlingAuthorizationFilterFactory(_policyName));
+            model.Filters.Add(new ThrottlingFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, PolicyName));
         }
     }
 }

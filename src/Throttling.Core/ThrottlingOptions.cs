@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Framework.Internal;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Routing;
+using Microsoft.AspNet.Routing.Template;
+using System.Linq;
+using Throttling.IPRanges;
 
 namespace Throttling
 {
     public class ThrottlingOptions
     {
         private string _defaultPolicyName = "__DefaultThrottlingPolicy";
-        private IDictionary<string, IThrottlingPolicy> PolicyMap { get; } = new Dictionary<string, IThrottlingPolicy>();
 
-        public string DefaultPolicyName 
+        public string DefaultPolicyName
         {
             get
             {
@@ -26,21 +30,17 @@ namespace Throttling
                 _defaultPolicyName = value;
             }
         }
-                
+
         public RetryAfterMode RetryAfterMode { get; set; }
-
-        public IRateStore RateStore { get; set; }
-
-        public ISystemClock Clock { get; set; }
-
+                
         /// <summary>
         /// Adds a new policy.
         /// </summary>
         /// <param name="name">The name of the policy.</param>
-        /// <param name="policy">The <see cref="ThrottlingPolicy"/> policy to be added.</param>
+        /// <param name="policy">The <see cref="IThrottlingPolicy"/> policy to be added.</param>
         public void AddPolicy([NotNull] string name, [NotNull] ThrottlingPolicy policy)
         {
-            PolicyMap[name] = policy;
+            Routes.PolicyMap[name] = policy;
         }
 
         /// <summary>
@@ -50,9 +50,9 @@ namespace Throttling
         /// <param name="configurePolicy">A delegate which can use a policy builder to build a policy.</param>
         public void AddPolicy([NotNull] string name, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            var policyBuilder = new ThrottlingPolicyBuilder(this);
+            var policyBuilder = new ThrottlingPolicyBuilder(name);
             configurePolicy(policyBuilder);
-            PolicyMap[name] = policyBuilder.Build();
+            Routes.PolicyMap[name] = policyBuilder.Build();
         }
 
         /// <summary>
@@ -60,9 +60,12 @@ namespace Throttling
         /// </summary>
         /// <param name="name">The name of the policy to lookup.</param>
         /// <returns>The <see cref="ThrottlingPolicy"/> if the policy was added.<c>null</c> otherwise.</returns>
-        public IThrottlingPolicy GetPolicy([NotNull] string name)
+        public ThrottlingPolicy GetPolicy([NotNull] string name)
         {
-            return PolicyMap.ContainsKey(name) ? PolicyMap[name] : null;
+            return Routes.PolicyMap.ContainsKey(name) ? Routes.PolicyMap[name] : null;
         }
+
+        public IThrottlingRouter Routes { get; set; }
+
     }
 }
