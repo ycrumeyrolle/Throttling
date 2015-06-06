@@ -26,6 +26,7 @@ namespace Throttling
         public static void ConfigureMessageOptions([NotNull] ThrottlingOptions options)
         {
             options.RetryAfterMode = RetryAfterMode.DeltaSeconds;
+            options.SendThrottlingHeaders = true;
         }
     }
 }

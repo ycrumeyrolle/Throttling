@@ -6,7 +6,7 @@
 
     public class IPAddressRange
     {
-        private static readonly IIPAddressPattern[] Patterns = new IIPAddressPattern[]
+        private static readonly IIPAddressPattern[] Patterns = 
         {
             new UniListPattern(),
             new UniPattern(),

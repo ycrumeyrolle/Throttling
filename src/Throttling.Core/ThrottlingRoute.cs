@@ -16,13 +16,12 @@ namespace Throttling
 
         private readonly TemplateMatcher _matcher;
 
-        public ThrottlingRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, IPWhitelist whitelist = null)
+        public ThrottlingRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate)
         {
             _httpMethods = httpMethods;
             RouteTemplate = routeTemplate;
             var route = TemplateParser.Parse(routeTemplate);
             _matcher = new TemplateMatcher(route, EmptyRouteValues);
-            Whitelist = whitelist;
         }
 
         public ThrottlingRoute(string routeTemplate)
@@ -30,9 +29,7 @@ namespace Throttling
         {
         }
 
-        public string RouteTemplate { get; private set; }
-
-        public IPWhitelist Whitelist { get; private set; }
+        public string RouteTemplate { get; private set; }        
 
         public abstract ThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options);
 

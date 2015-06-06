@@ -7,20 +7,19 @@ namespace Throttling
 {
     public static class ThrottlingRouterExtensions
     {
-
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] ThrottlingPolicy policy, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] ThrottlingPolicy policy)
         {
-            router.Add(new UnnamedThrottlingRoute(httpMethods, routeTemplate, policy, whitelist));
+            router.Add(new UnnamedThrottlingRoute(httpMethods, routeTemplate, policy));
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
             var policyBuilder = new ThrottlingPolicyBuilder(policyName);
             configurePolicy(policyBuilder);
-            router.ApplyStrategy(httpMethods, routeTemplate, policyBuilder.Build(), whitelist);
+            router.ApplyPolicy(httpMethods, routeTemplate, policyBuilder.Build());
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] string policyName, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull] string policyName)
         {
             ThrottlingPolicy policy;
             if (!router.PolicyMap.TryGetValue(policyName, out policy))
@@ -28,36 +27,36 @@ namespace Throttling
                 throw new InvalidOperationException("Not policy named '" + policyName + "'");
             }
 
-            router.ApplyStrategy(httpMethods, routeTemplate, policy, whitelist);
+            router.ApplyPolicy(httpMethods, routeTemplate, policy);
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, [NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] ThrottlingPolicy policy, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, [NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] ThrottlingPolicy policy)
         {
-            router.ApplyStrategy(new[] { httpMethod }, routeTemplate, policy, whitelist);
+            router.ApplyPolicy(new[] { httpMethod }, routeTemplate, policy);
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, [NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, [NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            router.ApplyStrategy(new[] { httpMethod }, routeTemplate, policyName, configurePolicy, whitelist);
+            router.ApplyPolicy(new[] { httpMethod }, routeTemplate, policyName, configurePolicy);
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, [NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] string policyName, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, [NotNull] string httpMethod, [NotNull] string routeTemplate, [NotNull] string policyName)
         {
-            router.ApplyStrategy(new[] { httpMethod }, routeTemplate, policyName, whitelist);
+            router.ApplyPolicy(new[] { httpMethod }, routeTemplate, policyName);
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, [NotNull] string routeTemplate, [NotNull] ThrottlingPolicy policy, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, [NotNull] string routeTemplate, [NotNull] ThrottlingPolicy policy)
         {
-            router.ApplyStrategy((IEnumerable<string>)null, routeTemplate, policy, whitelist);
+            router.ApplyPolicy((IEnumerable<string>)null, routeTemplate, policy);
         }
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, [NotNull] string routeTemplate, [NotNull] string policyName, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, [NotNull] string routeTemplate, [NotNull] string policyName)
         {
-            router.ApplyStrategy((IEnumerable<string>)null, routeTemplate, policyName, whitelist);
+            router.ApplyPolicy((IEnumerable<string>)null, routeTemplate, policyName);
         }
 
-        public static void ApplyStrategy([NotNull]this IThrottlingRouter router, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy, IPWhitelist whitelist = null)
+        public static void ApplyPolicy([NotNull]this IThrottlingRouter router, [NotNull] string routeTemplate, [NotNull] string policyName, [NotNull] Action<ThrottlingPolicyBuilder> configurePolicy)
         {
-            router.ApplyStrategy((IEnumerable<string>)null, routeTemplate, policyName, configurePolicy, whitelist);
+            router.ApplyPolicy((IEnumerable<string>)null, routeTemplate, policyName, configurePolicy);
         }
     }
 }

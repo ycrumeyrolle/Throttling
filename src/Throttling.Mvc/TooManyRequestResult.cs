@@ -18,7 +18,7 @@ namespace Throttling.Mvc
         {
             var response = context.HttpContext.Response;
   
-            context.HttpContext.Response.StatusCode = 429;
+            context.HttpContext.Response.StatusCode = Constants.Status429TooManyRequests;
 
             // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
             context.HttpContext.Response.Headers.SetValues("Cache-Control", "no-store", "no-cache");

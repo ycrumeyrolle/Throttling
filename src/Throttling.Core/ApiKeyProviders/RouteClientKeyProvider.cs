@@ -21,7 +21,7 @@ namespace Throttling
             var route = TemplateParser.Parse(routeTemplate);
             if (!route.Parameters.Any(p => p.Name == apiKeyName))
             {
-                throw new ArgumentException(string.Format("Unabled to find {0} key in the route template {1}", apiKeyName, routeTemplate), "apiKeyName");
+                throw new ArgumentException(string.Format("Unabled to find {0} key in the route template {1}", apiKeyName, routeTemplate), nameof(apiKeyName));
             }
 
             _routeTemplate = routeTemplate;

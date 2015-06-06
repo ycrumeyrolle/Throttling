@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Framework.Internal;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Routing;
-using Microsoft.AspNet.Routing.Template;
-using System.Linq;
-using Throttling.IPRanges;
 
 namespace Throttling
 {
@@ -24,15 +18,28 @@ namespace Throttling
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 _defaultPolicyName = value;
             }
         }
 
-        public RetryAfterMode RetryAfterMode { get; set; }
-                
+        public RetryAfterMode RetryAfterMode
+        {
+            get; set;
+        }
+
+        public IThrottlingRouter Routes
+        {
+            get; set;
+        }
+
+        public bool SendThrottlingHeaders
+        {
+            get; set;
+        }
+
         /// <summary>
         /// Adds a new policy.
         /// </summary>
@@ -64,8 +71,5 @@ namespace Throttling
         {
             return Routes.PolicyMap.ContainsKey(name) ? Routes.PolicyMap[name] : null;
         }
-
-        public IThrottlingRouter Routes { get; set; }
-
     }
 }

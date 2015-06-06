@@ -19,7 +19,7 @@ namespace Throttling
         private readonly ILogger _logger;
         private readonly ISystemClock _clock;
         private readonly ThrottlingOptions _options;
-        
+
         /// <summary>
         /// Instantiates a new <see cref="T:Throttling.ThrottlingMiddleware" />.
         /// </summary>
@@ -27,11 +27,11 @@ namespace Throttling
         /// <param name="throttlingService">An instance of <see cref="T:Throttling.IThrottlingService" />.</param>
         /// <param name="policy">An instance of the <see cref="T:Throttling.ThrottlingPolicy" /> which can be applied.</param>
         public ThrottlingMiddleware(
-            [NotNull] RequestDelegate next, 
-            [NotNull] ILoggerFactory loggerFactory, 
-            [NotNull] IThrottlingService throttlingService, 
-            [NotNull] IThrottlingStrategyProvider policyProvider, 
-            [NotNull] ISystemClock clock, 
+            [NotNull] RequestDelegate next,
+            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] IThrottlingService throttlingService,
+            [NotNull] IThrottlingStrategyProvider policyProvider,
+            [NotNull] ISystemClock clock,
             [NotNull] IOptions<ThrottlingOptions> options)
         {
             _next = next;
@@ -46,37 +46,55 @@ namespace Throttling
         public async Task Invoke(HttpContext context)
         {
             var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(context, null);
-            if (strategy != null)
+            if (strategy == null)
             {
-                var throttlingContext = await _throttlingService.EvaluateAsync(context, strategy);
-                var response = context.Response;
+                _logger.LogVerbose("No strategy for current request.");
+                await _next(context);
+                return;
+            }
+
+            var throttlingContext = await _throttlingService.EvaluateAsync(context, strategy);
+            if (throttlingContext.HasAborted)
+            {
+                _logger.LogVerbose("Throttling aborted. No throttling applied.");
+                await _next(context);
+                return;
+            }
+
+            var response = context.Response;
+            if (_options.SendThrottlingHeaders)
+            {
                 foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
                 {
                     response.Headers.SetValues(header.Key, header.Value);
                 }
-
-                if (throttlingContext.HasFailed)
-                {
-                    string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
-                  
-
-                    response.StatusCode = 429;
-
-                    // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
-                    response.Headers.SetValues("Cache-Control", "no-store", "no-cache");
-                    response.Headers.Set("Pragma", "no-cache");
-
-                    // rfc6585 section 4 : The response [...] MAY include a Retry-After header indicating how long to wait before making a new request.
-                    if (retryAfter != null)
-                    {
-                        response.Headers.Set("Retry-After", retryAfter);
-                    }
-
-                    return;
-                }
             }
 
-            await _next(context);
+            if (throttlingContext.HasTooManyRequest)
+            {
+                _logger.LogInformation("Throttling applied.");
+                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
+
+                response.StatusCode = Constants.Status429TooManyRequests;
+
+                // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
+                response.Headers.SetValues("Cache-Control", "no-store", "no-cache");
+                response.Headers.Set("Pragma", "no-cache");
+
+                // rfc6585 section 4 : The response [...] MAY include a Retry-After header indicating how long to wait before making a new request.
+                if (retryAfter != null)
+                {
+                    response.Headers.Set("Retry-After", retryAfter);
+                }
+            }
+            else
+            {
+                _logger.LogVerbose("No throttling applied.");
+                await _next(context);
+            }
+
+
+            await _throttlingService.PostEvaluateAsync(throttlingContext);
         }
     }
 }

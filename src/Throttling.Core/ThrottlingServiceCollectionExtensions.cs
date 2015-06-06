@@ -35,13 +35,17 @@ namespace Microsoft.Framework.DependencyInjection
             serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();
             serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
             serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
-            serviceCollection.AddTransient<IApiKeyProvider, ApiKeyProvider>();
-            serviceCollection.AddTransient<IThrottlingHandler, FormApiKeyLimitRateHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, HeaderApiKeyLimitRateHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, QueryStringApiKeyLimitRateHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, RouteApiKeyLimitRateHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, UserLimitRateHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, IPLimitRateHandler>();
+
+            // Throttling handlers
+            serviceCollection.AddTransient<IThrottlingHandler, AuthenticatedUserRateLimitHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, IPRateLimitHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, ApiKeyRateLimitHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, IPBandwidthHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, AuthenticatedUserBandwidthLimitHandler>();
+            serviceCollection.AddTransient<IThrottlingHandler, ApiKeyBandwidthHandler>();
+
+            // Exclusion handlers
+            serviceCollection.AddTransient<IExclusionHandler, IPExclusionHandler>();
 
             return serviceCollection;
         }

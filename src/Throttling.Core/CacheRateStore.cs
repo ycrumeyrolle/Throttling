@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Framework.Caching.Memory;
 using Microsoft.Framework.Internal;
 
@@ -15,7 +16,7 @@ namespace Throttling
             _clock = clock;
         }
 
-        public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] LimitRateRequirement requirement, long decrementValue)
+        public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
         {
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)
@@ -23,12 +24,51 @@ namespace Throttling
                 rate = new RemainingRate
                 {
                     Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
-                    RemainingCalls = requirement.Calls
+                    RemainingCalls = requirement.MaxValue
                 };
             }
             else if (requirement.Sliding)
             {
                 rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+            }
+
+            rate.RemainingCalls -= decrementValue;
+            if (rate.RemainingCalls < 0 || (reachLimitAtZero && rate.RemainingCalls == 0))
+            {
+                rate.LimitReached = true;
+                rate.RemainingCalls = 0;
+            }
+
+            _cache.Set(key, rate, new MemoryCacheEntryOptions { AbsoluteExpiration = rate.Reset });
+
+            return Task.FromResult(rate);
+        }
+
+        public Task<RemainingRate> GetRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement)
+        {
+            return Task.FromResult(GetRemainingRate(key, requirement));
+        }
+
+        public Task SetRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement, long decrementValue)
+        {
+            RemainingRate rate = _cache.Get<RemainingRate>(key);
+            if (rate == null)
+            {
+                rate = new RemainingRate
+                {
+                    Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
+                    RemainingCalls = requirement.MaxValue
+                };
+            }
+            else if (requirement.Sliding)
+            {
+                rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+            }
+
+            if (rate.RemainingCalls < 0)
+            {
+                rate.LimitReached = true;
+                rate.RemainingCalls = 0;
             }
 
             rate.RemainingCalls -= decrementValue;
@@ -39,8 +79,32 @@ namespace Throttling
             }
 
             _cache.Set(key, rate, new MemoryCacheEntryOptions { AbsoluteExpiration = rate.Reset });
+            return Constants.CompletedTask;
+        }
 
-            return Task.FromResult(rate);
+        private RemainingRate GetRemainingRate(string key, ThrottlingRequirement requirement)
+        {
+            RemainingRate rate = _cache.Get<RemainingRate>(key);
+            if (rate == null)
+            {
+                rate = new RemainingRate
+                {
+                    Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
+                    RemainingCalls = requirement.MaxValue
+                };
+            }
+            else if (requirement.Sliding)
+            {
+                rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+            }
+
+            if (rate.RemainingCalls < 0)
+            {
+                rate.LimitReached = true;
+                rate.RemainingCalls = 0;
+            }
+
+            return rate;
         }
     }
 }

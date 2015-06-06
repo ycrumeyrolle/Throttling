@@ -12,25 +12,53 @@ namespace Throttling
         private HashSet<IThrottlingRequirement> _pendingRequirements;
         private bool _tooManyRequestCalled;
         private bool _succeedCalled;
+        private bool _abortCalled;
 
         public ThrottlingContext([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
         {
             Headers = new HeaderDictionary();
             HttpContext = httpContext;
             Requirements = strategy.Policy.Requirements;
+            Exclusions = strategy.Policy.Exclusions;
             RouteTemplate = strategy.RouteTemplate;
             _pendingRequirements = new HashSet<IThrottlingRequirement>(Requirements);
         }
 
-        public HttpContext HttpContext { get; set; }
 
-        public IEnumerable<IThrottlingRequirement> Requirements { get; private set; }
+        public HttpContext HttpContext
+        {
+            get; set;
+        }
 
-        public string RouteTemplate { get; private set; }
+        public IEnumerable<IThrottlingRequirement> Requirements
+        {
+            get; 
+        }
+        public IEnumerable<IThrottlingExclusion> Exclusions
+        {
+            get;
+        }
 
-        public IEnumerable<IThrottlingRequirement> PendingRequirements { get { return _pendingRequirements; } }
+        public string RouteTemplate
+        {
+            get; private set;
+        }
 
-        public bool HasFailed { get { return _tooManyRequestCalled; } }
+        public IEnumerable<IThrottlingRequirement> PendingRequirements
+        {
+            get
+            {
+                return _pendingRequirements;
+            }
+        }
+
+        public bool HasTooManyRequest
+        {
+            get
+            {
+                return _tooManyRequestCalled;
+            }
+        }
 
         public bool HasSucceeded
         {
@@ -40,9 +68,23 @@ namespace Throttling
             }
         }
 
-        public DateTimeOffset? RetryAfter { get; set; }
+        public bool HasAborted
+        {
+            get
+            {
+                return _abortCalled;
+            }
+        }
 
-        public IHeaderDictionary Headers { get; private set; }
+        public DateTimeOffset? RetryAfter
+        {
+            get; set;
+        }
+
+        public IHeaderDictionary Headers
+        {
+            get; private set;
+        }
 
         public void Succeed([NotNull] IThrottlingRequirement requirement)
         {
@@ -50,13 +92,18 @@ namespace Throttling
             _pendingRequirements.Remove(requirement);
         }
 
-        public void TooManyRequest<TRequirement>([NotNull] TRequirement requirement, DateTimeOffset retryAfter) where TRequirement : LimitRateRequirement
+        public void TooManyRequest([NotNull] IThrottlingRequirement requirement, DateTimeOffset retryAfter)
         {
             _tooManyRequestCalled = true;
             if (!RetryAfter.HasValue || RetryAfter.Value < retryAfter)
             {
                 RetryAfter = retryAfter;
             }
+        }
+
+        public void Abort([NotNull] IThrottlingExclusion exclusion)
+        {
+            _abortCalled = true;
         }
     }
 }

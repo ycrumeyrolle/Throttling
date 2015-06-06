@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 
 namespace Throttling
 {
-    internal static class Constants
+    public static class Constants
     {
-        internal const int Status429TooManyRequests = 429;
+        public const int Status429TooManyRequests = 429;
 
         internal static readonly Task CompletedTask = CreateCompletedTask();
 

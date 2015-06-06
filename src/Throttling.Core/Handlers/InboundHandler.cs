@@ -5,11 +5,11 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class RateLimitHandler<TRequirement> : ThrottlingHandler<TRequirement> where TRequirement : LimitRateRequirement
+    public abstract class InboundHandler<TRequirement> : ThrottlingHandler<TRequirement> where TRequirement : ThrottlingRequirement
     {
         private readonly IRateStore _store;
 
-        public RateLimitHandler([NotNull] IRateStore store)
+        public InboundHandler([NotNull] IRateStore store)
         {
             _store = store;
         }
@@ -19,7 +19,7 @@ namespace Throttling
             var key = GetKey(context.HttpContext, requirement);
             if (key == null)
             {
-                throw new InvalidOperationException("The current throttling requirement do not provide a key for the current context.");
+                return;
             }
 
             key = typeof(TRequirement) + key;
@@ -27,6 +27,10 @@ namespace Throttling
             if (rate.LimitReached)
             {
                 context.TooManyRequest(requirement, rate.Reset);
+            }
+            else
+            {
+                context.Succeed(requirement);
             }
 
             AddRateLimitHeaders(rate, context, requirement);

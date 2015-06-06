@@ -9,14 +9,14 @@ namespace Throttling
     {
         private readonly ThrottlingPolicy _policy;
 
-        public UnnamedThrottlingRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, ThrottlingPolicy policy, IPWhitelist whitelist = null)
-            : base(httpMethods, routeTemplate, whitelist)
+        public UnnamedThrottlingRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, ThrottlingPolicy policy)
+            : base(httpMethods, routeTemplate)
         {
             _policy = policy;
         }
 
-        public UnnamedThrottlingRoute(string routeTemplate, [NotNull] ThrottlingPolicy policy, IPWhitelist whitelist = null)
-            : base(null, routeTemplate, whitelist)
+        public UnnamedThrottlingRoute(string routeTemplate, [NotNull] ThrottlingPolicy policy)
+            : base(null, routeTemplate)
         {
             _policy = policy;
         }
