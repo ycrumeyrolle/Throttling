@@ -10,7 +10,6 @@ namespace Throttling.Core.Internal
     {
         private readonly Stream _inner;
         private long _length;
-        private bool _disposed;
 
         public CountingStream(Stream inner)
         {
@@ -175,7 +174,6 @@ namespace Throttling.Core.Internal
 
         protected override void Dispose(bool disposing)
         {
-            _disposed = true;
             if (disposing)
             {
                 _inner.Dispose();

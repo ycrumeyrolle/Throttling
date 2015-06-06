@@ -35,7 +35,7 @@ namespace ThrottlingSample
                         .LimitIPRate(10, TimeSpan.FromDays(1));
                 });
 
-                options.Routes.ApplyStrategy("test/action/{id?}", "5 requests per 10 seconds, fixed reset");
+                options.Routes.ApplyPolicy("test/action/{id?}", "5 requests per 10 seconds, fixed reset");
             });
 
             services.ConfigureMvc(options =>

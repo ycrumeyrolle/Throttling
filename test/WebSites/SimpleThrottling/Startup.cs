@@ -41,10 +41,10 @@ namespace SimpleThrottling
                 {
                     builder.LimitIPBandwidth(160, TimeSpan.FromHours(1));
                 });
-                options.Routes.ApplyStrategy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyStrategy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyStrategy("{apikey}/test/action3/{id?}", "Limited bandwidth");
-                options.Routes.ApplyStrategy("{apikey}/test/action4/{id?}", "10 requests per hour by API key");
+                options.Routes.ApplyPolicy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
+                options.Routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
+                options.Routes.ApplyPolicy("{apikey}/test/action3/{id?}", "Limited bandwidth");
+                options.Routes.ApplyPolicy("{apikey}/test/action4/{id?}", "10 requests per hour by API key");
             });
         }
 
