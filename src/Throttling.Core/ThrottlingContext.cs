@@ -12,15 +12,18 @@ namespace Throttling
         private HashSet<IThrottlingRequirement> _pendingRequirements;
         private bool _tooManyRequestCalled;
         private bool _succeedCalled;
+        private bool _abortCalled;
 
         public ThrottlingContext([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
         {
             Headers = new HeaderDictionary();
             HttpContext = httpContext;
             Requirements = strategy.Policy.Requirements;
+            Exclusions = strategy.Policy.Exclusions;
             RouteTemplate = strategy.RouteTemplate;
             _pendingRequirements = new HashSet<IThrottlingRequirement>(Requirements);
         }
+
 
         public HttpContext HttpContext
         {
@@ -29,7 +32,11 @@ namespace Throttling
 
         public IEnumerable<IThrottlingRequirement> Requirements
         {
-            get; private set;
+            get; 
+        }
+        public IEnumerable<IThrottlingExclusion> Exclusions
+        {
+            get;
         }
 
         public string RouteTemplate
@@ -61,6 +68,14 @@ namespace Throttling
             }
         }
 
+        public bool HasAborted
+        {
+            get
+            {
+                return _abortCalled;
+            }
+        }
+
         public DateTimeOffset? RetryAfter
         {
             get; set;
@@ -77,13 +92,18 @@ namespace Throttling
             _pendingRequirements.Remove(requirement);
         }
 
-        public void TooManyRequest<TRequirement>([NotNull] TRequirement requirement, DateTimeOffset retryAfter) where TRequirement : ThrottlingRequirement
+        public void TooManyRequest([NotNull] IThrottlingRequirement requirement, DateTimeOffset retryAfter)
         {
             _tooManyRequestCalled = true;
             if (!RetryAfter.HasValue || RetryAfter.Value < retryAfter)
             {
                 RetryAfter = retryAfter;
             }
+        }
+
+        public void Abort([NotNull] IThrottlingExclusion exclusion)
+        {
+            _abortCalled = true;
         }
     }
 }

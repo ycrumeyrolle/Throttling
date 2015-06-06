@@ -17,10 +17,12 @@ namespace Throttling
         private readonly ILogger _logger;
         private readonly ISystemClock _clock;
         private readonly IList<IThrottlingHandler> _handlers;
+        private readonly IList<IExclusionHandler> _exclusionHandlers;
 
         public ThrottlingService(
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IEnumerable<IThrottlingHandler> handlers,
+            [NotNull] IEnumerable<IExclusionHandler> exclusionHandlers,
             [NotNull] ISystemClock clock,
             [NotNull] IOptions<ThrottlingOptions> options,
             ConfigureOptions<ThrottlingOptions> configureOptions = null)
@@ -36,6 +38,7 @@ namespace Throttling
             }
 
             _handlers = handlers.ToArray();
+            _exclusionHandlers = exclusionHandlers.ToArray();
             _logger = loggerFactory.CreateLogger<ThrottlingService>();
             _clock = clock;
         }
@@ -43,18 +46,18 @@ namespace Throttling
         public virtual async Task<ThrottlingContext> EvaluateAsync([NotNull] HttpContext context, [NotNull] ThrottlingStrategy strategy)
         {
             var throttlingContext = new ThrottlingContext(context, strategy);
-            if (strategy.Policy.Whitelist != null)
+
+            for (int i = 0; i < _exclusionHandlers.Count; i++)
             {
-                IHttpConnectionFeature connection = context.GetFeature<IHttpConnectionFeature>();
-                if (strategy.Policy.Whitelist.Contains(connection.RemoteIpAddress))
-                {
-                    return null;
-                }
+                await _exclusionHandlers[i].HandleAsync(throttlingContext);
             }
 
-            for (int i = 0; i < _handlers.Count; i++)
+            if (!throttlingContext.HasAborted)
             {
-                await _handlers[i].HandleAsync(throttlingContext);
+                for (int i = 0; i < _handlers.Count; i++)
+                {
+                    await _handlers[i].HandleAsync(throttlingContext);
+                }
             }
 
             return throttlingContext;

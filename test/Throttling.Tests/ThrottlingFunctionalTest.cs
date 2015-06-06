@@ -141,7 +141,33 @@ namespace Throttling.Tests
         }
 
         [Theory]
-        [InlineData(1, "0")]
+        [InlineData(1, "144")]
+        [InlineData(5, "80")]
+        [InlineData(10, "0")]
+        public async Task BandwidthPolicy_BellowLimits_Returns200(int tries, string userRemaining)
+        {
+            // Arrange
+            var server = TestHelper.CreateServer(_app, SiteName, _configureServices);
+            var client = server.CreateClient();
+            HttpResponseMessage response = null;
+            for (int i = 0; i < tries; i++)
+            {
+                var requestBuilder = server
+                    .CreateRequest("http://localhost/apikey/test/action4/" + i);
+
+                // Act
+                response = await requestBuilder.SendAsync("GET");
+            }
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            // TODO : Fix the ISystemClock
+            // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
+        }
+
+        [Theory]
+        [InlineData(11, "0")]
         public async Task BandwidthPolicy_BeyondLimits_Returns429(int tries, string userRemaining)
         {
             // Arrange

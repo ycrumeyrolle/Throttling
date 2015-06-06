@@ -36,13 +36,16 @@ namespace Microsoft.Framework.DependencyInjection
             serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
             serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
 
+            // Throttling handlers
             serviceCollection.AddTransient<IThrottlingHandler, AuthenticatedUserRateLimitHandler>();
             serviceCollection.AddTransient<IThrottlingHandler, IPRateLimitHandler>();
             serviceCollection.AddTransient<IThrottlingHandler, ApiKeyRateLimitHandler>();
-
             serviceCollection.AddTransient<IThrottlingHandler, IPBandwidthHandler>();
             serviceCollection.AddTransient<IThrottlingHandler, AuthenticatedUserBandwidthLimitHandler>();
             serviceCollection.AddTransient<IThrottlingHandler, ApiKeyBandwidthHandler>();
+
+            // Exclusion handlers
+            serviceCollection.AddTransient<IExclusionHandler, IPExclusionHandler>();
 
             return serviceCollection;
         }

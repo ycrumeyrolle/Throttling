@@ -54,6 +54,12 @@ namespace Throttling
             }
 
             var throttlingContext = await _throttlingService.EvaluateAsync(context, strategy);
+            if (throttlingContext.HasAborted)
+            {
+                _logger.LogVerbose("Throttling aborted. No throttling applied.");
+                await _next(context);
+            }
+
             var response = context.Response;
             if (_options.SendThrottlingHeaders)
             {
@@ -82,9 +88,10 @@ namespace Throttling
             }
             else
             {
-                _logger.LogInformation("No throttling applied.");
+                _logger.LogVerbose("No throttling applied.");
                 await _next(context);
             }
+
 
             await _throttlingService.PostEvaluateAsync(throttlingContext);
         }

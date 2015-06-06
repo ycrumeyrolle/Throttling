@@ -3,9 +3,9 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class ApiKeyBandwidthHandler : BandwidthHandler<ApiKeyBandwidthRequirement>
+    public class ApiKeyBandwidthHandler : BandwidthHandler<ApiKeyBandwidthRequirement>
     {
-        protected ApiKeyBandwidthHandler(IRateStore store)
+        public ApiKeyBandwidthHandler(IRateStore store)
             : base(store)
         {
         }

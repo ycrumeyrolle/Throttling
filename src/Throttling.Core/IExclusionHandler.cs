@@ -3,10 +3,8 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public interface IThrottlingHandler
+    public interface IExclusionHandler
     {
         Task HandleAsync([NotNull] ThrottlingContext throttlingContext);
-
-        Task PostHandleAsync([NotNull] ThrottlingContext throttlingContext);
     }
 }

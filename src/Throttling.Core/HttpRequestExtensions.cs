@@ -9,7 +9,7 @@ namespace Throttling
         public static void EnableCounting([NotNull] this HttpResponse response)
         {
             var body = response.Body;
-            if (!body.CanRead)
+            if (!(body is CountingStream))
             {
                 response.Body = new CountingStream(body);
             }

@@ -39,7 +39,7 @@ namespace SimpleThrottling
                 });
                 options.AddPolicy("Limited bandwidth", builder =>
                 {
-                    builder.LimitIPBandwidth(160, TimeSpan.FromHours(1));
+                    builder.LimitIPBandwidth(160, TimeSpan.FromDays(1));
                 });
                 options.Routes.ApplyPolicy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
                 options.Routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
