@@ -32,7 +32,7 @@ namespace Throttling
                 throttlingContext.Succeed(requirement);
             }
 
-            throttlingContext.ContentLengthTracker = throttlingContext.HttpContext.Response.TrackContentLength();
+            throttlingContext.HttpContext.Response.TrackContentLength(throttlingContext.ContentLengthTracker);
         }
 
         public override async Task PostHandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull]TRequirement requirement)

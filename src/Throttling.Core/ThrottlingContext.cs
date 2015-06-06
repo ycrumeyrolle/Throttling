@@ -16,7 +16,6 @@ namespace Throttling
 
         public ThrottlingContext([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
         {
-            Headers = new HeaderDictionary();
             HttpContext = httpContext;
             Requirements = strategy.Policy.Requirements;
             Exclusions = strategy.Policy.Exclusions;
@@ -32,6 +31,12 @@ namespace Throttling
         public IEnumerable<IThrottlingExclusion> Exclusions { get; }
 
         public string RouteTemplate { get; }
+
+        public DateTimeOffset? RetryAfter { get; set; }
+
+        public IHeaderDictionary Headers { get; } = new HeaderDictionary();
+
+        public ContentLengthTracker ContentLengthTracker { get; } = new ContentLengthTracker();
 
         public IEnumerable<IThrottlingRequirement> PendingRequirements
         {
@@ -55,12 +60,6 @@ namespace Throttling
                 return _abortCalled;
             }
         }
-
-        public DateTimeOffset? RetryAfter { get; set; }
-
-        public IHeaderDictionary Headers { get; }
-
-        public ContentLengthTracker ContentLengthTracker { get; set; }
 
         public void Succeed([NotNull] IThrottlingRequirement requirement)
         {
