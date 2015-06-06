@@ -58,6 +58,7 @@ namespace Throttling
             {
                 _logger.LogVerbose("Throttling aborted. No throttling applied.");
                 await _next(context);
+                return;
             }
 
             var response = context.Response;
