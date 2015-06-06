@@ -2,16 +2,16 @@
 
 namespace Throttling
 {
-    public abstract class LimitRateRequirement : IThrottlingRequirement
+    public abstract class ThrottlingRequirement : IThrottlingRequirement
     {
-        protected LimitRateRequirement(long calls, TimeSpan renewalPeriod, bool sliding)
+        protected ThrottlingRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding)
         {
-            Calls = calls;
+            MaxValue = maxValue;
             RenewalPeriod = renewalPeriod;
             Sliding = sliding;
         }
 
-        public long Calls
+        public long MaxValue
         {
             get;
         }

@@ -25,7 +25,6 @@ namespace Throttling
 
         public IReadOnlyList<IThrottlingRequirement> Requirements { get; private set; }
 
-
         public IPWhitelist Whitelist { get; private set; }
     }
 }

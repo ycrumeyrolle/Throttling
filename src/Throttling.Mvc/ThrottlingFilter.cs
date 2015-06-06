@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
@@ -15,7 +16,6 @@ namespace Throttling.Mvc
         private readonly IThrottlingStrategyProvider _throttlingPolicyProvider;
         private readonly ThrottlingOptions _options;
         private readonly ISystemClock _clock;
-
 
         /// <summary>
         /// Creates a new instace of <see cref="ThrottlingFilter"/>.
@@ -39,9 +39,15 @@ namespace Throttling.Mvc
             }
         }
 
-        public string PolicyName { get; set; }
+        public string PolicyName
+        {
+            get; set;
+        }
 
-        public ThrottlingRoute Route { get; set; }
+        public ThrottlingRoute Route
+        {
+            get; set;
+        }
 
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
@@ -59,20 +65,34 @@ namespace Throttling.Mvc
                 };
             }
 
-            if (strategy != null)
+            if (strategy == null)
             {
-                var throttlingContext = await _throttlingService.EvaluateAsync(httpContext, strategy);
-                foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
-                {
-                    context.HttpContext.Response.Headers.SetValues(header.Key, header.Value);
-                }
-
-                if (throttlingContext.HasFailed)
-                {
-                    string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
-                    context.Result = new TooManyRequestResult(throttlingContext.Headers, retryAfter);
-                }
+                return;
             }
+
+            var throttlingContext = await _throttlingService.EvaluateAsync(httpContext, strategy);
+            foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
+            {
+                context.HttpContext.Response.Headers.SetValues(header.Key, header.Value);
+            }
+            
+            if (throttlingContext.HasTooManyRequest)
+            {
+                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
+                context.Result = new TooManyRequestResult(throttlingContext.Headers, retryAfter);
+            }
+            else
+            {
+                await _throttlingService.PostEvaluateAsync(throttlingContext);
+            }
+        }
+
+        public void OnActionExecuting([NotNull]ActionExecutingContext context)
+        {
+        }
+
+        public void OnActionExecuted([NotNull]ActionExecutedContext context)
+        {
         }
     }
 }

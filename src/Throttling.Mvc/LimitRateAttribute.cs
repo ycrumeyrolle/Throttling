@@ -4,13 +4,13 @@ using Microsoft.AspNet.Mvc.ApplicationModels;
 namespace Throttling.Mvc
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class LimitRateAttribute : ThrottlingConventionAttribute
+    public abstract class RateLimitAttribute : ThrottlingConventionAttribute
     {
         protected long Calls { get; }
 
         protected long RenewalPeriod { get; }
 
-        public LimitRateAttribute(long calls, long renewalPeriod)
+        public RateLimitAttribute(long calls, long renewalPeriod)
         {
             Calls = calls;
             RenewalPeriod = renewalPeriod;

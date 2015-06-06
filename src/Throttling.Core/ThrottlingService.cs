@@ -19,10 +19,10 @@ namespace Throttling
         private readonly IList<IThrottlingHandler> _handlers;
 
         public ThrottlingService(
-            [NotNull] ILoggerFactory loggerFactory, 
+            [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IEnumerable<IThrottlingHandler> handlers,
             [NotNull] ISystemClock clock,
-            [NotNull] IOptions<ThrottlingOptions> options, 
+            [NotNull] IOptions<ThrottlingOptions> options,
             ConfigureOptions<ThrottlingOptions> configureOptions = null)
         {
             if (configureOptions != null)
@@ -34,7 +34,7 @@ namespace Throttling
             {
                 _options = options.Options;
             }
-            
+
             _handlers = handlers.ToArray();
             _logger = loggerFactory.CreateLogger<ThrottlingService>();
             _clock = clock;
@@ -56,10 +56,10 @@ namespace Throttling
             {
                 await _handlers[i].HandleAsync(throttlingContext);
             }
-           
+
             return throttlingContext;
         }
-        
+
         private string GetRetryAfterValue(RetryAfterMode mode, DateTimeOffset reset)
         {
             switch (mode)
@@ -70,6 +70,14 @@ namespace Throttling
                     return Convert.ToInt64((reset - _clock.UtcNow).TotalSeconds).ToString(CultureInfo.InvariantCulture);
                 default:
                     return null;
+            }
+        }
+
+        public async Task PostEvaluateAsync([NotNull] ThrottlingContext throttlingContext)
+        {
+            for (int i = 0; i < _handlers.Count; i++)
+            {
+                await _handlers[i].PostHandleAsync(throttlingContext);
             }
         }
     }

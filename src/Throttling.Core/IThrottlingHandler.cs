@@ -6,5 +6,7 @@ namespace Throttling
     public interface IThrottlingHandler
     {
         Task HandleAsync([NotNull] ThrottlingContext context);
+
+        Task PostHandleAsync([NotNull] ThrottlingContext throttlingContext);
     }
 }

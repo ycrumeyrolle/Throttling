@@ -33,8 +33,8 @@ namespace ThrottlingSample
         }
 
         [HttpGet("test/MutliThrottling")]
-        [UserThrottling(10, 10)]
-        [UserThrottling(100, 60)]
+        [AuthenticatedUserThrottling(10, 10)]
+        [AuthenticatedUserThrottling(100, 60)]
         [IPThrottling(10, 10)]
         public string MutliThrottling()
         {

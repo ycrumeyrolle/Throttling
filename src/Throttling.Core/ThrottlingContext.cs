@@ -22,15 +22,36 @@ namespace Throttling
             _pendingRequirements = new HashSet<IThrottlingRequirement>(Requirements);
         }
 
-        public HttpContext HttpContext { get; set; }
+        public HttpContext HttpContext
+        {
+            get; set;
+        }
 
-        public IEnumerable<IThrottlingRequirement> Requirements { get; private set; }
+        public IEnumerable<IThrottlingRequirement> Requirements
+        {
+            get; private set;
+        }
 
-        public string RouteTemplate { get; private set; }
+        public string RouteTemplate
+        {
+            get; private set;
+        }
 
-        public IEnumerable<IThrottlingRequirement> PendingRequirements { get { return _pendingRequirements; } }
+        public IEnumerable<IThrottlingRequirement> PendingRequirements
+        {
+            get
+            {
+                return _pendingRequirements;
+            }
+        }
 
-        public bool HasFailed { get { return _tooManyRequestCalled; } }
+        public bool HasTooManyRequest
+        {
+            get
+            {
+                return _tooManyRequestCalled;
+            }
+        }
 
         public bool HasSucceeded
         {
@@ -40,9 +61,15 @@ namespace Throttling
             }
         }
 
-        public DateTimeOffset? RetryAfter { get; set; }
+        public DateTimeOffset? RetryAfter
+        {
+            get; set;
+        }
 
-        public IHeaderDictionary Headers { get; private set; }
+        public IHeaderDictionary Headers
+        {
+            get; private set;
+        }
 
         public void Succeed([NotNull] IThrottlingRequirement requirement)
         {
@@ -50,7 +77,7 @@ namespace Throttling
             _pendingRequirements.Remove(requirement);
         }
 
-        public void TooManyRequest<TRequirement>([NotNull] TRequirement requirement, DateTimeOffset retryAfter) where TRequirement : LimitRateRequirement
+        public void TooManyRequest<TRequirement>([NotNull] TRequirement requirement, DateTimeOffset retryAfter) where TRequirement : ThrottlingRequirement
         {
             _tooManyRequestCalled = true;
             if (!RetryAfter.HasValue || RetryAfter.Value < retryAfter)

@@ -30,25 +30,36 @@ namespace SimpleThrottling
                 {
                     builder
                         .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1))
-                               .LimitIPRate(10, TimeSpan.FromDays(1));
+                        .LimitIPRate(10, TimeSpan.FromDays(1));
+                });
+                options.AddPolicy("10 requests per hour by API key", builder =>
+                {
+                    builder
+                        .LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 10, TimeSpan.FromDays(1), true);
+                });
+                options.AddPolicy("Limited bandwidth", builder =>
+                {
+                    builder.LimitIPBandwidth(160, TimeSpan.FromHours(1));
                 });
                 options.Routes.ApplyStrategy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
                 options.Routes.ApplyStrategy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
+                options.Routes.ApplyStrategy("{apikey}/test/action3/{id?}", "Limited bandwidth");
+                options.Routes.ApplyStrategy("{apikey}/test/action4/{id?}", "10 requests per hour by API key");
             });
         }
 
         public void Configure(IApplicationBuilder app)
         {
             app.UseMiddleware<IPEnforcerMiddleware>();
-            
+
             app.UseThrottling();
 
             app.Use(next =>
             {
-                return async context =>
+                return context =>
                 {
                     context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{text: \"Hello!\"}");
+                    return context.Response.WriteAsync("{text: \"Hello!\"}");
                 };
             });
         }

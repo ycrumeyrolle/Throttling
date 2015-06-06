@@ -39,8 +39,8 @@ namespace Throttling.Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
-            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
+            Assert.Single(response.Headers.GetValues("X-RateLimit-IPLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-IPRemaining"), userRemaining);
         }
 
         [Theory]
@@ -63,8 +63,8 @@ namespace Throttling.Tests
             // Assert
             // TODO : assertions for http headers
             Assert.Equal((HttpStatusCode)429, response.StatusCode);
-            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
-            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
+            Assert.Single(response.Headers.GetValues("X-RateLimit-IPLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-IPRemaining"), userRemaining);
 
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").Single());
@@ -97,8 +97,8 @@ namespace Throttling.Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Single(response.Headers.GetValues("X-RateLimit-UserLimit"), "10");
-            Assert.Single(response.Headers.GetValues("X-RateLimit-UserRemaining"), userRemaining);
+            Assert.Single(response.Headers.GetValues("X-RateLimit-IPLimit"), "10");
+            Assert.Single(response.Headers.GetValues("X-RateLimit-IPRemaining"), userRemaining);
 
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
