@@ -32,8 +32,14 @@ namespace Throttling
             return null;
         }
 
-        public int Count { get { return _routes.Count; } }
-        
+        public int Count
+        {
+            get
+            {
+                return _routes.Count;
+            }
+        }
+
         public IDictionary<string, ThrottlingPolicy> PolicyMap { get; } = new Dictionary<string, ThrottlingPolicy>();
     }
 }

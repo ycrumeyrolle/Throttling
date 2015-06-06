@@ -29,7 +29,7 @@ namespace Throttling
         {
         }
 
-        public string RouteTemplate { get; private set; }        
+        public string RouteTemplate { get; }        
 
         public abstract ThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options);
 

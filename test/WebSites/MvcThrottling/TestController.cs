@@ -28,9 +28,16 @@ namespace MvcThrottling
         }
 
         [HttpGet("Fixed")]
-        [Throttling("10 requests per 10 seconds, fixed reset")]
+        [Throttling("10 requests per hour, fixed reset")]
         public string Fixed()
-        {   
+        {
+            return "OK";
+        }
+
+        [HttpGet("Bandwidth")]
+        [Throttling("Bandwidth")]
+        public string Bandwidth()
+        {
             return "OK";
         }
 

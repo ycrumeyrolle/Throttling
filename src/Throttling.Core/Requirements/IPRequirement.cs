@@ -7,8 +7,8 @@ namespace Throttling
 {
     public abstract class IPRequirement : ThrottlingRequirement, IKeyProvider
     {
-        protected IPRequirement(long calls, TimeSpan renewalPeriod, bool sliding)
-            : base(calls, renewalPeriod, sliding)
+        protected IPRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding)
+            : base(maxValue, renewalPeriod, sliding)
         {
         }
 

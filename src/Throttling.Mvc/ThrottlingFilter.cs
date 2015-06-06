@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
@@ -41,15 +40,9 @@ namespace Throttling.Mvc
             }
         }
 
-        public string PolicyName
-        {
-            get; set;
-        }
+        public string PolicyName { get; set; }
 
-        public ThrottlingRoute Route
-        {
-            get; set;
-        }
+        public ThrottlingRoute Route { get; set; }
 
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)

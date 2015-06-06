@@ -25,47 +25,27 @@ namespace Throttling
         }
 
 
-        public HttpContext HttpContext
-        {
-            get; set;
-        }
+        public HttpContext HttpContext { get; set; }
 
-        public IEnumerable<IThrottlingRequirement> Requirements
-        {
-            get; 
-        }
-        public IEnumerable<IThrottlingExclusion> Exclusions
-        {
-            get;
-        }
+        public IEnumerable<IThrottlingRequirement> Requirements { get; }
 
-        public string RouteTemplate
-        {
-            get; private set;
-        }
+        public IEnumerable<IThrottlingExclusion> Exclusions { get; }
+
+        public string RouteTemplate { get; }
 
         public IEnumerable<IThrottlingRequirement> PendingRequirements
         {
-            get
-            {
-                return _pendingRequirements;
-            }
+            get { return _pendingRequirements; }
         }
 
         public bool HasTooManyRequest
         {
-            get
-            {
-                return _tooManyRequestCalled;
-            }
+            get { return _tooManyRequestCalled; }
         }
 
         public bool HasSucceeded
         {
-            get
-            {
-                return !_tooManyRequestCalled && _succeedCalled && !PendingRequirements.Any();
-            }
+            get { return !_tooManyRequestCalled && _succeedCalled && !PendingRequirements.Any(); }
         }
 
         public bool HasAborted
@@ -76,15 +56,9 @@ namespace Throttling
             }
         }
 
-        public DateTimeOffset? RetryAfter
-        {
-            get; set;
-        }
+        public DateTimeOffset? RetryAfter { get; set; }
 
-        public IHeaderDictionary Headers
-        {
-            get; private set;
-        }
+        public IHeaderDictionary Headers { get; }
 
         public void Succeed([NotNull] IThrottlingRequirement requirement)
         {

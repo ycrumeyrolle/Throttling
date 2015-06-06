@@ -92,8 +92,7 @@ namespace Throttling
                 _logger.LogVerbose("No throttling applied.");
                 await _next(context);
             }
-
-
+            
             await _throttlingService.PostEvaluateAsync(throttlingContext);
         }
     }

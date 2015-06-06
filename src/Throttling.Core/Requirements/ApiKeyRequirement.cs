@@ -19,18 +19,4 @@ namespace Throttling
             return _apiKeyProvider.GetApiKey(context);
         }
     }
-    public abstract class ApiKeyBandwidthRequirement : ApiKeyRequirement
-    {
-        protected ApiKeyBandwidthRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding, IApiKeyProvider apiKeyProvider)
-            : base(maxValue, renewalPeriod, sliding, apiKeyProvider)
-        {
-        }
-    }
-    public abstract class ApiKeyRateLimitRequirement : ApiKeyRequirement
-    {
-        protected ApiKeyRateLimitRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding, IApiKeyProvider apiKeyProvider)
-            : base(maxValue, renewalPeriod, sliding, apiKeyProvider)
-        {
-        }
-    }
 }

@@ -26,9 +26,6 @@ namespace Throttling
             Whitelist = new IPWhitelist(ranges);
         }
 
-        public IPWhitelist Whitelist
-        {
-            get;
-        }
+        public IPWhitelist Whitelist { get; }
     }
 }

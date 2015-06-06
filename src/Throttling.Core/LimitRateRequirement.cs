@@ -11,19 +11,10 @@ namespace Throttling
             Sliding = sliding;
         }
 
-        public long MaxValue
-        {
-            get;
-        }
+        public long MaxValue { get; }
 
-        public TimeSpan RenewalPeriod
-        {
-            get;
-        }
+        public TimeSpan RenewalPeriod { get; }
 
-        public bool Sliding
-        {
-            get;
-        }
+        public bool Sliding { get; }
     }
 }

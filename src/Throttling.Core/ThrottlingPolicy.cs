@@ -21,19 +21,10 @@ namespace Throttling
             Name = policyName;
         }
 
-        public string Name
-        {
-            get; set;
-        }
+        public string Name { get; set; }
 
+        public IReadOnlyList<IThrottlingRequirement> Requirements { get; }
 
-        public IReadOnlyList<IThrottlingRequirement> Requirements
-        {
-            get;
-        }
-        public IReadOnlyList<IThrottlingExclusion> Exclusions
-        {
-            get;
-        }
+        public IReadOnlyList<IThrottlingExclusion> Exclusions { get; }
     }
 }

@@ -25,20 +25,11 @@ namespace Throttling
             }
         }
 
-        public RetryAfterMode RetryAfterMode
-        {
-            get; set;
-        }
+        public RetryAfterMode RetryAfterMode { get; set; }
 
-        public IThrottlingRouter Routes
-        {
-            get; set;
-        }
+        public IThrottlingRouter Routes { get; set; }
 
-        public bool SendThrottlingHeaders
-        {
-            get; set;
-        }
+        public bool SendThrottlingHeaders { get; set; }
 
         /// <summary>
         /// Adds a new policy.

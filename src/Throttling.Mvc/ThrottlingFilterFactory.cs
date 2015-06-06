@@ -12,7 +12,6 @@ namespace Throttling.Mvc
     public class ThrottlingFilterFactory : IFilterFactory, IOrderedFilter
     {
         private readonly string _policyName;
-
         private readonly ThrottlingPolicyBuilder _builder;
         private readonly string _routeTemplate;
         private readonly IEnumerable<string> _httpMethods;
