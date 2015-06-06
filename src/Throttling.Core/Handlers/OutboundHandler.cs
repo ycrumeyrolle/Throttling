@@ -13,9 +13,9 @@ namespace Throttling
             _store = store;
         }
 
-        public override async Task HandleAsync([NotNull] ThrottlingContext context, [NotNull] TRequirement requirement)
+        public override async Task HandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement)
         {
-            var key = GetKey(context.HttpContext, requirement);
+            var key = GetKey(throttlingContext.HttpContext, requirement);
             if (key == null)
             {
                 return;
@@ -25,31 +25,31 @@ namespace Throttling
             var rate = await _store.GetRemainingRateAsync(key, requirement);
             if (rate.LimitReached)
             {
-                context.TooManyRequest(requirement, rate.Reset);
+                throttlingContext.TooManyRequest(requirement, rate.Reset);
             }
             else
             {
-                context.Succeed(requirement);
+                throttlingContext.Succeed(requirement);
             }
 
-            context.HttpContext.Response.EnableCounting();
+            throttlingContext.ContentLengthTracker = throttlingContext.HttpContext.Response.TrackContentLength();
         }
 
-        public override async Task PostHandleAsync([NotNull]ThrottlingContext context, [NotNull]TRequirement requirement)
+        public override async Task PostHandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull]TRequirement requirement)
         {
-            var key = GetKey(context.HttpContext, requirement);
+            var key = GetKey(throttlingContext.HttpContext, requirement);
             if (key == null)
             {
                 return;
             }
             
             key = typeof(TRequirement) + key;
-            var decrementValue = GetDecrementValue(context.HttpContext, requirement);
+            var decrementValue = GetDecrementValue(throttlingContext, requirement);
             await _store.DecrementRemainingRateAsync(key, requirement, decrementValue, reachLimitAtZero: true);
         }
 
         public abstract string GetKey([NotNull] HttpContext httpContext, [NotNull] TRequirement requirement);
 
-        public abstract long GetDecrementValue([NotNull] HttpContext httpContext, [NotNull] TRequirement requirement);
+        public abstract long GetDecrementValue([NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement);
     }
 }

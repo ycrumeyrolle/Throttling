@@ -43,25 +43,25 @@ namespace Throttling
         }
 
         /// <inheritdoc />
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext httpContext)
         {
-            var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(context, null);
+            var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(httpContext, null);
             if (strategy == null)
             {
                 _logger.LogVerbose("No strategy for current request.");
-                await _next(context);
+                await _next(httpContext);
                 return;
             }
 
-            var throttlingContext = await _throttlingService.EvaluateAsync(context, strategy);
+            var throttlingContext = await _throttlingService.EvaluateAsync(httpContext, strategy);
             if (throttlingContext.HasAborted)
             {
                 _logger.LogVerbose("Throttling aborted. No throttling applied.");
-                await _next(context);
+                await _next(httpContext);
                 return;
             }
 
-            var response = context.Response;
+            var response = httpContext.Response;
             if (_options.SendThrottlingHeaders)
             {
                 foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
@@ -90,7 +90,7 @@ namespace Throttling
             else
             {
                 _logger.LogVerbose("No throttling applied.");
-                await _next(context);
+                await _next(httpContext);
             }
             
             await _throttlingService.PostEvaluateAsync(throttlingContext);

@@ -60,6 +60,8 @@ namespace Throttling
 
         public IHeaderDictionary Headers { get; }
 
+        public ContentLengthTracker ContentLengthTracker { get; set; }
+
         public void Succeed([NotNull] IThrottlingRequirement requirement)
         {
             _succeedCalled = true;

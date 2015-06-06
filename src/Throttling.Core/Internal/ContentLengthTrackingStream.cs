@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 namespace Throttling.Core.Internal
 {
-
-    public class CountingStream : Stream
+    public class ContentLengthTrackingStream : Stream
     {
         private readonly Stream _inner;
-        private long _length;
+        private readonly ContentLengthTracker _tracker;
 
-        public CountingStream(Stream inner)
+        public ContentLengthTrackingStream(Stream inner, ContentLengthTracker tracker)
         {
             _inner = inner;
+            _tracker = tracker;
         }
 
         public override bool CanRead
@@ -44,7 +44,7 @@ namespace Throttling.Core.Internal
         {
             get
             {
-                return _length;
+                return _inner.Length;
             }
         }
 
@@ -92,6 +92,14 @@ namespace Throttling.Core.Internal
             set
             {
                 _inner.WriteTimeout = value;
+            }
+        }
+
+        public ContentLengthTracker Tracker
+        {
+            get
+            {
+                return _tracker;
             }
         }
 
@@ -145,13 +153,13 @@ namespace Throttling.Core.Internal
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _length += count;
+            _tracker.ContentLength += count - offset;
             _inner.Write(buffer, offset, count);
         }
 #if DNX451
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
-            _length += count;
+            _tracker.ContentLength += count - offset;
             return _inner.BeginWrite(buffer, offset, count, callback, state);
         }
 
@@ -162,13 +170,13 @@ namespace Throttling.Core.Internal
 #endif
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            _length += count;
+            _tracker.ContentLength += count - offset;
             return _inner.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override void WriteByte(byte value)
         {
-            _length++;
+            _tracker.ContentLength++;
             _inner.WriteByte(value);
         }
 
