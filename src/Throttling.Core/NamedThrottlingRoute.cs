@@ -21,7 +21,7 @@ namespace Throttling
             _policyName = policyName;
         }
 
-        public override ThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options)
+        public override ThrottlingPolicy GetPolicy([NotNull] HttpRequest httpContext, [NotNull] ThrottlingOptions options)
         {
             return options.GetPolicy(_policyName);
         }

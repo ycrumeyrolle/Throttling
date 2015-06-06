@@ -12,9 +12,9 @@ namespace Throttling
             _parameter = parameter;
         }
 
-        public string GetApiKey([NotNull] HttpContext context)
+        public string GetApiKey([NotNull] HttpContext httpContext)
         {
-            var keys = context.Request.Query.GetValues(_parameter);
+            var keys = httpContext.Request.Query.GetValues(_parameter);
             if (keys != null && keys.Count > 0)
             {
                 return keys[0];

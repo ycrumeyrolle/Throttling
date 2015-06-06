@@ -11,11 +11,11 @@ namespace Throttling
         {
         }
 
-        public string GetKey([NotNull] HttpContext context)
+        public string GetKey([NotNull] HttpContext httpContext)
         {
-            if (context.User.Identity.IsAuthenticated)
+            if (httpContext.User.Identity.IsAuthenticated)
             {
-                return context.User.Identity.Name;
+                return httpContext.User.Identity.Name;
             }
 
             return null;

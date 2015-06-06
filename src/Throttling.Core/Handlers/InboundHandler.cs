@@ -14,9 +14,9 @@ namespace Throttling
             _store = store;
         }
 
-        public override async Task HandleAsync([NotNull] ThrottlingContext context, [NotNull] TRequirement requirement)
+        public override async Task HandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement)
         {
-            var key = GetKey(context.HttpContext, requirement);
+            var key = GetKey(throttlingContext.HttpContext, requirement);
             if (key == null)
             {
                 return;
@@ -26,17 +26,17 @@ namespace Throttling
             var rate = await _store.DecrementRemainingRateAsync(key, requirement, 1);
             if (rate.LimitReached)
             {
-                context.TooManyRequest(requirement, rate.Reset);
+                throttlingContext.TooManyRequest(requirement, rate.Reset);
             }
             else
             {
-                context.Succeed(requirement);
+                throttlingContext.Succeed(requirement);
             }
 
-            AddRateLimitHeaders(rate, context, requirement);
+            AddRateLimitHeaders(rate, throttlingContext, requirement);
         }
 
-        public abstract void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottlingContext context, [NotNull] TRequirement requirement);
+        public abstract void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement);
 
         public abstract string GetKey([NotNull] HttpContext httpContext, [NotNull] TRequirement requirement);
     }

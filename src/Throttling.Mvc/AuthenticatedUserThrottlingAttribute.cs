@@ -6,8 +6,8 @@ namespace Throttling.Mvc
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class AuthenticatedUserThrottlingAttribute : RateLimitAttribute
     {
-        public AuthenticatedUserThrottlingAttribute(long authenticatedCalls, long authenticatedRenewalPeriod)
-            : base(authenticatedCalls, authenticatedRenewalPeriod)
+        public AuthenticatedUserThrottlingAttribute(long calls, long renewalPeriod)
+            : base(calls, renewalPeriod)
         {
         }
 

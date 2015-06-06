@@ -13,17 +13,17 @@ namespace Throttling
             _routes.Add(route);
         }
 
-        public ThrottlingStrategy GetThrottlingStrategyAsync([NotNull] HttpContext context, [NotNull] ThrottlingOptions options)
+        public ThrottlingStrategy GetThrottlingStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottlingOptions options)
         {
             for (var i = 0; i < _routes.Count; i++)
             {
                 var route = _routes[i];
 
-                if (route.Match(context.Request))
+                if (route.Match(httpContext.Request))
                 {
                     return new ThrottlingStrategy
                     {
-                        Policy = route.GetPolicy(context.Request, options),
+                        Policy = route.GetPolicy(httpContext.Request, options),
                         RouteTemplate = route.RouteTemplate
                     };
                 }

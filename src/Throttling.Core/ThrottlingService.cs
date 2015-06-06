@@ -43,9 +43,9 @@ namespace Throttling
             _clock = clock;
         }
 
-        public virtual async Task<ThrottlingContext> EvaluateAsync([NotNull] HttpContext context, [NotNull] ThrottlingStrategy strategy)
+        public virtual async Task<ThrottlingContext> EvaluateAsync([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
         {
-            var throttlingContext = new ThrottlingContext(context, strategy);
+            var throttlingContext = new ThrottlingContext(httpContext, strategy);
 
             for (int i = 0; i < _exclusionHandlers.Count; i++)
             {

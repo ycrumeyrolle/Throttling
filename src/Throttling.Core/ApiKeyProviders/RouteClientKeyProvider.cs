@@ -29,9 +29,9 @@ namespace Throttling
             _apiKeyName = apiKeyName;
         }
 
-        public string GetApiKey([NotNull] HttpContext context)
+        public string GetApiKey([NotNull] HttpContext httpContext)
         {
-            var requestPath = context.Request.Path.Value;
+            var requestPath = httpContext.Request.Path.Value;
 
             if (!string.IsNullOrEmpty(requestPath) && requestPath[0] == '/')
             {

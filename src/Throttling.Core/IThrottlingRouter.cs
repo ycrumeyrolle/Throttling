@@ -8,7 +8,7 @@ namespace Throttling
     {
         void Add([NotNull] ThrottlingRoute route);
 
-        ThrottlingStrategy GetThrottlingStrategyAsync([NotNull] HttpContext context, [NotNull] ThrottlingOptions options);
+        ThrottlingStrategy GetThrottlingStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottlingOptions options);
 
         int Count { get; }
 

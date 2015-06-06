@@ -22,9 +22,9 @@ namespace Throttling
             }
         }
 
-        public abstract Task HandleAsync([NotNull] ThrottlingContext context, [NotNull] TRequirement requirement);
+        public abstract Task HandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement);
 
-        public virtual Task PostHandleAsync([NotNull] ThrottlingContext context, [NotNull] TRequirement requirement)
+        public virtual Task PostHandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement)
         {
             return Constants.CompletedTask;
         }

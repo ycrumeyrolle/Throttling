@@ -31,13 +31,13 @@ namespace Throttling
 
         public string RouteTemplate { get; }        
 
-        public abstract ThrottlingPolicy GetPolicy([NotNull] HttpRequest request, [NotNull] ThrottlingOptions options);
+        public abstract ThrottlingPolicy GetPolicy([NotNull] HttpRequest httpContext, [NotNull] ThrottlingOptions options);
 
-        public bool Match([NotNull] HttpRequest request)
+        public bool Match([NotNull] HttpRequest httpContext)
         {
-            if (_httpMethods == null || _httpMethods.Contains(request.Method))
+            if (_httpMethods == null || _httpMethods.Contains(httpContext.Method))
             {
-                var requestPath = request.Path.Value;
+                var requestPath = httpContext.Path.Value;
 
                 if (!string.IsNullOrEmpty(requestPath) && requestPath[0] == '/')
                 {

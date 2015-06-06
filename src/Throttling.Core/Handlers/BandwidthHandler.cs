@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
+﻿using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
@@ -12,9 +9,9 @@ namespace Throttling
         {
         }
 
-        public override long GetDecrementValue([NotNull]HttpContext httpContext, [NotNull]TRequirement requirement)
+        public override long GetDecrementValue([NotNull] ThrottlingContext throttlingContext, [NotNull]TRequirement requirement)
         {
-            return httpContext.Response.Body.Length;
+            return throttlingContext.ContentLengthTracker.ContentLength;
         }
     }
 }

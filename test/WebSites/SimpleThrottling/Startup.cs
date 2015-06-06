@@ -59,6 +59,11 @@ namespace SimpleThrottling
                 return context =>
                 {
                     context.Response.ContentType = "application/json";
+
+                    context.Response.Body.WriteByte(123);
+                    var buffer = System.Text.Encoding.UTF8.GetBytes("test");
+                    context.Response.Body.Write(buffer, 1, buffer.Length-1);
+
                     return context.Response.WriteAsync("{text: \"Hello!\"}");
                 };
             });
