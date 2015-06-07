@@ -4,28 +4,27 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Features;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
-    public class ThrottlingService : IThrottlingService
+    public class ThrottleService : IThrottleService
     {
-        private readonly ThrottlingOptions _options;
+        private readonly ThrottleOptions _options;
         private readonly ILogger _logger;
         private readonly ISystemClock _clock;
-        private readonly IList<IThrottlingHandler> _handlers;
+        private readonly IList<IThrottleHandler> _handlers;
         private readonly IList<IExclusionHandler> _exclusionHandlers;
 
-        public ThrottlingService(
+        public ThrottleService(
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IEnumerable<IThrottlingHandler> handlers,
+            [NotNull] IEnumerable<IThrottleHandler> handlers,
             [NotNull] IEnumerable<IExclusionHandler> exclusionHandlers,
             [NotNull] ISystemClock clock,
-            [NotNull] IOptions<ThrottlingOptions> options,
-            ConfigureOptions<ThrottlingOptions> configureOptions = null)
+            [NotNull] IOptions<ThrottleOptions> options,
+            ConfigureOptions<ThrottleOptions> configureOptions = null)
         {
             if (configureOptions != null)
             {
@@ -39,28 +38,28 @@ namespace Throttling
 
             _handlers = handlers.ToArray();
             _exclusionHandlers = exclusionHandlers.ToArray();
-            _logger = loggerFactory.CreateLogger<ThrottlingService>();
+            _logger = loggerFactory.CreateLogger<ThrottleService>();
             _clock = clock;
         }
 
-        public virtual async Task<ThrottlingContext> EvaluateAsync([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
+        public virtual async Task<ThrottleContext> EvaluateAsync([NotNull] HttpContext httpContext, [NotNull] ThrottleStrategy strategy)
         {
-            var throttlingContext = new ThrottlingContext(httpContext, strategy);
+            var throttleContext = new ThrottleContext(httpContext, strategy);
 
             for (int i = 0; i < _exclusionHandlers.Count; i++)
             {
-                await _exclusionHandlers[i].HandleAsync(throttlingContext);
+                await _exclusionHandlers[i].HandleAsync(throttleContext);
             }
 
-            if (!throttlingContext.HasAborted)
+            if (!throttleContext.HasAborted)
             {
                 for (int i = 0; i < _handlers.Count; i++)
                 {
-                    await _handlers[i].HandleAsync(throttlingContext);
+                    await _handlers[i].HandleAsync(throttleContext);
                 }
             }
 
-            return throttlingContext;
+            return throttleContext;
         }
 
         private string GetRetryAfterValue(RetryAfterMode mode, DateTimeOffset reset)
@@ -76,11 +75,11 @@ namespace Throttling
             }
         }
 
-        public async Task PostEvaluateAsync([NotNull] ThrottlingContext throttlingContext)
+        public async Task PostEvaluateAsync([NotNull] ThrottleContext throttleContext)
         {
             for (int i = 0; i < _handlers.Count; i++)
             {
-                await _handlers[i].PostHandleAsync(throttlingContext);
+                await _handlers[i].PostHandleAsync(throttleContext);
             }
         }
     }

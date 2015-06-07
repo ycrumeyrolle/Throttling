@@ -3,13 +3,13 @@ using Microsoft.Framework.Logging;
 
 namespace Throttling
 {
-    public class ThrottlingPolicyLogValues : ReflectionBasedLogValues
+    public class ThrottlePolicyLogValues : ReflectionBasedLogValues
     {
         string Name { get; set; }
 
         string Category { get; set; }
 
-        public ThrottlingPolicyLogValues([NotNull] ThrottlingPolicy inner)
+        public ThrottlePolicyLogValues([NotNull] ThrottlePolicy inner)
         {
             Name = inner.Name;
         }

@@ -1,11 +1,9 @@
-﻿using System;
-using Microsoft.AspNet.Builder;
+﻿using Microsoft.AspNet.Builder;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
-    public static class ThrottlingExtensions
+    public static class ThrottleExtensions
     {
         /// <summary>
         /// Enable throttling on the current path
@@ -14,7 +12,7 @@ namespace Throttling
         /// <returns></returns>
         public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app, string policyName)
         {
-            return app.UseMiddleware<ThrottlingMiddleware>(policyName);
+            return app.UseMiddleware<ThrottleMiddleware>(policyName);
         }
 
         /// <summary>
@@ -25,7 +23,7 @@ namespace Throttling
         /// <returns></returns>
         public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app)
         {
-            return app.UseMiddleware<ThrottlingMiddleware>();
+            return app.UseMiddleware<ThrottleMiddleware>();
         }
     }
 }

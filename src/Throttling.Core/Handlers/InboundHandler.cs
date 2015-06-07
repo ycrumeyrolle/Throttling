@@ -5,7 +5,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class InboundHandler<TRequirement> : ThrottlingHandler<TRequirement> where TRequirement : ThrottlingRequirement
+    public abstract class InboundHandler<TRequirement> : ThrottleHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
         private readonly IRateStore _store;
 
@@ -14,9 +14,9 @@ namespace Throttling
             _store = store;
         }
 
-        public override async Task HandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement)
+        public override async Task HandleAsync([NotNull] ThrottleContext throttleContext, [NotNull] TRequirement requirement)
         {
-            var key = GetKey(throttlingContext.HttpContext, requirement);
+            var key = GetKey(throttleContext.HttpContext, requirement);
             if (key == null)
             {
                 return;
@@ -26,17 +26,17 @@ namespace Throttling
             var rate = await _store.DecrementRemainingRateAsync(key, requirement, 1);
             if (rate.LimitReached)
             {
-                throttlingContext.TooManyRequest(requirement, rate.Reset);
+                throttleContext.TooManyRequest(requirement, rate.Reset);
             }
             else
             {
-                throttlingContext.Succeed(requirement);
+                throttleContext.Succeed(requirement);
             }
 
-            AddRateLimitHeaders(rate, throttlingContext, requirement);
+            AddRateLimitHeaders(rate, throttleContext, requirement);
         }
 
-        public abstract void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottlingContext throttlingContext, [NotNull] TRequirement requirement);
+        public abstract void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottleContext throttleContext, [NotNull] TRequirement requirement);
 
         public abstract string GetKey([NotNull] HttpContext httpContext, [NotNull] TRequirement requirement);
     }

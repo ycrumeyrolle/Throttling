@@ -7,19 +7,19 @@ namespace Throttling
 {
     public class IPExclusionHandler : ExclusionHandler<IPExclusion>
     {
-        public override Task HandleAsync([NotNull]ThrottlingContext throttlingContext, IPExclusion exclusion)
+        public override Task HandleAsync([NotNull]ThrottleContext throttleContext, IPExclusion exclusion)
         {
-            IHttpConnectionFeature connection = throttlingContext.HttpContext.GetFeature<IHttpConnectionFeature>();
+            IHttpConnectionFeature connection = throttleContext.HttpContext.GetFeature<IHttpConnectionFeature>();
             if (exclusion.Whitelist.Contains(connection.RemoteIpAddress))
             {
-                throttlingContext.Abort(exclusion);
+                throttleContext.Abort(exclusion);
             }
 
             return Constants.CompletedTask;
         }
     }
 
-    public class IPExclusion : IThrottlingExclusion
+    public class IPExclusion : IThrottleExclusion
     {
         public IPExclusion([NotNull] params string[] ranges)
         {

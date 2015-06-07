@@ -4,16 +4,16 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class ThrottlingRouteCollection : IThrottlingRouter
+    public class ThrottleRouteCollection : IThrottleRouter
     {
-        private readonly List<ThrottlingRoute> _routes = new List<ThrottlingRoute>();
+        private readonly List<ThrottleRoute> _routes = new List<ThrottleRoute>();
 
-        public void Add([NotNull] ThrottlingRoute route)
+        public void Add([NotNull] ThrottleRoute route)
         {
             _routes.Add(route);
         }
 
-        public ThrottlingStrategy GetThrottlingStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottlingOptions options)
+        public ThrottleStrategy GetThrottleStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottleOptions options)
         {
             for (var i = 0; i < _routes.Count; i++)
             {
@@ -21,7 +21,7 @@ namespace Throttling
 
                 if (route.Match(httpContext.Request))
                 {
-                    return new ThrottlingStrategy
+                    return new ThrottleStrategy
                     {
                         Policy = route.GetPolicy(httpContext.Request, options),
                         RouteTemplate = route.RouteTemplate
@@ -40,6 +40,6 @@ namespace Throttling
             }
         }
 
-        public IDictionary<string, ThrottlingPolicy> PolicyMap { get; } = new Dictionary<string, ThrottlingPolicy>();
+        public IDictionary<string, ThrottlePolicy> PolicyMap { get; } = new Dictionary<string, ThrottlePolicy>();
     }
 }

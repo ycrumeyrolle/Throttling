@@ -4,16 +4,16 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class ExclusionHandler<TExclusion> : IExclusionHandler where TExclusion : IThrottlingExclusion
+    public abstract class ExclusionHandler<TExclusion> : IExclusionHandler where TExclusion : IThrottleExclusion
     {
-        public virtual async Task HandleAsync([NotNull] ThrottlingContext throttlingContext)
+        public virtual async Task HandleAsync([NotNull] ThrottleContext throttleContext)
         {
-            foreach (var exclusion in throttlingContext.Exclusions.OfType<TExclusion>())
+            foreach (var exclusion in throttleContext.Exclusions.OfType<TExclusion>())
             {
-                await HandleAsync(throttlingContext, exclusion);
+                await HandleAsync(throttleContext, exclusion);
             }
         }
 
-        public abstract Task HandleAsync([NotNull] ThrottlingContext throttlingContext, [NotNull] TExclusion exclusion);
+        public abstract Task HandleAsync([NotNull] ThrottleContext throttleContext, [NotNull] TExclusion exclusion);
     }
 }

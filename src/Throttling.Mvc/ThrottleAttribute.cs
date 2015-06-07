@@ -4,9 +4,9 @@ using Microsoft.AspNet.Mvc.ApplicationModels;
 namespace Throttling.Mvc
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class ThrottlingAttribute : ThrottlingConventionAttribute
+    public class ThrottleAttribute : ThrottleConventionAttribute
     {
-        public ThrottlingAttribute(string policyName)
+        public ThrottleAttribute(string policyName)
         {
             PolicyName = policyName;
         }
@@ -15,7 +15,7 @@ namespace Throttling.Mvc
 
         protected override void ApplyCore(ActionModel model)
         {
-            model.Filters.Add(new ThrottlingFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, PolicyName));
+            model.Filters.Add(new ThrottleFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, PolicyName));
         }
     }
 }

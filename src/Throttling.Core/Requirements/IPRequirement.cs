@@ -5,7 +5,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class IPRequirement : ThrottlingRequirement, IKeyProvider
+    public abstract class IPRequirement : ThrottleRequirement, IKeyProvider
     {
         protected IPRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding)
             : base(maxValue, renewalPeriod, sliding)

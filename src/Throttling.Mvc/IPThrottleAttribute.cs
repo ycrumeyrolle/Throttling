@@ -4,14 +4,14 @@ using Microsoft.AspNet.Mvc.ApplicationModels;
 namespace Throttling.Mvc
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class IPThrottlingAttribute : RateLimitAttribute
+    public class IPThrottleAttribute : RateLimitAttribute
     {
-        public IPThrottlingAttribute(long calls, long renewalPeriod)
+        public IPThrottleAttribute(long calls, long renewalPeriod)
             : base(calls, renewalPeriod)
         {
         }
 
-        protected override void ApplyCore(ActionModel model, ThrottlingPolicyBuilder builder)
+        protected override void ApplyCore(ActionModel model, ThrottlePolicyBuilder builder)
         {
             builder.LimitIPRate(Calls, TimeSpan.FromSeconds(RenewalPeriod), Sliding);
         }

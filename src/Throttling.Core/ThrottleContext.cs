@@ -7,28 +7,28 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class ThrottlingContext
+    public class ThrottleContext
     {
-        private HashSet<IThrottlingRequirement> _pendingRequirements;
+        private HashSet<IThrottleRequirement> _pendingRequirements;
         private bool _tooManyRequestCalled;
         private bool _succeedCalled;
         private bool _abortCalled;
 
-        public ThrottlingContext([NotNull] HttpContext httpContext, [NotNull] ThrottlingStrategy strategy)
+        public ThrottleContext([NotNull] HttpContext httpContext, [NotNull] ThrottleStrategy strategy)
         {
             HttpContext = httpContext;
             Requirements = strategy.Policy.Requirements;
             Exclusions = strategy.Policy.Exclusions;
             RouteTemplate = strategy.RouteTemplate;
-            _pendingRequirements = new HashSet<IThrottlingRequirement>(Requirements);
+            _pendingRequirements = new HashSet<IThrottleRequirement>(Requirements);
         }
 
 
         public HttpContext HttpContext { get; set; }
 
-        public IEnumerable<IThrottlingRequirement> Requirements { get; }
+        public IEnumerable<IThrottleRequirement> Requirements { get; }
 
-        public IEnumerable<IThrottlingExclusion> Exclusions { get; }
+        public IEnumerable<IThrottleExclusion> Exclusions { get; }
 
         public string RouteTemplate { get; }
 
@@ -38,7 +38,7 @@ namespace Throttling
 
         public ContentLengthTracker ContentLengthTracker { get; } = new ContentLengthTracker();
 
-        public IEnumerable<IThrottlingRequirement> PendingRequirements
+        public IEnumerable<IThrottleRequirement> PendingRequirements
         {
             get { return _pendingRequirements; }
         }
@@ -61,13 +61,13 @@ namespace Throttling
             }
         }
 
-        public void Succeed([NotNull] IThrottlingRequirement requirement)
+        public void Succeed([NotNull] IThrottleRequirement requirement)
         {
             _succeedCalled = true;
             _pendingRequirements.Remove(requirement);
         }
 
-        public void TooManyRequest([NotNull] IThrottlingRequirement requirement, DateTimeOffset retryAfter)
+        public void TooManyRequest([NotNull] IThrottleRequirement requirement, DateTimeOffset retryAfter)
         {
             _tooManyRequestCalled = true;
             if (!RetryAfter.HasValue || RetryAfter.Value < retryAfter)
@@ -76,7 +76,7 @@ namespace Throttling
             }
         }
 
-        public void Abort([NotNull] IThrottlingExclusion exclusion)
+        public void Abort([NotNull] IThrottleExclusion exclusion)
         {
             _abortCalled = true;
         }

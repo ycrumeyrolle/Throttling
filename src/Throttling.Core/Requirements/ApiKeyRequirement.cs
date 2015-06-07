@@ -4,7 +4,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class ApiKeyRequirement : ThrottlingRequirement, IApiKeyProvider
+    public abstract class ApiKeyRequirement : ThrottleRequirement, IApiKeyProvider
     {
         private readonly IApiKeyProvider _apiKeyProvider;
 

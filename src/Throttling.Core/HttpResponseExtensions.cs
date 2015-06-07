@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
-using Throttling.Core.Internal;
+using Throttling.Internal;
 
 namespace Throttling
 {

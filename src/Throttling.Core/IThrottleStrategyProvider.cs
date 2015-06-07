@@ -4,14 +4,14 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public interface IThrottlingStrategyProvider
+    public interface IThrottleStrategyProvider
     {
         /// <summary>
-        /// Selects a throttling policy to apply for the given request.
+        /// Selects a throttle policy to apply for the given request.
         /// </summary>
         /// <param name="httpContext">The <see cref="HttpContext"/> associated with this call.</param>
         /// <param name="policyName">An optional policy name to look for.</param>
-        /// <returns>A <see cref="IThrottlingPolicy"/></returns>
-        Task<ThrottlingStrategy> GetThrottlingStrategyAsync([NotNull] HttpContext httpContext, string policyName);
+        /// <returns>A <see cref="IThrottlePolicy"/></returns>
+        Task<ThrottleStrategy> GetThrottleStrategyAsync([NotNull] HttpContext httpContext, string policyName);
     }
 }

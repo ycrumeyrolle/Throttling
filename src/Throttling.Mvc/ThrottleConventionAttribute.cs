@@ -5,7 +5,7 @@
     using Microsoft.AspNet.Mvc.ApplicationModels;
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class ThrottlingConventionAttribute : Attribute, IActionModelConvention, IControllerModelConvention, IApplicationModelConvention
+    public abstract class ThrottleConventionAttribute : Attribute, IActionModelConvention, IControllerModelConvention, IApplicationModelConvention
     {
         public void Apply(ActionModel model)
         {

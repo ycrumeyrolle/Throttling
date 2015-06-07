@@ -5,7 +5,7 @@ namespace Microsoft.Framework.DependencyInjection
     /// <summary>
     /// The <see cref="IServiceCollection"/> extensions for enabling Throttling support.
     /// </summary>
-    public static class ThrottlingServiceCollectionExtensions
+    public static class ThrottleServiceCollectionExtensions
     {
         /// <summary>
         /// Add services needed to support throttling to the given <paramref name="serviceCollection"/>.
@@ -15,8 +15,7 @@ namespace Microsoft.Framework.DependencyInjection
         public static IServiceCollection AddMvcThrottling(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddThrottling();
-            serviceCollection.AddTransient<IThrottlingFilter, ThrottlingFilter>();
-
+            serviceCollection.AddTransient<IThrottleFilter, ThrottleFilter>();
             return serviceCollection;
         }
     }

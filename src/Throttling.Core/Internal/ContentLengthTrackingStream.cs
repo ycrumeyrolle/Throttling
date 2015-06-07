@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Throttling.Core.Internal
+namespace Throttling.Internal
 {
     public class ContentLengthTrackingStream : Stream
     {

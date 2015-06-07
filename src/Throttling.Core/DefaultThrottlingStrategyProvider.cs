@@ -5,33 +5,33 @@ using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
-    public class DefaultThrottlingStrategyProvider : IThrottlingStrategyProvider
+    public class DefaultThrottleStrategyProvider : IThrottleStrategyProvider
     {
-        private readonly ThrottlingOptions _options;
+        private readonly ThrottleOptions _options;
 
         /// <summary>
-        /// Creates a new instance of <see cref="DefaultThrottlingStrategyProvider"/>.
+        /// Creates a new instance of <see cref="DefaultThrottleStrategyProvider"/>.
         /// </summary>
         /// <param name="options">The options configured for the application.</param>
-        public DefaultThrottlingStrategyProvider([NotNull] IOptions<ThrottlingOptions> options)
+        public DefaultThrottleStrategyProvider([NotNull] IOptions<ThrottleOptions> options)
         {
             _options = options.Options;
         }
 
         /// <inheritdoc />
-        public virtual Task<ThrottlingStrategy> GetThrottlingStrategyAsync([NotNull] HttpContext httpContext, string policyName)
+        public virtual Task<ThrottleStrategy> GetThrottleStrategyAsync([NotNull] HttpContext httpContext, string policyName)
         {
-            ThrottlingPolicy policy;
+            ThrottlePolicy policy;
             if (policyName != null)
             {
                 policy = _options.GetPolicy(policyName);
                 if (policy != null)
                 {
-                    return Task.FromResult(new ThrottlingStrategy { Policy = policy, RouteTemplate = "{*any}" });
+                    return Task.FromResult(new ThrottleStrategy { Policy = policy, RouteTemplate = "{*any}" });
                 }
             }
 
-            ThrottlingStrategy strategy = _options.Routes.GetThrottlingStrategyAsync(httpContext, _options);
+            ThrottleStrategy strategy = _options.Routes.GetThrottleStrategyAsync(httpContext, _options);
 
             return Task.FromResult(strategy);
         }

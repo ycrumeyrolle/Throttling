@@ -2,9 +2,9 @@
 
 namespace Throttling
 {
-    public abstract class ThrottlingRequirement : IThrottlingRequirement
+    public abstract class ThrottleRequirement : IThrottleRequirement
     {
-        protected ThrottlingRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding)
+        protected ThrottleRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding)
         {
             MaxValue = maxValue;
             RenewalPeriod = renewalPeriod;

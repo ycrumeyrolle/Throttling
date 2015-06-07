@@ -8,7 +8,7 @@ namespace Microsoft.Framework.DependencyInjection
     /// <summary>
     /// The <see cref="IServiceCollection"/> extensions for enabling Throttling support.
     /// </summary>
-    public static class ThrottlingServiceCollectionExtensions
+    public static class ThrottleServiceCollectionExtensions
     {
         /// <summary>
         /// Can be used to configure services in the <paramref name="serviceCollection"/>.
@@ -16,7 +16,7 @@ namespace Microsoft.Framework.DependencyInjection
         /// <param name="serviceCollection">The service collection which needs to be configured.</param>
         /// <param name="configure">A delegate which is run to configure the services.</param>
         /// <returns></returns>
-        public static IServiceCollection ConfigureThrottling([NotNull] this IServiceCollection serviceCollection, [NotNull] Action<ThrottlingOptions> configure)
+        public static IServiceCollection ConfigureThrottling([NotNull] this IServiceCollection serviceCollection, [NotNull] Action<ThrottleOptions> configure)
         {
             return serviceCollection.Configure(configure);
         }
@@ -29,20 +29,20 @@ namespace Microsoft.Framework.DependencyInjection
         public static IServiceCollection AddThrottling([NotNull] this IServiceCollection serviceCollection)
         {
             serviceCollection.AddOptions();
-            serviceCollection.AddTransient<IThrottlingStrategyProvider, DefaultThrottlingStrategyProvider>();
+            serviceCollection.AddTransient<IThrottleStrategyProvider, DefaultThrottleStrategyProvider>();
             serviceCollection.AddTransient<IRateStore, CacheRateStore>();
             serviceCollection.AddTransient<ISystemClock, SystemClock>();
-            serviceCollection.AddTransient<IConfigureOptions<ThrottlingOptions>, ThrottlingOptionsSetup>();
-            serviceCollection.AddTransient<IThrottlingService, ThrottlingService>();
-            serviceCollection.AddTransient<IThrottlingRouter, ThrottlingRouteCollection>();
+            serviceCollection.AddTransient<IConfigureOptions<ThrottleOptions>, ThrottleOptionsSetup>();
+            serviceCollection.AddTransient<IThrottleService, ThrottleService>();
+            serviceCollection.AddTransient<IThrottleRouter, ThrottleRouteCollection>();
 
             // Throttling handlers
-            serviceCollection.AddTransient<IThrottlingHandler, AuthenticatedUserRateLimitHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, IPRateLimitHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, ApiKeyRateLimitHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, IPBandwidthHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, AuthenticatedUserBandwidthLimitHandler>();
-            serviceCollection.AddTransient<IThrottlingHandler, ApiKeyBandwidthHandler>();
+            serviceCollection.AddTransient<IThrottleHandler, AuthenticatedUserRateLimitHandler>();
+            serviceCollection.AddTransient<IThrottleHandler, IPRateLimitHandler>();
+            serviceCollection.AddTransient<IThrottleHandler, ApiKeyRateLimitHandler>();
+            serviceCollection.AddTransient<IThrottleHandler, IPBandwidthHandler>();
+            serviceCollection.AddTransient<IThrottleHandler, AuthenticatedUserBandwidthLimitHandler>();
+            serviceCollection.AddTransient<IThrottleHandler, ApiKeyBandwidthHandler>();
 
             // Exclusion handlers
             serviceCollection.AddTransient<IExclusionHandler, IPExclusionHandler>();

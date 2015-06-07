@@ -4,7 +4,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class AuthenticatedUserRequirement : ThrottlingRequirement, IKeyProvider
+    public abstract class AuthenticatedUserRequirement : ThrottleRequirement, IKeyProvider
     {
         protected AuthenticatedUserRequirement(long calls, TimeSpan renewalPeriod, bool sliding)
             : base(calls, renewalPeriod, sliding)

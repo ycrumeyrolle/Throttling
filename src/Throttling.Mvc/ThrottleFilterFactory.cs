@@ -7,20 +7,20 @@ using Microsoft.Framework.Internal;
 namespace Throttling.Mvc
 {
     /// <summary>
-    /// A filter factory which creates a new instance of <see cref="ThrottlingFilter"/>.
+    /// A filter factory which creates a new instance of <see cref="ThrottleFilter"/>.
     /// </summary>
-    public class ThrottlingFilterFactory : IFilterFactory, IOrderedFilter
+    public class ThrottleFilterFactory : IFilterFactory, IOrderedFilter
     {
         private readonly string _policyName;
-        private readonly ThrottlingPolicyBuilder _builder;
+        private readonly ThrottlePolicyBuilder _builder;
         private readonly string _routeTemplate;
         private readonly IEnumerable<string> _httpMethods;
         
         /// <summary>
-        /// Creates a new instance of <see cref="ThrottlingFilterFactory"/>.
+        /// Creates a new instance of <see cref="ThrottleFilterFactory"/>.
         /// </summary>
         /// <param name="policyName"></param>
-        public ThrottlingFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, string policyName)
+        public ThrottleFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, string policyName)
         {
             _policyName = policyName;
             _httpMethods = httpMethods;
@@ -28,10 +28,10 @@ namespace Throttling.Mvc
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="ThrottlingFilterFactory"/>.
+        /// Creates a new instance of <see cref="ThrottleFilterFactory"/>.
         /// </summary>
         /// <param name="policy"></param>
-        public ThrottlingFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, ThrottlingPolicyBuilder builder)
+        public ThrottleFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, ThrottlePolicyBuilder builder)
         {
             _builder = builder;
             _httpMethods = httpMethods;
@@ -49,14 +49,14 @@ namespace Throttling.Mvc
 
         public IFilter CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
-            var filter = serviceProvider.GetRequiredService<IThrottlingFilter>();
+            var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
             if (_policyName == null)
             {
-                filter.Route = new UnnamedThrottlingRoute(_httpMethods, _routeTemplate, _builder.Build());
+                filter.Route = new UnnamedThrottleRoute(_httpMethods, _routeTemplate, _builder.Build());
             }
             else
             {
-                filter.Route = new NamedThrottlingRoute(_httpMethods, _routeTemplate, _policyName);
+                filter.Route = new NamedThrottleRoute(_httpMethods, _routeTemplate, _policyName);
             }
 
             return filter;

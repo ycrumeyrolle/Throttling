@@ -1,6 +1,6 @@
 ﻿namespace Throttling
 {
-    public interface IThrottlingRequirement
+    public interface IThrottleRequirement
     {        
     }
 }

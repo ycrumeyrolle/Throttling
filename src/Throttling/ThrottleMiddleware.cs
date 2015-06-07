@@ -11,33 +11,33 @@ namespace Throttling
     /// <summary>
     /// An ASP.NET middleware for handling Throttling.
     /// </summary>
-    public class ThrottlingMiddleware
+    public class ThrottleMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IThrottlingService _throttlingService;
-        private readonly IThrottlingStrategyProvider _throttlingPolicyProvider;
+        private readonly IThrottleService _throttleService;
+        private readonly IThrottleStrategyProvider _strategyProvider;
         private readonly ILogger _logger;
         private readonly ISystemClock _clock;
-        private readonly ThrottlingOptions _options;
+        private readonly ThrottleOptions _options;
 
         /// <summary>
-        /// Instantiates a new <see cref="T:Throttling.ThrottlingMiddleware" />.
+        /// Instantiates a new <see cref="T:ThrottleMiddleware" />.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
-        /// <param name="throttlingService">An instance of <see cref="T:Throttling.IThrottlingService" />.</param>
-        /// <param name="policy">An instance of the <see cref="T:Throttling.ThrottlingPolicy" /> which can be applied.</param>
-        public ThrottlingMiddleware(
+        /// <param name="throttleService">An instance of <see cref="T:IThrottleService" />.</param>
+        /// <param name="policy">An instance of the <see cref="T:ThrottlePolicy" /> which can be applied.</param>
+        public ThrottleMiddleware(
             [NotNull] RequestDelegate next,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IThrottlingService throttlingService,
-            [NotNull] IThrottlingStrategyProvider policyProvider,
+            [NotNull] IThrottleService throttleService,
+            [NotNull] IThrottleStrategyProvider strategyProvider,
             [NotNull] ISystemClock clock,
-            [NotNull] IOptions<ThrottlingOptions> options)
+            [NotNull] IOptions<ThrottleOptions> options)
         {
             _next = next;
-            _logger = loggerFactory.CreateLogger<ThrottlingMiddleware>();
-            _throttlingService = throttlingService;
-            _throttlingPolicyProvider = policyProvider;
+            _logger = loggerFactory.CreateLogger<ThrottleMiddleware>();
+            _throttleService = throttleService;
+            _strategyProvider = strategyProvider;
             _clock = clock;
             _options = options.Options;
         }
@@ -45,7 +45,7 @@ namespace Throttling
         /// <inheritdoc />
         public async Task Invoke(HttpContext httpContext)
         {
-            var strategy = await _throttlingPolicyProvider?.GetThrottlingStrategyAsync(httpContext, null);
+            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, null);
             if (strategy == null)
             {
                 _logger.LogVerbose("No strategy for current request.");
@@ -53,8 +53,8 @@ namespace Throttling
                 return;
             }
 
-            var throttlingContext = await _throttlingService.EvaluateAsync(httpContext, strategy);
-            if (throttlingContext.HasAborted)
+            var throttleContext = await _throttleService.EvaluateAsync(httpContext, strategy);
+            if (throttleContext.HasAborted)
             {
                 _logger.LogVerbose("Throttling aborted. No throttling applied.");
                 await _next(httpContext);
@@ -62,18 +62,18 @@ namespace Throttling
             }
 
             var response = httpContext.Response;
-            if (_options.SendThrottlingHeaders)
+            if (_options.SendThrottleHeaders)
             {
-                foreach (var header in throttlingContext.Headers.OrderBy(h => h.Key))
+                foreach (var header in throttleContext.Headers.OrderBy(h => h.Key))
                 {
                     response.Headers.SetValues(header.Key, header.Value);
                 }
             }
 
-            if (throttlingContext.HasTooManyRequest)
+            if (throttleContext.HasTooManyRequest)
             {
                 _logger.LogInformation("Throttling applied.");
-                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttlingContext.RetryAfter);
+                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttleContext.RetryAfter);
 
                 response.StatusCode = Constants.Status429TooManyRequests;
 
@@ -93,7 +93,7 @@ namespace Throttling
                 await _next(httpContext);
             }
             
-            await _throttlingService.PostEvaluateAsync(throttlingContext);
+            await _throttleService.PostEvaluateAsync(throttleContext);
         }
     }
 }
