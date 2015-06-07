@@ -7,6 +7,6 @@ namespace Throttling
     /// </summary>
     public interface IApiKeyProvider
     {
-        string GetApiKey(HttpContext context);
+        string GetApiKey(HttpContext httpContext);
     }
 }

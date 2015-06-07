@@ -4,7 +4,7 @@ using Microsoft.AspNet.Mvc.ApplicationModels;
 namespace Throttling.Mvc
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class RateLimitAttribute : ThrottlingConventionAttribute
+    public abstract class RateLimitAttribute : ThrottleConventionAttribute
     {
         protected long Calls { get; }
 
@@ -24,6 +24,6 @@ namespace Throttling.Mvc
             ApplyCore(model, builder);
         }
 
-        protected abstract void ApplyCore(ActionModel model, ThrottlingPolicyBuilder builder);
+        protected abstract void ApplyCore(ActionModel model, ThrottlePolicyBuilder builder);
     }
 }

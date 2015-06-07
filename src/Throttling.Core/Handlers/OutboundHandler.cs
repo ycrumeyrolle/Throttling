@@ -4,7 +4,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class OutboundHandler<TRequirement> : ThrottlingHandler<TRequirement> where TRequirement : ThrottlingRequirement
+    public abstract class OutboundHandler<TRequirement> : ThrottleHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
         private readonly IRateStore _store;
 
@@ -13,9 +13,9 @@ namespace Throttling
             _store = store;
         }
 
-        public override async Task HandleAsync([NotNull] ThrottlingContext context, [NotNull] TRequirement requirement)
+        public override async Task HandleAsync([NotNull] ThrottleContext throttleContext, [NotNull] TRequirement requirement)
         {
-            var key = GetKey(context.HttpContext, requirement);
+            var key = GetKey(throttleContext.HttpContext, requirement);
             if (key == null)
             {
                 return;
@@ -25,31 +25,31 @@ namespace Throttling
             var rate = await _store.GetRemainingRateAsync(key, requirement);
             if (rate.LimitReached)
             {
-                context.TooManyRequest(requirement, rate.Reset);
+                throttleContext.TooManyRequest(requirement, rate.Reset);
             }
             else
             {
-                context.Succeed(requirement);
+                throttleContext.Succeed(requirement);
             }
 
-            context.HttpContext.Response.EnableCounting();
+            throttleContext.HttpContext.Response.TrackContentLength(throttleContext.ContentLengthTracker);
         }
 
-        public override async Task PostHandleAsync([NotNull]ThrottlingContext context, [NotNull]TRequirement requirement)
+        public override async Task PostHandleAsync([NotNull] ThrottleContext throttleContext, [NotNull]TRequirement requirement)
         {
-            var key = GetKey(context.HttpContext, requirement);
+            var key = GetKey(throttleContext.HttpContext, requirement);
             if (key == null)
             {
                 return;
             }
             
             key = typeof(TRequirement) + key;
-            var decrementValue = GetDecrementValue(context.HttpContext, requirement);
+            var decrementValue = GetDecrementValue(throttleContext, requirement);
             await _store.DecrementRemainingRateAsync(key, requirement, decrementValue, reachLimitAtZero: true);
         }
 
         public abstract string GetKey([NotNull] HttpContext httpContext, [NotNull] TRequirement requirement);
 
-        public abstract long GetDecrementValue([NotNull] HttpContext httpContext, [NotNull] TRequirement requirement);
+        public abstract long GetDecrementValue([NotNull] ThrottleContext throttleContext, [NotNull] TRequirement requirement);
     }
 }

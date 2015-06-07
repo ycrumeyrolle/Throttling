@@ -8,6 +8,6 @@ namespace Throttling
     /// </summary>
     public interface IKeyProvider
     {
-        string GetKey([NotNull]HttpContext context);
+        string GetKey([NotNull]HttpContext httpContext);
     }
 }

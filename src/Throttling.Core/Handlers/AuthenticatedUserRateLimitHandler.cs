@@ -11,11 +11,11 @@ namespace Throttling
         {
         }
 
-        public override void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottlingContext context, [NotNull] AuthenticatedUserRateLimitRequirement requirement)
+        public override void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottleContext throttleContext, [NotNull] AuthenticatedUserRateLimitRequirement requirement)
         {
-            context.Headers.Set("X-RateLimit-UserLimit", requirement.MaxValue.ToString(CultureInfo.InvariantCulture));
-            context.Headers.Set("X-RateLimit-UserRemaining", rate.RemainingCalls.ToString(CultureInfo.InvariantCulture));
-            context.Headers.Set("X-RateLimit-UserReset", rate.Reset.ToEpoch().ToString(CultureInfo.InvariantCulture));
+            throttleContext.Headers.Set("X-RateLimit-UserLimit", requirement.MaxValue.ToString(CultureInfo.InvariantCulture));
+            throttleContext.Headers.Set("X-RateLimit-UserRemaining", rate.RemainingCalls.ToString(CultureInfo.InvariantCulture));
+            throttleContext.Headers.Set("X-RateLimit-UserReset", rate.Reset.ToEpoch().ToString(CultureInfo.InvariantCulture));
         }
 
         public override string GetKey([NotNull] HttpContext httpContext, [NotNull] AuthenticatedUserRateLimitRequirement requirement)

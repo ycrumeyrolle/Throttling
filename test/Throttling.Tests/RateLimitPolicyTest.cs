@@ -44,8 +44,8 @@
 //        {
 //            // Arrange
 //            var clock = CreateClock();
-//            ThrottlingOptionsSetup setup = new ThrottlingOptionsSetup(new CacheRateStore(CreateCache(), clock), clock, new ThrottlingRouteCollection(), new RouteClientKeyProvider("{apiKey}", "apiKey"));
-//            var optionsAccessor = new OptionsManager<ThrottlingOptions>(new[] { setup });
+//            ThrottleOptionsSetup setup = new ThrottleOptionsSetup(new CacheRateStore(CreateCache(), clock), clock, new ThrottleRouteCollection(), new RouteClientKeyProvider("{apiKey}", "apiKey"));
+//            var optionsAccessor = new OptionsManager<ThrottleOptions>(new[] { setup });
 //            optionsAccessor.Configure();
 //            RateLimitPolicy policy = new RateLimitPolicyStub(calls, TimeSpan.FromDays(1), false);
 //            HttpContext httpContext = new DefaultHttpContext();

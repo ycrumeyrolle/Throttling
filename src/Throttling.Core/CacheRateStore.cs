@@ -16,7 +16,7 @@ namespace Throttling
             _clock = clock;
         }
 
-        public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
+        public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
         {
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)
@@ -44,12 +44,12 @@ namespace Throttling
             return Task.FromResult(rate);
         }
 
-        public Task<RemainingRate> GetRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement)
+        public Task<RemainingRate> GetRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement)
         {
             return Task.FromResult(GetRemainingRate(key, requirement));
         }
 
-        public Task SetRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement, long decrementValue)
+        public Task SetRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement, long decrementValue)
         {
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)
@@ -82,7 +82,7 @@ namespace Throttling
             return Constants.CompletedTask;
         }
 
-        private RemainingRate GetRemainingRate(string key, ThrottlingRequirement requirement)
+        private RemainingRate GetRemainingRate(string key, ThrottleRequirement requirement)
         {
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)

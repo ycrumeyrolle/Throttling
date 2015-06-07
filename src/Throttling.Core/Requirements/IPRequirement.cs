@@ -5,17 +5,17 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class IPRequirement : ThrottlingRequirement, IKeyProvider
+    public abstract class IPRequirement : ThrottleRequirement, IKeyProvider
     {
-        protected IPRequirement(long calls, TimeSpan renewalPeriod, bool sliding)
-            : base(calls, renewalPeriod, sliding)
+        protected IPRequirement(long maxValue, TimeSpan renewalPeriod, bool sliding)
+            : base(maxValue, renewalPeriod, sliding)
         {
         }
 
-        public string GetKey([NotNull]HttpContext context)
+        public string GetKey([NotNull]HttpContext httpContext)
         {
             // TODO : What if behind reverse proxy? X-Forwarded-For ?
-            IHttpConnectionFeature connection = context.GetFeature<IHttpConnectionFeature>();
+            IHttpConnectionFeature connection = httpContext.GetFeature<IHttpConnectionFeature>();
             return connection.RemoteIpAddress.ToString();
         }
     }

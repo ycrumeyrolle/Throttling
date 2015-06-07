@@ -1,20 +1,17 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
+﻿using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class BandwidthHandler<TRequirement> : OutboundHandler<TRequirement> where TRequirement : ThrottlingRequirement
+    public abstract class BandwidthHandler<TRequirement> : OutboundHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
         public BandwidthHandler(IRateStore store)
             : base(store)
         {
         }
 
-        public override long GetDecrementValue([NotNull]HttpContext httpContext, [NotNull]TRequirement requirement)
+        public override long GetDecrementValue([NotNull] ThrottleContext throttleContext, [NotNull]TRequirement requirement)
         {
-            return httpContext.Response.Body.Length;
+            return throttleContext.ContentLengthTracker.ContentLength;
         }
     }
 }

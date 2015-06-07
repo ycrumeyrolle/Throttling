@@ -14,23 +14,30 @@ namespace MvcThrottling
         }
 
         [HttpGet("Sliding/{value}")]
-        [Throttling("10 requests per hour, sliding reset")]
+        [Throttle("10 requests per hour, sliding reset")]
         public string Sliding(int value)
         {
             return "Value : " + value; 
         }
 
         [HttpGet("Sliding2/{value}")]
-        [Throttling("10 requests per hour, sliding reset")]
+        [Throttle("10 requests per hour, sliding reset")]
         public string Sliding2(int value)
         {
             return "Value2 : " + value;
         }
 
         [HttpGet("Fixed")]
-        [Throttling("10 requests per 10 seconds, fixed reset")]
+        [Throttle("10 requests per hour, fixed reset")]
         public string Fixed()
-        {   
+        {
+            return "OK";
+        }
+
+        [HttpGet("Bandwidth")]
+        [Throttle("Bandwidth")]
+        public string Bandwidth()
+        {
             return "OK";
         }
 
@@ -40,9 +47,9 @@ namespace MvcThrottling
         }
 
         [HttpGet("MutliThrottling")]
-        [AuthenticatedUserThrottling(10, 10)]
-        [AuthenticatedUserThrottling(100, 60)]
-        [IPThrottling(10, 10)]
+        [AuthenticatedUserThrottle(10, 10)]
+        [AuthenticatedUserThrottle(100, 60)]
+        [IPThrottle(10, 10)]
         public string MutliThrottling()
         {
             return "OK";

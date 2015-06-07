@@ -28,6 +28,11 @@ namespace MvcThrottling
                         .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1))
                         .LimitIPRate(10, TimeSpan.FromDays(1));
                 });
+                options.AddPolicy("Bandwidth", builder =>
+                {
+                    builder
+                        .LimitIPBandwidth(10, TimeSpan.FromDays(1));
+                });
             });
 
             services.ConfigureMvc(options =>

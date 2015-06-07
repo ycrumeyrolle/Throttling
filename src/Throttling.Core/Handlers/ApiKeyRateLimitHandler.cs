@@ -11,10 +11,10 @@ namespace Throttling
         {
         }
 
-        public override void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottlingContext context, [NotNull] ApiKeyRateLimitRequirement requirement)
+        public override void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottleContext throttleContext, [NotNull] ApiKeyRateLimitRequirement requirement)
         {
-            context.Headers.Set("X-RateLimit-ClientLimit", requirement.MaxValue.ToString(CultureInfo.InvariantCulture));
-            context.Headers.Set("X-RateLimit-ClientRemaining", rate.RemainingCalls.ToString(CultureInfo.InvariantCulture));
+            throttleContext.Headers.Set("X-RateLimit-ClientLimit", requirement.MaxValue.ToString(CultureInfo.InvariantCulture));
+            throttleContext.Headers.Set("X-RateLimit-ClientRemaining", rate.RemainingCalls.ToString(CultureInfo.InvariantCulture));
         }
 
         public override string GetKey([NotNull] HttpContext httpContext, [NotNull] ApiKeyRateLimitRequirement requirement)

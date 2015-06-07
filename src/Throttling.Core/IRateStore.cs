@@ -5,8 +5,8 @@ namespace Throttling
 {
     public interface IRateStore
     {
-        Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement, long decrementValue, bool reachLimitAtZero = false);
+        Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false);
 
-        Task<RemainingRate> GetRemainingRateAsync([NotNull] string key, [NotNull] ThrottlingRequirement requirement);
+        Task<RemainingRate> GetRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement);
     }
 }
