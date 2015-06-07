@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.Framework.DependencyInjection;
 using SimpleThrottling;
+using Throttling.Tests.Common;
 using Xunit;
 
 namespace Throttling.Tests
@@ -14,7 +15,7 @@ namespace Throttling.Tests
         private const string SiteName = nameof(MvcThrottling);
         private readonly Action<IApplicationBuilder> _app = new Startup().Configure;
         private readonly Action<IServiceCollection> _configureServices = new Startup().ConfigureServices;
-
+        
         [Theory]
         [InlineData(1, "9")]
         [InlineData(10, "0")]

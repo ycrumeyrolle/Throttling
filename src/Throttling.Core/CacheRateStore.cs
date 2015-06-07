@@ -21,7 +21,7 @@ namespace Throttling
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)
             {
-                rate = new RemainingRate
+                rate = new RemainingRate(reachLimitAtZero)
                 {
                     Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
                     RemainingCalls = requirement.MaxValue
@@ -33,11 +33,6 @@ namespace Throttling
             }
 
             rate.RemainingCalls -= decrementValue;
-            if (rate.RemainingCalls < 0 || (reachLimitAtZero && rate.RemainingCalls == 0))
-            {
-                rate.LimitReached = true;
-                rate.RemainingCalls = 0;
-            }
 
             _cache.Set(key, rate, new MemoryCacheEntryOptions { AbsoluteExpiration = rate.Reset });
 
@@ -49,45 +44,12 @@ namespace Throttling
             return Task.FromResult(GetRemainingRate(key, requirement));
         }
 
-        public Task SetRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement, long decrementValue)
-        {
-            RemainingRate rate = _cache.Get<RemainingRate>(key);
-            if (rate == null)
-            {
-                rate = new RemainingRate
-                {
-                    Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
-                    RemainingCalls = requirement.MaxValue
-                };
-            }
-            else if (requirement.Sliding)
-            {
-                rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
-            }
-
-            if (rate.RemainingCalls < 0)
-            {
-                rate.LimitReached = true;
-                rate.RemainingCalls = 0;
-            }
-
-            rate.RemainingCalls -= decrementValue;
-            if (rate.RemainingCalls < 0)
-            {
-                rate.LimitReached = true;
-                rate.RemainingCalls = 0;
-            }
-
-            _cache.Set(key, rate, new MemoryCacheEntryOptions { AbsoluteExpiration = rate.Reset });
-            return Constants.CompletedTask;
-        }
-
         private RemainingRate GetRemainingRate(string key, ThrottleRequirement requirement)
         {
             RemainingRate rate = _cache.Get<RemainingRate>(key);
             if (rate == null)
             {
-                rate = new RemainingRate
+                rate = new RemainingRate(false)
                 {
                     Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
                     RemainingCalls = requirement.MaxValue
@@ -96,12 +58,6 @@ namespace Throttling
             else if (requirement.Sliding)
             {
                 rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
-            }
-
-            if (rate.RemainingCalls < 0)
-            {
-                rate.LimitReached = true;
-                rate.RemainingCalls = 0;
             }
 
             return rate;

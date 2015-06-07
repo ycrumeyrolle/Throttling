@@ -117,13 +117,13 @@ namespace Throttling.Tests
             hostingEnvironment.Initialize(applicationBasePath, environmentName: null);
             services.AddInstance<IHostingEnvironment>(hostingEnvironment);
 
-            var clock = CreateClock();
-            services.AddInstance(clock);
 
             if (configureServices != null)
             {
                 configureServices(services);
             }
+            var clock = CreateClock();
+            services.AddInstance(clock);
         }
 
         // Calculate the path relative to the application base path.
@@ -141,7 +141,7 @@ namespace Throttling.Tests
         {
             Mock<ISystemClock> clock = new Mock<ISystemClock>();
             clock.Setup(c => c.UtcNow)
-                .Returns(new DateTimeOffset(2000, 01, 01, 00, 00, 00, TimeSpan.Zero));
+                .Returns(new DateTimeOffset(3000, 01, 01, 00, 00, 00, TimeSpan.Zero));
 
             return clock.Object;
         }
