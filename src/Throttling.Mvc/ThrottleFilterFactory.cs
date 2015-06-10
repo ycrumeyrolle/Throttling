@@ -19,7 +19,7 @@ namespace Throttling.Mvc
         private readonly IEnumerable<string> _httpMethods;
         private readonly ReadOnlyCollection<AttributeRouteModel> _controllerTemplates;
         private readonly AttributeRouteModel _actionTemplate;
-                
+
         /// <summary>
         /// Creates a new instance of <see cref="ThrottleFilterFactory"/>.
         /// </summary>
@@ -53,17 +53,32 @@ namespace Throttling.Mvc
         public IFilter CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
             var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
-         
-            if (_policyName == null)
+
+            filter.Routes = new ReadOnlyCollection<ThrottleRoute>(_controllerTemplates.Select(template => CreateRoute(template)).ToList());
+
+            return filter;
+        }
+
+        private ThrottleRoute CreateRoute(AttributeRouteModel controllerTemplate)
+        {
+            string routeTemplate;
+            if (_actionTemplate.IsAbsoluteTemplate)
             {
-                filter.Routes = new ReadOnlyCollection<UnnamedThrottleRoute>(_controllerTemplates.Select(template => new UnnamedThrottleRoute(_httpMethods, AttributeRouteModel.CombineAttributeRouteModel(template, _actionTemplate).Template, _builder.Build())).ToList());
+                routeTemplate = _actionTemplate.Template;
             }
             else
             {
-                filter.Routes = new ReadOnlyCollection<NamedThrottleRoute>(_controllerTemplates.Select(template => new NamedThrottleRoute(_httpMethods, AttributeRouteModel.CombineAttributeRouteModel(template, _actionTemplate).Template, _policyName)).ToList());
+                routeTemplate = AttributeRouteModel.CombineAttributeRouteModel(controllerTemplate, _actionTemplate).Template;
             }
 
-            return filter;
+            if (_policyName == null)
+            {
+                return new UnnamedThrottleRoute(_httpMethods, routeTemplate, _builder.Build());
+            }
+            else
+            {
+                return new NamedThrottleRoute(_httpMethods, routeTemplate, _policyName);
+            }
         }
     }
 }
