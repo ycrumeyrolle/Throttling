@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNet.Mvc;
 
 namespace Throttling.Mvc
 {
@@ -7,6 +8,6 @@ namespace Throttling.Mvc
     /// </summary>
     public interface IThrottleFilter : IAsyncAuthorizationFilter, IOrderedFilter, IAsyncResultFilter
     {
-        ThrottleRoute Route { get; set; }
+        IReadOnlyCollection<ThrottleRoute> Routes { get; set; }
     }
 }

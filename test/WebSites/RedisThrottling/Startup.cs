@@ -17,41 +17,40 @@ namespace RedisThrottling
         // Set up application services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IMemoryCache, MemoryCache>();
             services.AddThrottling();
+            services.AddRedisThrottling(options =>
+            {
+                options.Configuration = "localhost:6379";
+                options.InstanceName = GetType().Name;
+            });
 
-            services.AddInstance<IRateStore>(RedisTestConfig.CreateStoreInstance(GetType().Name));
-
-            services.AddInstance(new RouteApiKeyProvider("{apikey}/{*remaining}", "apikey"));
             services.ConfigureThrottling(options =>
             {
-                //System.Threading.Thread.Sleep(10000);
                 options.AddPolicy("10 requests per hour, sliding reset", builder =>
                 {
                     builder
-                        .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1), true)
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
+                        .LimitIPRate(10, TimeSpan.FromHours(1), true);
                 });
                 options.AddPolicy("10 requests per hour, fixed reset", builder =>
                 {
                     builder
-                        .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1))
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
+                        .LimitIPRate(10, TimeSpan.FromHours(1));
                 });
-                options.AddPolicy("10 requests per hour by API key", builder =>
+                options.AddPolicy("160 bytes per hour by API key", builder =>
                 {
-                    builder
-                        .LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 10, TimeSpan.FromDays(1), true);
+                    builder.LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 160, TimeSpan.FromHours(1));
                 });
-                options.AddPolicy("Limited bandwidth", builder =>
+                options.AddPolicy("160 bytes per hour by IP", builder =>
                 {
-                    builder.LimitIPBandwidth(160, TimeSpan.FromDays(1));
+                    builder.LimitIPBandwidth(160, TimeSpan.FromHours(1));
                 });
-                options.Routes.ApplyPolicy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
+                options.Routes.ApplyPolicy("{apikey}/test/action1/{id?}", "10 requests per hour, fixed reset");
                 options.Routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyPolicy("{apikey}/test/action3/{id?}", "Limited bandwidth");
-                options.Routes.ApplyPolicy("{apikey}/test/action4/{id?}", "10 requests per hour by API key");
+                options.Routes.ApplyPolicy("{apikey}/test/action3/{id?}", "160 bytes per hour by IP");
+                options.Routes.ApplyPolicy("{apikey}/test/action4/{id?}", "160 bytes per hour by API key");
             });
+
+            RedisTestConfig.ResetRedis(GetType().Name);
         }
 
         public void Configure(IApplicationBuilder app)
@@ -65,45 +64,22 @@ namespace RedisThrottling
                 return context =>
                 {
                     context.Response.ContentType = "application/json";
-
-                    context.Response.Body.WriteByte(123);
-                    var buffer = System.Text.Encoding.UTF8.GetBytes("test");
-                    context.Response.Body.Write(buffer, 1, buffer.Length-1);
-
                     return context.Response.WriteAsync("{text: \"Hello!\"}");
                 };
             });
         }
     }
-    
+
     public static class RedisTestConfig
     {
         public static int RedisPort = 6379; // override default so that do not interfere with anyone else's server
 
-        private static ISystemClock CreateClock()
-        {
-            // Warning : Take care of the year 3K bug !
-            Mock<ISystemClock> clock = new Mock<ISystemClock>();
-            clock.Setup(c => c.UtcNow)
-                .Returns(new DateTimeOffset(3000, 1, 1, 0, 0, 0, TimeSpan.Zero));
-
-            return clock.Object;
-        }
-
-        public static RedisRateStore CreateStoreInstance(string instanceName)
+        public static void ResetRedis(string instanceName)
         {
             var connection = ConnectionMultiplexer.Connect("localhost:" + RedisPort + ",allowAdmin=true");
-
             var database = connection.GetDatabase();
             var server = connection.GetServer("localhost:" + RedisPort);
             server.FlushDatabase();
-
-            return new RedisRateStore(new RedisThrottleOptions()
-            {
-                Configuration = "localhost:" + RedisPort,
-                InstanceName = instanceName,
-            }, CreateClock());
         }
-
     }
 }

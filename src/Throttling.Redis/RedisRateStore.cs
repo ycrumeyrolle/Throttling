@@ -57,7 +57,7 @@ namespace Throttling.Redis
         {
             Connect();
 
-            RemainingRate rate = new RemainingRate(false);
+            RemainingRate rate = new RemainingRate(true);
             var keyWithExpiry = await _database.StringGetWithExpiryAsync(key);
             long count = (long)keyWithExpiry.Value;
             if (requirement.Sliding)
@@ -74,25 +74,5 @@ namespace Throttling.Redis
 
             return rate;
         }
-    }
-
-    public class RedisThrottleOptions : IOptions<RedisThrottleOptions>
-    {
-        public string Configuration { get; set; }
-
-        public string InstanceName { get; set; }
-
-        RedisThrottleOptions IOptions<RedisThrottleOptions>.Options
-        {
-            get
-            {
-                return this;
-            }
-        }
-
-        RedisThrottleOptions IOptions<RedisThrottleOptions>.GetNamedOptions(string name)
-        {
-            return this;
-        }
-    }
+    }    
 }

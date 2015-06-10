@@ -134,7 +134,7 @@ namespace Throttling
         /// <returns>The current policy builder</returns>
         public ThrottlePolicyBuilder LimitClientBandwidthByRoute(string routeTemplate, string routeFragment, long bandwidth, TimeSpan renewalPeriod, bool sliding = false)
         {
-            return AddRequirements(new RouteApiKeyRateLimitRequirement(bandwidth, renewalPeriod, sliding, routeTemplate, routeFragment));
+            return AddRequirements(new RouteApiKeyBandwidthRequirement(bandwidth, renewalPeriod, sliding, routeTemplate, routeFragment));
         }
 
         /// <summary>

@@ -22,8 +22,7 @@ namespace Throttling
             RouteTemplate = strategy.RouteTemplate;
             _pendingRequirements = new HashSet<IThrottleRequirement>(Requirements);
         }
-
-
+        
         public HttpContext HttpContext { get; set; }
 
         public IEnumerable<IThrottleRequirement> Requirements { get; }

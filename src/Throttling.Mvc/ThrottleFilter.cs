@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
@@ -42,7 +43,7 @@ namespace Throttling.Mvc
 
         public string PolicyName { get; set; }
 
-        public ThrottleRoute Route { get; set; }
+        public IReadOnlyCollection<ThrottleRoute> Routes { get; set; }
 
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
@@ -50,13 +51,19 @@ namespace Throttling.Mvc
             var httpContext = context.HttpContext;
 
             var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, PolicyName);
-            if (strategy == null && Route.Match(httpContext.Request))
+            if (strategy == null)
             {
-                strategy = new ThrottleStrategy
+                foreach (var route in Routes)
                 {
-                    Policy = Route.GetPolicy(httpContext.Request, _options),
-                    RouteTemplate = Route.RouteTemplate
-                };
+                    if (route.Match(httpContext.Request))
+                    {
+                        strategy = new ThrottleStrategy
+                        {
+                            Policy = route.GetPolicy(httpContext.Request, _options),
+                            RouteTemplate = route.RouteTemplate
+                        };
+                    }
+                }
             }
 
             if (strategy == null)
@@ -93,8 +100,10 @@ namespace Throttling.Mvc
             {
                 var resultExecutedContext = await next();
                 var throttleContext = (ThrottleContext)resultExecutedContext.HttpContext.Items[ThrottleContextKey];
-
-                await _throttleService.PostEvaluateAsync(throttleContext);
+                if (throttleContext != null)
+                {
+                    await _throttleService.PostEvaluateAsync(throttleContext);
+                }
             }
         }
     }

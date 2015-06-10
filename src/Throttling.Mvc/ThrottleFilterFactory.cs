@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.ApplicationModels;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
 
@@ -13,30 +16,30 @@ namespace Throttling.Mvc
     {
         private readonly string _policyName;
         private readonly ThrottlePolicyBuilder _builder;
-        private readonly string _routeTemplate;
         private readonly IEnumerable<string> _httpMethods;
-        
-        /// <summary>
-        /// Creates a new instance of <see cref="ThrottleFilterFactory"/>.
-        /// </summary>
-        /// <param name="policyName"></param>
-        public ThrottleFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, string policyName)
-        {
-            _policyName = policyName;
-            _httpMethods = httpMethods;
-            _routeTemplate = routeTemplate;
-        }
-
+        private readonly ReadOnlyCollection<AttributeRouteModel> _controllerTemplates;
+        private readonly AttributeRouteModel _actionTemplate;
+                
         /// <summary>
         /// Creates a new instance of <see cref="ThrottleFilterFactory"/>.
         /// </summary>
         /// <param name="policy"></param>
-        public ThrottleFilterFactory(IEnumerable<string> httpMethods, string routeTemplate, ThrottlePolicyBuilder builder)
+        public ThrottleFilterFactory(IEnumerable<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, ThrottlePolicyBuilder builder)
         {
             _builder = builder;
             _httpMethods = httpMethods;
-            _routeTemplate = routeTemplate;
+            _controllerTemplates = new ReadOnlyCollection<AttributeRouteModel>(controllerTemplates.ToArray());
+            _actionTemplate = actionTemplate;
         }
+
+        public ThrottleFilterFactory(IList<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, string policyName)
+        {
+            _httpMethods = httpMethods;
+            _controllerTemplates = new ReadOnlyCollection<AttributeRouteModel>(controllerTemplates.ToArray());
+            _actionTemplate = actionTemplate;
+            _policyName = policyName;
+        }
+
 
         /// <inheritdoc />
         public int Order
@@ -50,13 +53,14 @@ namespace Throttling.Mvc
         public IFilter CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
             var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
+         
             if (_policyName == null)
             {
-                filter.Route = new UnnamedThrottleRoute(_httpMethods, _routeTemplate, _builder.Build());
+                filter.Routes = new ReadOnlyCollection<UnnamedThrottleRoute>(_controllerTemplates.Select(template => new UnnamedThrottleRoute(_httpMethods, AttributeRouteModel.CombineAttributeRouteModel(template, _actionTemplate).Template, _builder.Build())).ToList());
             }
             else
             {
-                filter.Route = new NamedThrottleRoute(_httpMethods, _routeTemplate, _policyName);
+                filter.Routes = new ReadOnlyCollection<NamedThrottleRoute>(_controllerTemplates.Select(template => new NamedThrottleRoute(_httpMethods, AttributeRouteModel.CombineAttributeRouteModel(template, _actionTemplate).Template, _policyName)).ToList());
             }
 
             return filter;

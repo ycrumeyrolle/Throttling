@@ -18,10 +18,11 @@ namespace Throttling
 
         public Task<RemainingRate> DecrementRemainingRateAsync([NotNull] string key, [NotNull] ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
         {
-            RemainingRate rate = _cache.Get<RemainingRate>(key);
-            if (rate == null)
+            RemainingRate rate;
+            InMemoryRemainingRate inMemoryRate = _cache.Get<InMemoryRemainingRate>(key);
+            if (inMemoryRate == null)
             {
-                rate = new RemainingRate(reachLimitAtZero)
+                inMemoryRate = new InMemoryRemainingRate
                 {
                     Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
                     RemainingCalls = requirement.MaxValue
@@ -29,12 +30,18 @@ namespace Throttling
             }
             else if (requirement.Sliding)
             {
-                rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+                inMemoryRate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
             }
 
-            rate.RemainingCalls -= decrementValue;
+            rate = new RemainingRate(reachLimitAtZero)
+            {
+                Reset = inMemoryRate.Reset,
+                RemainingCalls = inMemoryRate.RemainingCalls - decrementValue
+            };
 
-            _cache.Set(key, rate, new MemoryCacheEntryOptions { AbsoluteExpiration = rate.Reset });
+            inMemoryRate.RemainingCalls = rate.RemainingCalls;
+
+            _cache.Set(key, inMemoryRate, new MemoryCacheEntryOptions { AbsoluteExpiration = inMemoryRate.Reset });
 
             return Task.FromResult(rate);
         }
@@ -46,10 +53,11 @@ namespace Throttling
 
         private RemainingRate GetRemainingRate(string key, ThrottleRequirement requirement)
         {
-            RemainingRate rate = _cache.Get<RemainingRate>(key);
-            if (rate == null)
+            RemainingRate rate;
+            InMemoryRemainingRate inMemoryRate = _cache.Get<InMemoryRemainingRate>(key);
+            if (inMemoryRate == null)
             {
-                rate = new RemainingRate(false)
+                inMemoryRate = new InMemoryRemainingRate
                 {
                     Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
                     RemainingCalls = requirement.MaxValue
@@ -57,10 +65,22 @@ namespace Throttling
             }
             else if (requirement.Sliding)
             {
-                rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+                inMemoryRate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
             }
 
+            rate = new RemainingRate(true)
+            {
+                Reset = inMemoryRate.Reset,
+                RemainingCalls = inMemoryRate.RemainingCalls
+            };
+
             return rate;
+        }
+
+        private class InMemoryRemainingRate
+        {
+            public long RemainingCalls { get; internal set; }
+            public DateTimeOffset Reset { get; internal set; }
         }
     }
 }

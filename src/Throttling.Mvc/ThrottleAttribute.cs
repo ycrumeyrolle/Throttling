@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 
 namespace Throttling.Mvc
@@ -15,7 +16,7 @@ namespace Throttling.Mvc
 
         protected override void ApplyCore(ActionModel model)
         {
-            model.Filters.Add(new ThrottleFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, PolicyName));
+            model.Filters.Add(new ThrottleFilterFactory(model.HttpMethods, model.AttributeRouteModel, model.Controller.AttributeRoutes, PolicyName));
         }
     }
 }

@@ -19,24 +19,25 @@ namespace MvcThrottling
                 options.AddPolicy("10 requests per hour, sliding reset", builder =>
                 {
                     builder
-                        .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1), true)
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
+                        .LimitIPRate(10, TimeSpan.FromHours(1), true);
                 });
                 options.AddPolicy("10 requests per hour, fixed reset", builder =>
                 {
                     builder
-                        .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1))
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
+                        .LimitIPRate(10, TimeSpan.FromHours(1));
                 });
-                options.AddPolicy("Bandwidth", builder =>
+                options.AddPolicy("160 bytes per hour by API key", builder =>
                 {
-                    builder
-                        .LimitIPBandwidth(10, TimeSpan.FromDays(1));
+                    builder.LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 160, TimeSpan.FromHours(1));
+                });
+                options.AddPolicy("160 bytes per hour by IP", builder =>
+                {
+                    builder.LimitIPBandwidth(160, TimeSpan.FromHours(1));
                 });
             });
 
             services.ConfigureMvc(options =>
-            {
+            {                
             });
         }
 
@@ -49,7 +50,7 @@ namespace MvcThrottling
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action}/{id?}");
+                    template: "{apikey}/{controller}/{action}/{id?}");
             });
         }
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using System.Linq;
+using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 
 namespace Throttling.Mvc
@@ -15,7 +16,7 @@ namespace Throttling.Mvc
             {
                 builder = new ThrottlePolicyBuilder(policyName);
                 model.Properties.Add("Throttling.PolicyBuilder", builder);
-                model.Filters.Add(new ThrottleFilterFactory(model.HttpMethods, model.AttributeRouteModel.Template, builder));
+                model.Filters.Add(new ThrottleFilterFactory(model.HttpMethods, model.AttributeRouteModel, model.Controller.AttributeRoutes, builder));
             }
             else
             {
