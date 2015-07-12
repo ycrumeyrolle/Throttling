@@ -1,10 +1,7 @@
 ﻿using System;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.Framework.Caching.Memory;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Internal;
-using Moq;
 using StackExchange.Redis;
 using Throttling;
 using Throttling.Redis;

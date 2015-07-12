@@ -8,7 +8,6 @@ using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
-using Moq;
 
 namespace Throttling.Tests
 {
@@ -139,11 +138,18 @@ namespace Throttling.Tests
 
         private static ISystemClock CreateClock()
         {
-            Mock<ISystemClock> clock = new Mock<ISystemClock>();
-            clock.Setup(c => c.UtcNow)
-                .Returns(new DateTimeOffset(3000, 01, 01, 00, 00, 00, TimeSpan.Zero));
+            return new TestClock();
+        }
 
-            return clock.Object;
+        private class TestClock : ISystemClock
+        {
+            public DateTimeOffset UtcNow
+            {
+                get
+                {
+                    return new DateTimeOffset(3000, 01, 01, 00, 00, 00, TimeSpan.Zero);
+                }
+            }
         }
     }
 

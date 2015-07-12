@@ -7,9 +7,8 @@
     "licenseUrl": "",
 
     "dependencies": {
-        "Microsoft.AspNet.Http.Abstractions": "1.0.0-beta5-*",
-        "Microsoft.AspNet.Http.Features": "1.0.0-beta5-*",
-        "Moq": "4.2.1312.1622"
+        "Microsoft.AspNet.Http.Abstractions": "1.0.0-*",
+        "Microsoft.AspNet.Http.Features": "1.0.0-*"
     },
 
     "frameworks": {
