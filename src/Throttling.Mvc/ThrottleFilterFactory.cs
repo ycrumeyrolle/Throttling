@@ -50,7 +50,7 @@ namespace Throttling.Mvc
             }
         }
 
-        public IFilter CreateInstance([NotNull] IServiceProvider serviceProvider)
+        public IFilterMetadata CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
             var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
 
