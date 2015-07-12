@@ -46,16 +46,16 @@ namespace Throttling
         {
             var throttleContext = new ThrottleContext(httpContext, strategy);
 
-            for (int i = 0; i < _exclusionHandlers.Count; i++)
+            foreach (var exclusion in _exclusionHandlers)
             {
-                await _exclusionHandlers[i].HandleAsync(throttleContext);
+                await exclusion.HandleAsync(throttleContext);
             }
 
             if (!throttleContext.HasAborted)
             {
-                for (int i = 0; i < _handlers.Count; i++)
+                foreach (var handler in _handlers)
                 {
-                    await _handlers[i].HandleAsync(throttleContext);
+                    await handler.HandleAsync(throttleContext);
                 }
             }
 
@@ -77,9 +77,9 @@ namespace Throttling
 
         public async Task PostEvaluateAsync([NotNull] ThrottleContext throttleContext)
         {
-            for (int i = 0; i < _handlers.Count; i++)
+            foreach (var handler in _handlers)
             {
-                await _handlers[i].PostHandleAsync(throttleContext);
+                await handler.PostHandleAsync(throttleContext);
             }
         }
     }

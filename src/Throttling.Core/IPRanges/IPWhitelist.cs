@@ -20,9 +20,9 @@ namespace Throttling.IPRanges
 
         public bool Contains(IPAddress address)
         {
-            for (int i = 0; i < _ranges.Length; i++)
+            foreach (var range in _ranges)
             {
-                if (_ranges[i].Contains(address))
+                if (range.Contains(address))
                 {
                     return true;
                 }

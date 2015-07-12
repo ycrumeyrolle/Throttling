@@ -15,10 +15,8 @@ namespace Throttling
 
         public ThrottleStrategy GetThrottleStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottleOptions options)
         {
-            for (var i = 0; i < _routes.Count; i++)
+            foreach (var route in _routes)
             {
-                var route = _routes[i];
-
                 if (route.Match(httpContext.Request))
                 {
                     return new ThrottleStrategy

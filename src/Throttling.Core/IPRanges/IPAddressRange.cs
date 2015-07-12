@@ -76,9 +76,9 @@
             // remove all spaces.
             range = range.Replace(" ", string.Empty);
 
-            for (int i = 0; i < Patterns.Length; i++)
+            foreach (var pattern in Patterns)
             {
-                if (Patterns[i].TryParse(range, out rangeValidator))
+                if (pattern.TryParse(range, out rangeValidator))
                 {
                     return true;
                 }
