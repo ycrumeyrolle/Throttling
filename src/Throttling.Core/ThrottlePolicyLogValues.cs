@@ -1,9 +1,10 @@
-﻿using Microsoft.Framework.Internal;
+﻿using System.Collections.Generic;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 
 namespace Throttling
 {
-    public class ThrottlePolicyLogValues : ReflectionBasedLogValues
+    public class ThrottlePolicyLogValues : ILogValues
     {
         string Name { get; set; }
 
@@ -12,6 +13,12 @@ namespace Throttling
         public ThrottlePolicyLogValues([NotNull] ThrottlePolicy inner)
         {
             Name = inner.Name;
+        }
+
+        public IEnumerable<KeyValuePair<string, object>> GetValues()
+        {
+            yield return new KeyValuePair<string, object>("Name", Name);
+            yield return new KeyValuePair<string, object>("Category", Category);
         }
     }
 }
