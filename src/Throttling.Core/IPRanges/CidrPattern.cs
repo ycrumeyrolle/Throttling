@@ -8,12 +8,12 @@ namespace Throttling.IPRanges
 {
     public class CidrPattern : IIPAddressPattern
     {
-        // CIDR range: "192.168.0.0/24", "fe80::/10"
-        private static readonly Regex CidrRangeRegex = new Regex(@"^(?<adr>[\da-f\.:]+)/(?<maskLen>\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // CIDR block: "192.168.0.0/24", "fe80::/10"
+        private static readonly Regex CidrBlockRegex = new Regex(@"^(?<adr>[\da-f\.:]+)/(?<maskLen>\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public bool TryParse([NotNull] string range, out IIPAddressRangeValidator rangeValidator)
         {
-            var cidrMatch = CidrRangeRegex.Match(range);
+            var cidrMatch = CidrBlockRegex.Match(range);
             if (cidrMatch.Success)
             {
                 var baseAdrBytes = IPAddress.Parse(cidrMatch.Groups["adr"].Value).GetAddressBytes();

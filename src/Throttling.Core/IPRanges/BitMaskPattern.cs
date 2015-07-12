@@ -8,7 +8,7 @@ namespace Throttling.IPRanges
 {
     public class BitMaskPattern : IIPAddressPattern
     {
-        // Bit mask range: "192.168.0.0/255.255.255.0"
+        // Bit mask : "192.168.0.0/255.255.255.0"
         private static readonly Regex BitMaskRangeRegex = new Regex(@"^(?<adr>[\da-f\.:]+)/(?<bitmask>[\da-f\.:]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public bool TryParse([NotNull] string range, out IIPAddressRangeValidator rangeValidator)

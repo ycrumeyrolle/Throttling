@@ -13,7 +13,7 @@ namespace Throttling.IPRanges
 
         public bool TryParse([NotNull] string range, out IIPAddressRangeValidator rangeValidator)
         {            
-            var addresses = range.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var addresses = range.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var list = new List<IPAddress>();
             foreach (string address in addresses)
             {
