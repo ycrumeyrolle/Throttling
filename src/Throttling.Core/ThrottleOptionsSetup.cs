@@ -8,15 +8,14 @@ namespace Throttling
     {
         private readonly IThrottleRouter _router;
 
-        public ThrottleOptionsSetup([NotNull] IThrottleRouter router)
+        public ThrottleOptionsSetup()
             : base(new Action<ThrottleOptions>(ThrottleOptionsSetup.ConfigureOptions))
         {
-            _router = router;
         }
 
         public override void Configure([NotNull] ThrottleOptions options, string name = "")
         {
-            options.Routes = _router;
+        //    options.Routes = _router;
             base.Configure(options, name);
         }
 

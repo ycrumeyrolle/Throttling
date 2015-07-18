@@ -1,13 +1,17 @@
 ﻿{
     "version": "1.0.0-*",
-    "dependencies": {
+    "description": "ASP.NET 5 middleware for requests throttling.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ycrumeyrolle/throttling"
+    },
+     "dependencies": {
         "Throttling.Core": "1.0.0-*",
         "Microsoft.AspNet.Http.Extensions": "1.0.0-*",
         "Microsoft.AspNet.WebUtilities": "1.0.0-*",
         "Microsoft.Framework.Logging.Abstractions": "1.0.0-*",
         "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-*", "type": "build" }
     },
-
     "frameworks": {
         "dnx451": {
             "dependencies": {

@@ -15,22 +15,9 @@ namespace Throttling.Mvc
     public class ThrottleFilterFactory : IFilterFactory, IOrderedFilter
     {
         private readonly string _policyName;
-        private readonly ThrottlePolicyBuilder _builder;
         private readonly IEnumerable<string> _httpMethods;
         private readonly ReadOnlyCollection<AttributeRouteModel> _controllerTemplates;
         private readonly AttributeRouteModel _actionTemplate;
-
-        /// <summary>
-        /// Creates a new instance of <see cref="ThrottleFilterFactory"/>.
-        /// </summary>
-        /// <param name="policy"></param>
-        public ThrottleFilterFactory(IEnumerable<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, ThrottlePolicyBuilder builder)
-        {
-            _builder = builder;
-            _httpMethods = httpMethods;
-            _controllerTemplates = new ReadOnlyCollection<AttributeRouteModel>(controllerTemplates.ToArray());
-            _actionTemplate = actionTemplate;
-        }
 
         public ThrottleFilterFactory(IList<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, string policyName)
         {
@@ -53,8 +40,15 @@ namespace Throttling.Mvc
         public IFilterMetadata CreateInstance([NotNull] IServiceProvider serviceProvider)
         {
             var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
-
-            filter.Routes = new ReadOnlyCollection<ThrottleRoute>(_controllerTemplates.Select(template => CreateRoute(template)).ToList());
+            if (_controllerTemplates.Count == 0)
+            {
+                filter.Routes = new ReadOnlyCollection<ThrottleRoute>(new[] { CreateRoute(null) });
+            }
+            else
+            {
+                filter.Routes = new ReadOnlyCollection<ThrottleRoute>(_controllerTemplates.Select(template => CreateRoute(template)).ToList());
+            }
+            
 
             return filter;
         }
@@ -62,23 +56,16 @@ namespace Throttling.Mvc
         private ThrottleRoute CreateRoute(AttributeRouteModel controllerTemplate)
         {
             string routeTemplate;
-            if (_actionTemplate.IsAbsoluteTemplate)
+            if (controllerTemplate == null)
             {
                 routeTemplate = _actionTemplate.Template;
             }
             else
-            {
+            {                
                 routeTemplate = AttributeRouteModel.CombineAttributeRouteModel(controllerTemplate, _actionTemplate).Template;
             }
 
-            if (_policyName == null)
-            {
-                return new UnnamedThrottleRoute(_httpMethods, routeTemplate, _builder.Build());
-            }
-            else
-            {
-                return new NamedThrottleRoute(_httpMethods, routeTemplate, _policyName);
-            }
+            return new NamedThrottleRoute(_httpMethods, routeTemplate, _policyName);
         }
     }
 }

@@ -17,28 +17,14 @@ namespace SimpleThrottling
 
             services.ConfigureThrottling(options =>
             {
-                options.AddPolicy("10 requests per hour, sliding reset", builder =>
-                {
-                    builder
-                        .LimitIPRate(10, TimeSpan.FromHours(1), true);
-                });
-                options.AddPolicy("10 requests per hour, fixed reset", builder =>
-                {
-                    builder
+                options.AddPolicy("10 requests per hour, sliding reset")
+                         .LimitIPRate(10, TimeSpan.FromHours(1), true);
+                options.AddPolicy("10 requests per hour, fixed reset")
                         .LimitIPRate(10, TimeSpan.FromHours(1));
-                });
-                options.AddPolicy("160 bytes per hour by API key", builder =>
-                {
-                    builder.LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 160, TimeSpan.FromHours(1));
-                });
-                options.AddPolicy("160 bytes per hour by IP", builder =>
-                {
-                    builder.LimitIPBandwidth(160, TimeSpan.FromHours(1));
-                });
-                options.Routes.ApplyPolicy("{apikey}/test/action1/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyPolicy("{apikey}/test/action3/{id?}", "160 bytes per hour by IP");
-                options.Routes.ApplyPolicy("{apikey}/test/action4/{id?}", "160 bytes per hour by API key");
+                options.AddPolicy("160 bytes per hour by API key")
+                    .LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 160, TimeSpan.FromHours(1));
+                options.AddPolicy("160 bytes per hour by IP")
+                    .LimitIPBandwidth(160, TimeSpan.FromHours(1));
             });
         }
 
@@ -46,7 +32,13 @@ namespace SimpleThrottling
         {
             app.UseMiddleware<IPEnforcerMiddleware>();
 
-            app.UseThrottling();
+            app.UseThrottling(routes => 
+            {
+                routes.ApplyPolicy("{apikey}/test/action1/{id?}", "10 requests per hour, fixed reset");
+                routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
+                routes.ApplyPolicy("{apikey}/test/action3/{id?}", "160 bytes per hour by IP");
+                routes.ApplyPolicy("{apikey}/test/action4/{id?}", "160 bytes per hour by API key");
+            });
 
             app.Use(next =>
             {

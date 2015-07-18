@@ -1,5 +1,10 @@
 {
     "version": "1.0.0-*",
+    "description": "ASP.NET 5 middleware for requests throttling.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ycrumeyrolle/throttling"
+    },
     "dependencies": {
         "Microsoft.Framework.ConfigurationModel.Abstractions": "1.0.0-*",
         "Microsoft.Framework.DependencyInjection.Abstractions": "1.0.0-*",

@@ -12,8 +12,8 @@ namespace Throttling
 
         public override void AddRateLimitHeaders([NotNull] RemainingRate rate, [NotNull] ThrottleContext throttleContext, [NotNull] IPRateLimitRequirement requirement)
         {
-            throttleContext.Headers.Set("X-RateLimit-IPLimit", requirement.MaxValue.ToString());
-            throttleContext.Headers.Set("X-RateLimit-IPRemaining", rate.RemainingCalls.ToString());
+            throttleContext.ResponseHeaders.Set("X-RateLimit-IPLimit", requirement.MaxValue.ToString());
+            throttleContext.ResponseHeaders.Set("X-RateLimit-IPRemaining", rate.RemainingCalls.ToString());
         }
 
         public override string GetKey([NotNull] HttpContext httpContext, [NotNull] IPRateLimitRequirement requirement)

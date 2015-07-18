@@ -6,13 +6,20 @@ namespace Throttling
 {
     public class ThrottleRouteCollection : IThrottleRouter
     {
-        private readonly List<ThrottleRoute> _routes = new List<ThrottleRoute>();
+        private readonly List<ThrottleRoute> _routes;
+        private readonly IDictionary<string, ThrottlePolicy> _policyMap;
 
-        public void Add([NotNull] ThrottleRoute route)
+        public ThrottleRouteCollection(List<ThrottleRoute> routes, IDictionary<string, ThrottlePolicy> policyMap)
         {
-            _routes.Add(route);
+            _routes = routes;
+            _policyMap = policyMap;
         }
 
+        public ThrottleRouteCollection() 
+            : this(new List<ThrottleRoute>(), new Dictionary<string, ThrottlePolicy>())
+        {
+        }
+        
         public ThrottleStrategy GetThrottleStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottleOptions options)
         {
             foreach (var route in _routes)
@@ -29,15 +36,7 @@ namespace Throttling
 
             return null;
         }
-
-        public int Count
-        {
-            get
-            {
-                return _routes.Count;
-            }
-        }
-
-        public IDictionary<string, ThrottlePolicy> PolicyMap { get; } = new Dictionary<string, ThrottlePolicy>();
+        
+        public IDictionary<string, ThrottlePolicy> PolicyMap { get { return _policyMap; } }
     }
 }

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Http;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
 using Throttling;
 using Throttling.Mvc;
+using Throttling.Tests.Common;
 
 namespace ThrottlingSample
 {
@@ -18,35 +15,32 @@ namespace ThrottlingSample
         {
             services.AddTransient<IThrottleFilter, ThrottleFilter>();
             services.AddMvc();
-            services.AddThrottling();
+            services.AddThrottling()
+                    .AddMvcThrottling();
 
             services.ConfigureThrottling(options =>
             {
-                options.AddPolicy("5 requests per 10 seconds, sliding reset", builder =>
-                {
-                    builder
-                        .LimitAuthenticatedUserRate(5, TimeSpan.FromSeconds(10), true)
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
-                });
-                options.AddPolicy("5 requests per 10 seconds, fixed reset", builder =>
-                {
-                    builder
-                        .LimitAuthenticatedUserRate(5, TimeSpan.FromSeconds(10))
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
-                });
+                options.AddPolicy("Empty")
+                    .LimitIPRate(10, TimeSpan.FromDays(1));
 
-                options.Routes.ApplyPolicy("test/action/{id?}", "5 requests per 10 seconds, fixed reset");
-            });
-
-            services.ConfigureMvc(options =>
-            {
+                options.AddPolicy("5 requests per 10 seconds, sliding reset")
+                    .LimitAuthenticatedUserRate(5, TimeSpan.FromSeconds(10), true)
+                    .LimitIPRate(10, TimeSpan.FromDays(1));
+                options.AddPolicy("5 requests per 10 seconds, fixed reset")
+                    .LimitAuthenticatedUserRate(5, TimeSpan.FromSeconds(10))
+                    .LimitIPRate(10, TimeSpan.FromDays(1));
             });
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-// loggerFactory.AddConsole((cat, level) => cat.StartsWith("Throttling"));
-            app.UseThrottling();
+            loggerFactory.AddDebug()
+                         .AddConsole();
+            app.UseMiddleware<IPEnforcerMiddleware>();
+            app.UseThrottling(routes =>
+            {
+                routes.ApplyPolicy("test/action/{id?}", "5 requests per 10 seconds, fixed reset");
+            });
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

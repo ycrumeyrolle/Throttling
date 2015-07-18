@@ -36,6 +36,8 @@ namespace Throttling
                 _options = options.Options;
             }
 
+            _options.BuildPolicies();
+
             _handlers = handlers.ToArray();
             _exclusionHandlers = exclusionHandlers.ToArray();
             _logger = loggerFactory.CreateLogger<ThrottleService>();

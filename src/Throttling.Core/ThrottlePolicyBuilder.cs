@@ -1,19 +1,41 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class ThrottlePolicyBuilder
+    public class ThrottlePolicyBuilder : IThrottlePolicyBuilder
     {
         private readonly string _policyName;
+
+        public ThrottlePolicyBuilder()
+            : this(string.Empty)
+        {            
+        }
 
         public ThrottlePolicyBuilder(string policyName)
         {
             _policyName = policyName;
         }
 
+        private ThrottlePolicyBuilder(string policyName, IList<IThrottleRequirement> requirements, IList<IThrottleExclusion> exclusions)
+        {
+            _policyName = policyName;
+            Requirements = requirements;
+            Exclusions = exclusions;
+        }
+
         public IList<IThrottleRequirement> Requirements { get; } = new List<IThrottleRequirement>();
 
         public IList<IThrottleExclusion> Exclusions { get; } = new List<IThrottleExclusion>();
+
+        public string Name
+        {
+            get
+            {
+                return _policyName;
+            }
+        }
+
 
         /// <summary>
         /// Adds a list of requirements.
@@ -43,9 +65,14 @@ namespace Throttling
             return this;
         }
 
-        public ThrottlePolicy Build()
+        public ThrottlePolicy Build([NotNull] ThrottleOptions options)
         {
             return new ThrottlePolicy(Requirements, Exclusions, _policyName);
+        }
+
+        public static ThrottlePolicyBuilder FromBuilder(ThrottlePolicyBuilder builder, string policyName)
+        {
+            return new ThrottlePolicyBuilder(policyName, builder.Requirements, builder.Exclusions);
         }
     }
 }

@@ -1,28 +1,34 @@
 ﻿using System.Collections.Generic;
-using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Http;
-using Throttling.IPRanges;
+using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
     public class UnnamedThrottleRoute : ThrottleRoute
     {
-        private readonly ThrottlePolicy _policy;
+        private readonly IThrottlePolicyBuilder _policyBuilder;
 
-        public UnnamedThrottleRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, ThrottlePolicy policy)
+        private ThrottlePolicy _policy;
+
+        public UnnamedThrottleRoute(IEnumerable<string> httpMethods, [NotNull] string routeTemplate, [NotNull]  IThrottlePolicyBuilder policyBuilder)
             : base(httpMethods, routeTemplate)
         {
-            _policy = policy;
+            _policyBuilder = policyBuilder;
         }
 
-        public UnnamedThrottleRoute(string routeTemplate, [NotNull] ThrottlePolicy policy)
+        public UnnamedThrottleRoute(string routeTemplate, [NotNull] IThrottlePolicyBuilder policyBuilder)
             : base(null, routeTemplate)
         {
-            _policy = policy;
+            _policyBuilder = policyBuilder;
         }
 
         public override ThrottlePolicy GetPolicy([NotNull] HttpRequest httpContext, [NotNull] ThrottleOptions options)
         {
+            if (_policy == null)
+            {
+                _policy = _policyBuilder.Build(options);
+            }
+
             return _policy;
         }
     }

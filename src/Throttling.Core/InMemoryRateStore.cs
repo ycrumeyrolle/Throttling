@@ -5,12 +5,12 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class CacheRateStore : IRateStore
+    public class InMemoryRateStore : IRateStore
     {
         private readonly IMemoryCache _cache;
         private readonly ISystemClock _clock;
 
-        public CacheRateStore([NotNull] IMemoryCache cache, [NotNull] ISystemClock clock)
+        public InMemoryRateStore([NotNull] IMemoryCache cache, [NotNull] ISystemClock clock)
         {
             _cache = cache;
             _clock = clock;

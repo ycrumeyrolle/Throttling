@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
     public sealed class ThrottlePolicy
     {
-        public ThrottlePolicy([NotNull] IEnumerable<IThrottleRequirement> requirements,
-            [NotNull] IEnumerable<IThrottleExclusion> exclusions,
+        public ThrottlePolicy([NotNull] IList<IThrottleRequirement> requirements,
+            [NotNull] IList<IThrottleExclusion> exclusions,
             [NotNull] string policyName)
         {
-            if (requirements.Count() == 0)
+            if (requirements.Count == 0)
             {
                 throw new ArgumentException("The requirements cannot be empty.", nameof(requirements));
             }

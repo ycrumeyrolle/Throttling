@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 using Throttling;
@@ -26,28 +28,117 @@ namespace Microsoft.Framework.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The service collection to which Throttling services are added.</param>
         /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddThrottling([NotNull] this IServiceCollection serviceCollection)
+        public static IThrottleServiceBuilder AddThrottling([NotNull] this IServiceCollection serviceCollection)
         {
             serviceCollection.AddOptions();
-            serviceCollection.AddTransient<IThrottleStrategyProvider, DefaultThrottleStrategyProvider>();
-            serviceCollection.AddTransient<IRateStore, CacheRateStore>();
-            serviceCollection.AddTransient<ISystemClock, SystemClock>();
-            serviceCollection.AddTransient<IConfigureOptions<ThrottleOptions>, ThrottleOptionsSetup>();
-            serviceCollection.AddTransient<IThrottleService, ThrottleService>();
-            serviceCollection.AddTransient<IThrottleRouter, ThrottleRouteCollection>();
+            serviceCollection.TryAddTransient<IThrottleStrategyProvider, DefaultThrottleStrategyProvider>();
+            serviceCollection.TryAddTransient<ISystemClock, SystemClock>();
+            serviceCollection.TryAddTransient<IConfigureOptions<ThrottleOptions>, ThrottleOptionsSetup>();
+            serviceCollection.TryAddTransient<IThrottleService, ThrottleService>();
+            serviceCollection.AddTransient<IRateStore, InMemoryRateStore>();
 
+            // TODO : Put this files into Options.ThrottleHandlers & Options.ExclusionHandlers
             // Throttling handlers
-            serviceCollection.AddTransient<IThrottleHandler, AuthenticatedUserRateLimitHandler>();
-            serviceCollection.AddTransient<IThrottleHandler, IPRateLimitHandler>();
-            serviceCollection.AddTransient<IThrottleHandler, ApiKeyRateLimitHandler>();
-            serviceCollection.AddTransient<IThrottleHandler, IPBandwidthHandler>();
-            serviceCollection.AddTransient<IThrottleHandler, AuthenticatedUserBandwidthLimitHandler>();
-            serviceCollection.AddTransient<IThrottleHandler, ApiKeyBandwidthHandler>();
-
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, AuthenticatedUserRateLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, IPRateLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, ApiKeyRateLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, IPBandwidthHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, AuthenticatedUserBandwidthLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, ApiKeyBandwidthHandler>());
+                                              
             // Exclusion handlers
-            serviceCollection.AddTransient<IExclusionHandler, IPExclusionHandler>();
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IExclusionHandler, IPExclusionHandler>());
 
-            return serviceCollection;
+            return new ThrottleBuilder(serviceCollection);
+        }
+
+        private class ThrottleBuilder : IThrottleServiceBuilder
+        {
+            private readonly IServiceCollection _services;
+
+            public ThrottleBuilder(IServiceCollection services)
+            {
+                _services = services;
+            }
+
+            public ServiceDescriptor this[int index]
+            {
+                get
+                {
+                    return _services[index];
+                }
+
+                set
+                {
+                    _services[index] = value;
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return _services.Count;
+                }
+            }
+
+            public bool IsReadOnly
+            {
+                get
+                {
+                    return _services.IsReadOnly;
+                }
+            }
+
+            public void Add(ServiceDescriptor item)
+            {
+                _services.Add(item);
+            }
+
+            public void Clear()
+            {
+                _services.Clear();
+            }
+
+            public bool Contains(ServiceDescriptor item)
+            {
+                return _services.Contains(item);
+            }
+
+            public void CopyTo(ServiceDescriptor[] array, int arrayIndex)
+            {
+                _services.CopyTo(array, arrayIndex);
+            }
+
+            public IEnumerator<ServiceDescriptor> GetEnumerator()
+            {
+                return _services.GetEnumerator();
+            }
+
+            public int IndexOf(ServiceDescriptor item)
+            {
+                return _services.IndexOf(item);
+            }
+
+            public void Insert(int index, ServiceDescriptor item)
+            {
+                _services.Insert(index, item);
+            }
+
+            public bool Remove(ServiceDescriptor item)
+            {
+                return _services.Remove(item);
+            }
+
+            public void RemoveAt(int index)
+            {
+                _services.RemoveAt(index);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return ((IEnumerable)_services).GetEnumerator();
+            }
         }
     }
 }

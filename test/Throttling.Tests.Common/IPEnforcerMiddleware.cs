@@ -26,14 +26,14 @@ namespace Throttling.Tests.Common
 
             await _next(context);
         }
-    }
 
-    public class FallbackHttpConnectionFeature : IHttpConnectionFeature
-    {
-        public IPAddress RemoteIpAddress { get; set; } = IPAddress.Parse("127.0.0.1");
-        public IPAddress LocalIpAddress { get; set; }
-        public int RemotePort { get; set; }
-        public int LocalPort { get; set; }
-        public bool IsLocal { get; set; }
+        private class FallbackHttpConnectionFeature : IHttpConnectionFeature
+        {
+            public IPAddress RemoteIpAddress { get; set; } = IPAddress.Parse("127.0.0.1");
+            public IPAddress LocalIpAddress { get; set; }
+            public int RemotePort { get; set; }
+            public int LocalPort { get; set; }
+            public bool IsLocal { get; set; }
+        }
     }
 }

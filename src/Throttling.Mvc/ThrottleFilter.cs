@@ -79,7 +79,7 @@ namespace Throttling.Mvc
 
             if (_options.SendThrottleHeaders)
             {
-                foreach (var header in throttleContext.Headers.OrderBy(h => h.Key))
+                foreach (var header in throttleContext.ResponseHeaders.OrderBy(h => h.Key))
                 {
                     httpContext.Response.Headers.SetValues(header.Key, header.Value);
                 }
@@ -88,7 +88,7 @@ namespace Throttling.Mvc
             if (throttleContext.HasTooManyRequest)
             {
                 string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttleContext.RetryAfter);
-                context.Result = new TooManyRequestResult(throttleContext.Headers, retryAfter);
+                context.Result = new TooManyRequestResult(throttleContext.ResponseHeaders, retryAfter);
             }
 
             context.HttpContext.Items[ThrottleContextKey] = throttleContext;

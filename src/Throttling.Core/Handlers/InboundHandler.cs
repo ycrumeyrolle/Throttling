@@ -19,6 +19,7 @@ namespace Throttling
             var key = GetKey(throttleContext.HttpContext, requirement);
             if (key == null)
             {
+                throttleContext.Skipped(requirement);
                 return;
             }
 

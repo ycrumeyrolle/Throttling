@@ -37,7 +37,8 @@ namespace Throttling.Redis
             // TODO : StringIncrementWithExpiryAsync
             RemainingRate rate = new RemainingRate(reachLimitAtZero);
             var count = await _database.StringIncrementAsync(key, decrementValue);
-            if (count == decrementValue || requirement.Sliding)
+            bool justCreated = count == decrementValue;
+            if (justCreated || requirement.Sliding)
             {
                 rate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
                 await _database.KeyExpireAsync(key, requirement.RenewalPeriod, CommandFlags.FireAndForget);

@@ -1,29 +1,41 @@
-﻿using Microsoft.AspNet.Builder;
+﻿using System;
+using Microsoft.AspNet.Builder;
 using Microsoft.Framework.Internal;
+using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
     public static class ThrottleExtensions
     {
         /// <summary>
-        /// Enable throttling on the current path
+        /// Enable throttling.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <returns></returns>
-        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app, string policyName)
-        {
-            return app.UseMiddleware<ThrottleMiddleware>(policyName);
-        }
-
-        /// <summary>
-        /// Enable directory browsing with the given options
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="options"></param>
         /// <returns></returns>
         public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app)
         {
-            return app.UseMiddleware<ThrottleMiddleware>();
+            return app.UseThrottling(configureRoutes => { });
+        }
+
+        /// <summary>
+        /// Enable throttling.
+        /// </summary>
+        /// <returns></returns>
+        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app, [NotNull] Action<IThrottleRouteBuilder> configureRoutes)
+        {
+            var builder = new ThrottleRouteBuilder();
+
+            configureRoutes(builder);
+            Action<ThrottleOptions> configure;
+            configure = o =>
+            {
+                o.Routes = builder.Build(o);
+            };
+
+            return app.UseMiddleware<ThrottleMiddleware>(
+                new ConfigureOptions<ThrottleOptions>(configure)
+                {
+                    Name = string.Empty
+                });
         }
     }
 }

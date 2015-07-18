@@ -18,6 +18,7 @@ namespace Throttling
             var key = GetKey(throttleContext.HttpContext, requirement);
             if (key == null)
             {
+                throttleContext.Skipped(requirement);
                 return;
             }
 
@@ -32,7 +33,7 @@ namespace Throttling
                 throttleContext.Succeed(requirement);
             }
 
-            throttleContext.HttpContext.Response.TrackContentLength(throttleContext.ContentLengthTracker);
+            throttleContext.HttpContext.Response.TrackContentLength(throttleContext);
         }
 
         public override async Task PostHandleAsync([NotNull] ThrottleContext throttleContext, [NotNull]TRequirement requirement)

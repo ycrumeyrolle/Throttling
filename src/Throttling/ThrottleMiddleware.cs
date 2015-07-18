@@ -32,14 +32,24 @@ namespace Throttling
             [NotNull] IThrottleService throttleService,
             [NotNull] IThrottleStrategyProvider strategyProvider,
             [NotNull] ISystemClock clock,
-            [NotNull] IOptions<ThrottleOptions> options)
+            [NotNull] IOptions<ThrottleOptions> options,
+            ConfigureOptions<ThrottleOptions> configureOptions)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<ThrottleMiddleware>();
             _throttleService = throttleService;
             _strategyProvider = strategyProvider;
             _clock = clock;
-            _options = options.Options;
+
+            if (configureOptions != null)
+            {
+                _options = options.GetNamedOptions(configureOptions.Name);
+                configureOptions.Configure(_options, configureOptions.Name);
+            }
+            else
+            {
+                _options = options.Options;
+            }
         }
 
         /// <inheritdoc />
@@ -64,7 +74,7 @@ namespace Throttling
             var response = httpContext.Response;
             if (_options.SendThrottleHeaders)
             {
-                foreach (var header in throttleContext.Headers.OrderBy(h => h.Key))
+                foreach (var header in throttleContext.ResponseHeaders.OrderBy(h => h.Key))
                 {
                     response.Headers.SetValues(header.Key, header.Value);
                 }
@@ -92,7 +102,7 @@ namespace Throttling
                 _logger.LogVerbose("No throttling applied.");
                 await _next(httpContext);
             }
-            
+
             await _throttleService.PostEvaluateAsync(throttleContext);
         }
     }

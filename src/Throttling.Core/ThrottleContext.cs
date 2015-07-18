@@ -23,7 +23,7 @@ namespace Throttling
             _pendingRequirements = new HashSet<IThrottleRequirement>(Requirements);
         }
         
-        public HttpContext HttpContext { get; set; }
+        public HttpContext HttpContext { get; }
 
         public IEnumerable<IThrottleRequirement> Requirements { get; }
 
@@ -33,9 +33,9 @@ namespace Throttling
 
         public DateTimeOffset? RetryAfter { get; set; }
 
-        public IHeaderDictionary Headers { get; } = new HeaderDictionary();
+        public IHeaderDictionary ResponseHeaders { get; } = new HeaderDictionary();
 
-        public ContentLengthTracker ContentLengthTracker { get; } = new ContentLengthTracker();
+        public ContentLengthTracker ContentLengthTracker { get; set; }
 
         public IEnumerable<IThrottleRequirement> PendingRequirements
         {
@@ -63,6 +63,11 @@ namespace Throttling
         public void Succeed([NotNull] IThrottleRequirement requirement)
         {
             _succeedCalled = true;
+            _pendingRequirements.Remove(requirement);
+        }
+
+        public void Skipped([NotNull] IThrottleRequirement requirement)
+        {
             _pendingRequirements.Remove(requirement);
         }
 
