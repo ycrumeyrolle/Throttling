@@ -4,7 +4,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class ApiKeyRateLimitHandler : InboundHandler<ApiKeyRateLimitRequirement>
+    public class ApiKeyRateLimitHandler : InboundRequirementHandler<ApiKeyRateLimitRequirement>
     {
         public ApiKeyRateLimitHandler(IRateStore store)
             : base(store)

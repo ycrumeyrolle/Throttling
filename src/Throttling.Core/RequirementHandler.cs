@@ -4,9 +4,9 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class ThrottleHandler<TRequirement> : IThrottleHandler where TRequirement : IThrottleRequirement
+    public abstract class RequirementHandler<TRequirement> : IRequirementHandler where TRequirement : IThrottleRequirement
     {
-        public virtual async Task HandleAsync([NotNull] ThrottleContext throttleContext)
+        public virtual async Task HandleRequirementAsync([NotNull] ThrottleContext throttleContext)
         {
             foreach (var requirement in throttleContext.Requirements.OfType<TRequirement>())
             {
@@ -14,7 +14,7 @@ namespace Throttling
             }
         }
 
-        public virtual async Task PostHandleAsync([NotNull] ThrottleContext throttleContext)
+        public virtual async Task PostHandleRequirementAsync([NotNull] ThrottleContext throttleContext)
         {
             foreach (var requirement in throttleContext.Requirements.OfType<TRequirement>())
             {

@@ -6,7 +6,7 @@ namespace Throttling
 {
     public abstract class ExclusionHandler<TExclusion> : IExclusionHandler where TExclusion : IThrottleExclusion
     {
-        public virtual async Task HandleAsync([NotNull] ThrottleContext throttleContext)
+        public virtual async Task HandleExclusionAsync([NotNull] ThrottleContext throttleContext)
         {
             foreach (var exclusion in throttleContext.Exclusions.OfType<TExclusion>())
             {

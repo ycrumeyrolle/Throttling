@@ -3,7 +3,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class IPRateLimitHandler : InboundHandler<IPRateLimitRequirement>
+    public class IPRateLimitHandler : InboundRequirementHandler<IPRateLimitRequirement>
     {
         public IPRateLimitHandler(IRateStore store)
             : base(store)

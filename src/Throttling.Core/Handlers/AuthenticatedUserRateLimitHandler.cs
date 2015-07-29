@@ -4,7 +4,7 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public class AuthenticatedUserRateLimitHandler : InboundHandler<AuthenticatedUserRateLimitRequirement>
+    public class AuthenticatedUserRateLimitHandler : InboundRequirementHandler<AuthenticatedUserRateLimitRequirement>
     {
         public AuthenticatedUserRateLimitHandler([NotNull] IRateStore store)
             : base(store)

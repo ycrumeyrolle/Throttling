@@ -5,6 +5,6 @@ namespace Throttling
 {
     public interface IExclusionHandler
     {
-        Task HandleAsync([NotNull] ThrottleContext throttleContext);
+        Task HandleExclusionAsync([NotNull] ThrottleContext throttleContext);
     }
 }

@@ -7,13 +7,7 @@ namespace Throttling.Redis
 {
     public static class RedisThrottleOptionsExtensions
     {
-        public static IServiceCollection AddRedisThrottling([NotNull]this IServiceCollection services)
-        {
-            services.AddSingleton<IRateStore, RedisRateStore>();
-            return services;
-        }
-
-        public static IServiceCollection AddRedisThrottling([NotNull]this IServiceCollection services, [NotNull] Action<RedisThrottleOptions> configureOptions, string optionsName = "")
+        public static IServiceCollection AddRedisThrottling([NotNull]this IServiceCollection services, Action<RedisThrottleOptions> configureOptions = null, string optionsName = "")
         {
             if (configureOptions != null)
             {

@@ -4,11 +4,11 @@ using Microsoft.Framework.Internal;
 
 namespace Throttling
 {
-    public abstract class OutboundHandler<TRequirement> : ThrottleHandler<TRequirement> where TRequirement : ThrottleRequirement
+    public abstract class OutboundRequirementHandler<TRequirement> : RequirementHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
         private readonly IRateStore _store;
 
-        public OutboundHandler([NotNull] IRateStore store)
+        public OutboundRequirementHandler([NotNull] IRateStore store)
         {
             _store = store;
         }

@@ -39,12 +39,12 @@ namespace Microsoft.Framework.DependencyInjection
 
             // TODO : Put this files into Options.ThrottleHandlers & Options.ExclusionHandlers
             // Throttling handlers
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, AuthenticatedUserRateLimitHandler>());
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, IPRateLimitHandler>());
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, ApiKeyRateLimitHandler>());
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, IPBandwidthHandler>());
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, AuthenticatedUserBandwidthLimitHandler>());
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IThrottleHandler, ApiKeyBandwidthHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IRequirementHandler, AuthenticatedUserRateLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IRequirementHandler, IPRateLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IRequirementHandler, ApiKeyRateLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IRequirementHandler, IPBandwidthHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IRequirementHandler, AuthenticatedUserBandwidthLimitHandler>());
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IRequirementHandler, ApiKeyBandwidthHandler>());
                                               
             // Exclusion handlers
             serviceCollection.TryAddEnumerable(ServiceDescriptor.Transient<IExclusionHandler, IPExclusionHandler>());
