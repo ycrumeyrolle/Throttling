@@ -175,9 +175,9 @@ namespace Throttling.Tests
             get { return _applicationName; }
         }
 
-        public string Version
+        public string ApplicationVersion
         {
-            get { return _originalAppEnvironment.Version; }
+            get { return _originalAppEnvironment.ApplicationVersion; }
         }
 
         public string ApplicationBasePath
@@ -196,6 +196,16 @@ namespace Throttling.Tests
         public FrameworkName RuntimeFramework
         {
             get { return _originalAppEnvironment.RuntimeFramework; }
+        }
+
+        public object GetData(string name)
+        {
+            return _originalAppEnvironment.GetData(name);
+        }
+
+        public void SetData(string name, object value)
+        {
+            _originalAppEnvironment.SetData(name, value);
         }
     }
 }
