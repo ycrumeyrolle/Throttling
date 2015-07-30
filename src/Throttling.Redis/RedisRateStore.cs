@@ -10,11 +10,11 @@ namespace Throttling.Redis
         private ConnectionMultiplexer _connection;
         private IDatabase _database;
 
-        private readonly RedisThrottleOptions _options;
+        private readonly ThrottleRedisOptions _options;
         private readonly string _instance;
         private readonly ISystemClock _clock;
 
-        public RedisRateStore([NotNull] IOptions<RedisThrottleOptions> optionsAccessor, [NotNull] ISystemClock clock)
+        public RedisRateStore([NotNull] IOptions<ThrottleRedisOptions> optionsAccessor, [NotNull] ISystemClock clock)
         {
             _options = optionsAccessor.Options;
             _clock = clock;

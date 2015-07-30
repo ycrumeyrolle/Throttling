@@ -2,13 +2,13 @@
 
 namespace Throttling.Redis
 {
-    public class RedisThrottleOptions : IOptions<RedisThrottleOptions>
+    public class ThrottleRedisOptions : IOptions<ThrottleRedisOptions>
     {
         public string Configuration { get; set; }
 
         public string InstanceName { get; set; }
 
-        RedisThrottleOptions IOptions<RedisThrottleOptions>.Options
+        ThrottleRedisOptions IOptions<ThrottleRedisOptions>.Options
         {
             get
             {
@@ -16,7 +16,7 @@ namespace Throttling.Redis
             }
         }
 
-        RedisThrottleOptions IOptions<RedisThrottleOptions>.GetNamedOptions(string name)
+        ThrottleRedisOptions IOptions<ThrottleRedisOptions>.GetNamedOptions(string name)
         {
             return this;
         }

@@ -15,7 +15,7 @@ namespace RedisThrottling
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddThrottling()
-                    .AddRedisThrottling(options =>
+                    .AddThrottlingRedis(options =>
                     {
                         options.Configuration = "localhost:6379";
                         options.InstanceName = GetType().Name;
