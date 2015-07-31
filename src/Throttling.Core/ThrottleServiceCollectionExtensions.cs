@@ -33,9 +33,9 @@ namespace Microsoft.Framework.DependencyInjection
             serviceCollection.AddOptions();
             serviceCollection.TryAddTransient<IThrottleStrategyProvider, DefaultThrottleStrategyProvider>();
             serviceCollection.TryAddTransient<ISystemClock, SystemClock>();
-            serviceCollection.TryAddTransient<IConfigureOptions<ThrottleOptions>, ThrottleOptionsSetup>();
+            serviceCollection.TryAddTransient<ConfigureOptions<ThrottleOptions>, ThrottleOptionsSetup>();
             serviceCollection.TryAddTransient<IThrottleService, ThrottleService>();
-            serviceCollection.AddTransient<IRateStore, InMemoryRateStore>();
+            serviceCollection.TryAddTransient<IRateStore, InMemoryRateStore>();
 
             // TODO : Put this files into Options.ThrottleHandlers & Options.ExclusionHandlers
             // Throttling handlers
