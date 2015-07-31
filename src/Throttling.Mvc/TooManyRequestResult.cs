@@ -17,12 +17,12 @@ namespace Throttling.Mvc
         public override void ExecuteResult(ActionContext context)
         {
             var response = context.HttpContext.Response;
-  
-            context.HttpContext.Response.StatusCode = Constants.Status429TooManyRequests;
+
+            response.StatusCode = Constants.Status429TooManyRequests;
 
             // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
-            context.HttpContext.Response.Headers.SetValues("Cache-Control", "no-store", "no-cache");
-            context.HttpContext.Response.Headers.Set("Pragma", "no-cache");
+            response.Headers.SetValues("Cache-Control", "no-store", "no-cache");
+            response.Headers.Set("Pragma", "no-cache");
 
             // rfc6585 section 4 : The response [...] MAY include a Retry-After header indicating how long to wait before making a new request.
             if (_retryAfter != null)
