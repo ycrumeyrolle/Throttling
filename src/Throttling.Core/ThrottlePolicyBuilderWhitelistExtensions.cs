@@ -43,7 +43,7 @@ namespace Throttling
         /// <returns>The current policy builder.</returns>
         public static ThrottlePolicyBuilder IgnoreIPAddress([NotNull] this ThrottlePolicyBuilder builder, [NotNull] string address)
         {
-            return builder.AddExclusions(new IPExclusion(new[] { address }));
+            return builder.IgnoreIPAddressRanges(new[] { address });
         }
     }
 }
