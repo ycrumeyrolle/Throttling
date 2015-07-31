@@ -28,7 +28,7 @@ namespace Throttling
             Action<ThrottleOptions> configure;
             configure = o =>
             {
-                o.Routes = builder.Build(o);
+                o.Routes = builder.Build();
             };
 
             return app.UseMiddleware<ThrottleMiddleware>(

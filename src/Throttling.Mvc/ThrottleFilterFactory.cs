@@ -42,11 +42,11 @@ namespace Throttling.Mvc
             var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
             if (_controllerTemplates.Count == 0)
             {
-                filter.Routes = new ReadOnlyCollection<ThrottleRoute>(new[] { CreateRoute(null) });
+                filter.Routes = new ThrottleRouteCollection (new[] { CreateRoute(null) });
             }
             else
             {
-                filter.Routes = new ReadOnlyCollection<ThrottleRoute>(_controllerTemplates.Select(template => CreateRoute(template)).ToList());
+                filter.Routes = new ThrottleRouteCollection(_controllerTemplates.Select(template => CreateRoute(template)).ToList());
             }
             
 

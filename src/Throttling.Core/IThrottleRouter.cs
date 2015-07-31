@@ -6,14 +6,14 @@ namespace Throttling
 {
     public interface IThrottleRouter
     {
-        ThrottleStrategy GetThrottleStrategyAsync([NotNull] HttpContext httpContext, [NotNull] ThrottleOptions options);
+        ThrottleStrategy GetThrottleStrategy([NotNull] HttpContext httpContext, [NotNull] ThrottleOptions options);
     }
 
     public interface IThrottleRouteBuilder
     {
         void Add([NotNull] ThrottleRoute route);
 
-        IThrottleRouter Build([NotNull]ThrottleOptions options);
+        IThrottleRouter Build();
     }
 
     public class ThrottleRouteBuilder : IThrottleRouteBuilder
@@ -25,9 +25,9 @@ namespace Throttling
             _routes.Add(route);
         }
 
-        public IThrottleRouter Build([NotNull]ThrottleOptions options)
+        public IThrottleRouter Build()
         {
-            var router = new ThrottleRouteCollection(_routes, options.PolicyMap);
+            var router = new ThrottleRouteCollection(_routes);
 
             return router;
         }

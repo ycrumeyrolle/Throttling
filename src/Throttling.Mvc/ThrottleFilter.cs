@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
@@ -18,6 +17,8 @@ namespace Throttling.Mvc
         private readonly IThrottleStrategyProvider _strategyProvider;
         private readonly ThrottleOptions _options;
         private readonly ISystemClock _clock;
+
+        private ThrottleContext _throttleContext;
 
         /// <summary>
         /// Creates a new instace of <see cref="ThrottleFilter"/>.
@@ -43,55 +44,39 @@ namespace Throttling.Mvc
 
         public string PolicyName { get; set; }
 
-        public IReadOnlyCollection<ThrottleRoute> Routes { get; set; }
+        public ThrottleRouteCollection Routes { get; set; }
 
         /// <inheritdoc />
         public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
         {
             var httpContext = context.HttpContext;
 
-            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, PolicyName);
-            if (strategy == null)
-            {
-                foreach (var route in Routes)
-                {
-                    if (route.Match(httpContext.Request))
-                    {
-                        strategy = new ThrottleStrategy
-                        {
-                            Policy = route.GetPolicy(httpContext.Request, _options),
-                            RouteTemplate = route.RouteTemplate
-                        };
-                    }
-                }
-            }
+            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, PolicyName, Routes);
 
             if (strategy == null)
             {
                 return;
             }
 
-            var throttleContext = await _throttleService.EvaluateAsync(httpContext, strategy);
-            if (throttleContext.HasAborted)
+            _throttleContext = await _throttleService.EvaluateAsync(httpContext, strategy);
+            if (_throttleContext.HasAborted)
             {
                 return;
             }
 
             if (_options.SendThrottleHeaders)
             {
-                foreach (var header in throttleContext.ResponseHeaders.OrderBy(h => h.Key))
+                foreach (var header in _throttleContext.ResponseHeaders.OrderBy(h => h.Key))
                 {
                     httpContext.Response.Headers.SetValues(header.Key, header.Value);
                 }
             }
 
-            if (throttleContext.HasTooManyRequest)
+            if (_throttleContext.HasTooManyRequest)
             {
-                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttleContext.RetryAfter);
-                context.Result = new TooManyRequestResult(throttleContext.ResponseHeaders, retryAfter);
+                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, _throttleContext.RetryAfter);
+                context.Result = new TooManyRequestResult(_throttleContext.ResponseHeaders, retryAfter);
             }
-
-            context.HttpContext.Items[ThrottleContextKey] = throttleContext;
         }
 
         public async Task OnResultExecutionAsync([NotNull]ResultExecutingContext context, [NotNull]ResultExecutionDelegate next)
@@ -99,10 +84,9 @@ namespace Throttling.Mvc
             if (!context.Cancel)
             {
                 var resultExecutedContext = await next();
-                var throttleContext = (ThrottleContext)resultExecutedContext.HttpContext.Items[ThrottleContextKey];
-                if (throttleContext != null)
+                if (_throttleContext != null)
                 {
-                    await _throttleService.PostEvaluateAsync(throttleContext);
+                    await _throttleService.PostEvaluateAsync(_throttleContext);
                 }
             }
         }

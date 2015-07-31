@@ -55,7 +55,7 @@ namespace Throttling
         /// <inheritdoc />
         public async Task Invoke(HttpContext httpContext)
         {
-            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, null);
+            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, null, null);
             if (strategy == null)
             {
                 _logger.LogVerbose("No strategy for current request.");

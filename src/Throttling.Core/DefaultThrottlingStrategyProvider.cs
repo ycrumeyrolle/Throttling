@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
@@ -19,7 +20,7 @@ namespace Throttling
         }
 
         /// <inheritdoc />
-        public virtual Task<ThrottleStrategy> GetThrottleStrategyAsync([NotNull] HttpContext httpContext, string policyName)
+        public virtual Task<ThrottleStrategy> GetThrottleStrategyAsync([NotNull] HttpContext httpContext, string policyName, IThrottleRouter fallbackRouter)
         {
             ThrottlePolicy policy;
             if (policyName != null)
@@ -31,7 +32,12 @@ namespace Throttling
                 }
             }
 
-            ThrottleStrategy strategy = _options.Routes.GetThrottleStrategyAsync(httpContext, _options);
+            ThrottleStrategy strategy = _options.Routes.GetThrottleStrategy(httpContext, _options);
+                        
+            if (strategy == null)
+            {
+                strategy = fallbackRouter?.GetThrottleStrategy(httpContext, _options);
+            }
 
             return Task.FromResult(strategy);
         }

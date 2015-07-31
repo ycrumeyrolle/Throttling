@@ -8,6 +8,6 @@ namespace Throttling.Mvc
     /// </summary>
     public interface IThrottleFilter : IAsyncAuthorizationFilter, IOrderedFilter, IAsyncResultFilter
     {
-        IReadOnlyCollection<ThrottleRoute> Routes { get; set; }
+        ThrottleRouteCollection Routes { get; set; }
     }
 }
