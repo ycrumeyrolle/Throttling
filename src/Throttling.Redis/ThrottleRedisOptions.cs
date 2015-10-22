@@ -8,17 +8,12 @@ namespace Throttling.Redis
 
         public string InstanceName { get; set; }
 
-        ThrottleRedisOptions IOptions<ThrottleRedisOptions>.Options
+        public ThrottleRedisOptions Value
         {
             get
             {
                 return this;
             }
-        }
-
-        ThrottleRedisOptions IOptions<ThrottleRedisOptions>.GetNamedOptions(string name)
-        {
-            return this;
         }
     }
 }

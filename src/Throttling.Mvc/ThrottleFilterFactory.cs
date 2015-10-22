@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ApplicationModels;
+using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Internal;
 
 namespace Throttling.Mvc
 {
@@ -21,6 +20,26 @@ namespace Throttling.Mvc
 
         public ThrottleFilterFactory(IList<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, string policyName)
         {
+            if (httpMethods == null)
+            {
+                throw new ArgumentNullException(nameof(httpMethods));
+            }
+
+            if (actionTemplate == null)
+            {
+                throw new ArgumentNullException(nameof(actionTemplate));
+            }
+
+            if (controllerTemplates == null)
+            {
+                throw new ArgumentNullException(nameof(controllerTemplates));
+            }
+
+            if (policyName == null)
+            {
+                throw new ArgumentNullException(nameof(policyName));
+            }
+
             _httpMethods = httpMethods;
             _controllerTemplates = new ReadOnlyCollection<AttributeRouteModel>(controllerTemplates.ToArray());
             _actionTemplate = actionTemplate;
@@ -37,8 +56,13 @@ namespace Throttling.Mvc
             }
         }
 
-        public IFilterMetadata CreateInstance([NotNull] IServiceProvider serviceProvider)
+        public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             var filter = serviceProvider.GetRequiredService<IThrottleFilter>();
             if (_controllerTemplates.Count == 0)
             {

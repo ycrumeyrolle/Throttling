@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
@@ -25,11 +26,31 @@ namespace Throttling.Mvc
         /// </summary>
         /// <param name="throttleService">The <see cref="IThrottleService"/>.</param>
         /// <param name="strategyProvider">The <see cref="IThrottleStrategyProvider"/>.</param>
-        public ThrottleFilter(IOptions<ThrottleOptions> optionsAccessor, IThrottleService throttleService, IThrottleStrategyProvider strategyProvider, ISystemClock clock)
+        public ThrottleFilter(IOptions<ThrottleOptions> options, IThrottleService throttleService, IThrottleStrategyProvider strategyProvider, ISystemClock clock)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (throttleService == null)
+            {
+                throw new ArgumentNullException(nameof(throttleService));
+            }
+
+            if (strategyProvider == null)
+            {
+                throw new ArgumentNullException(nameof(strategyProvider));
+            }
+
+            if (clock == null)
+            {
+                throw new ArgumentNullException(nameof(clock));
+            }
+
             _throttleService = throttleService;
             _strategyProvider = strategyProvider;
-            _options = optionsAccessor.Options;
+            _options = options.Value;
             _clock = clock;
         }
 
@@ -47,8 +68,13 @@ namespace Throttling.Mvc
         public ThrottleRouteCollection Routes { get; set; }
 
         /// <inheritdoc />
-        public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
+        public async Task OnAuthorizationAsync(AuthorizationContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             var httpContext = context.HttpContext;
 
             var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, PolicyName, Routes);
@@ -68,7 +94,7 @@ namespace Throttling.Mvc
             {
                 foreach (var header in _throttleContext.ResponseHeaders.OrderBy(h => h.Key))
                 {
-                    httpContext.Response.Headers.SetValues(header.Key, header.Value);
+                    httpContext.Response.Headers[header.Key] = header.Value;
                 }
             }
 
@@ -79,8 +105,18 @@ namespace Throttling.Mvc
             }
         }
 
-        public async Task OnResultExecutionAsync([NotNull]ResultExecutingContext context, [NotNull]ResultExecutionDelegate next)
+        public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
             if (!context.Cancel)
             {
                 var resultExecutedContext = await next();

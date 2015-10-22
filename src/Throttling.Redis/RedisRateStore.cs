@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 using StackExchange.Redis;
@@ -14,9 +15,19 @@ namespace Throttling.Redis
         private readonly string _instance;
         private readonly ISystemClock _clock;
 
-        public RedisRateStore([NotNull] IOptions<ThrottleRedisOptions> optionsAccessor, [NotNull] ISystemClock clock)
+        public RedisRateStore(IOptions<ThrottleRedisOptions> options, ISystemClock clock)
         {
-            _options = optionsAccessor.Options;
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (clock == null)
+            {
+                throw new ArgumentNullException(nameof(clock));
+            }
+
+            _options = options.Value;
             _clock = clock;
             _instance = _options.InstanceName ?? string.Empty;
         }
@@ -30,8 +41,18 @@ namespace Throttling.Redis
             }
         }
 
-        public async Task<RemainingRate> DecrementRemainingRateAsync([NotNull]string key, [NotNull]ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
+        public async Task<RemainingRate> DecrementRemainingRateAsync(string key, ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
         {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (requirement == null)
+            {
+                throw new ArgumentNullException(nameof(requirement));
+            }
+
             Connect();
 
             // TODO : StringIncrementWithExpiryAsync
@@ -54,8 +75,18 @@ namespace Throttling.Redis
             return rate;
         }
 
-        public async Task<RemainingRate> GetRemainingRateAsync([NotNull]string key, [NotNull]ThrottleRequirement requirement)
+        public async Task<RemainingRate> GetRemainingRateAsync(string key, ThrottleRequirement requirement)
         {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (requirement == null)
+            {
+                throw new ArgumentNullException(nameof(requirement));
+            }
+
             Connect();
 
             RemainingRate rate = new RemainingRate(true);

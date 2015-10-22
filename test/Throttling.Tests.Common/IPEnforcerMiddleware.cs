@@ -19,9 +19,9 @@ namespace Throttling.Tests.Common
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.GetFeature<IHttpConnectionFeature>() == null)
+            if (context.Features.Get<IHttpConnectionFeature>() == null)
             {
-                context.SetFeature<IHttpConnectionFeature>(new FallbackHttpConnectionFeature());
+                context.Features.Set<IHttpConnectionFeature>(new FallbackHttpConnectionFeature());
             }
 
             await _next(context);

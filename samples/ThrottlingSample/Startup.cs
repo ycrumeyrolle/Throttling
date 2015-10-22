@@ -13,10 +13,8 @@ namespace ThrottlingSample
         // Set up application services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IThrottleFilter, ThrottleFilter>();
-            services.AddMvc();
-            services.AddThrottling()
-                    .AddMvcThrottling();
+            services.AddMvc()
+                    .AddThrottling();
 
             services.ConfigureThrottling(options =>
             {

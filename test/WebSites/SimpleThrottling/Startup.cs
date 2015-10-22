@@ -12,7 +12,7 @@ namespace SimpleThrottling
         // Set up application services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddThrottling();
+            services.AddThrottlingCore();
             services.AddCaching();
 
             services.ConfigureThrottling(options =>

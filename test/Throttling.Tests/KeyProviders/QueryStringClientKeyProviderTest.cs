@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNet.Http.Features.Internal;
 using Microsoft.AspNet.Http.Internal;
+using Microsoft.Framework.Primitives;
 using Xunit;
 
 namespace Throttling.Tests
@@ -14,9 +15,9 @@ namespace Throttling.Tests
         {
             // Arrange
             var keyProvider = new QueryStringApiKeyProvider("apikey");
-            var queryFeature = new QueryFeature(new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) { { "apikey", values } });
+            var queryFeature = new QueryFeature(new Dictionary<string, StringValues>(StringComparer.OrdinalIgnoreCase) { { "apikey", values } });
             var context = new DefaultHttpContext();
-            context.SetFeature<IQueryFeature>(queryFeature);
+            context.Features[typeof(IQueryFeature)] = queryFeature;
 
             // Act
             var result = keyProvider.GetApiKey(context);

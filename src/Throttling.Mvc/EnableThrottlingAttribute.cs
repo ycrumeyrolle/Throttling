@@ -14,6 +14,11 @@ namespace Throttling.Mvc
         /// <param name="policyName">The name of the policy to be applied.</param>
         public EnableThrottlingAttribute(string policyName)
         {
+            if (policyName == null)
+            {
+                throw new ArgumentNullException(nameof(policyName));
+            }
+
             PolicyName = policyName;
         }
 

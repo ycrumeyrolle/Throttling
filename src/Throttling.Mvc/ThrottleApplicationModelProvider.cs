@@ -3,22 +3,25 @@
     using System;
     using System.Globalization;
     using System.Linq;
-    using Microsoft.AspNet.Mvc;
     using Microsoft.AspNet.Mvc.ApplicationModels;
-    using Microsoft.Framework.Internal;
+    using Microsoft.AspNet.Mvc.Filters;
 
     public class ThrottleApplicationModelProvider : IApplicationModelProvider
     {
-        public int Order { get { return DefaultOrder.DefaultFrameworkSortOrder + 20; } }
+        public int Order { get { return 20; } }
 
-        public void OnProvidersExecuted([NotNull] ApplicationModelProviderContext context)
+        public void OnProvidersExecuted(ApplicationModelProviderContext context)
         {
             // Intentionally empty.
         }
 
-        public void OnProvidersExecuting([NotNull] ApplicationModelProviderContext context)
+        public void OnProvidersExecuting(ApplicationModelProviderContext context)
         {
-
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            
             foreach (var controllerModel in context.Result.Controllers)
             {
                 var controllerEnableThrottling = controllerModel.Attributes.OfType<IEnableThrottlingAttribute>().FirstOrDefault();

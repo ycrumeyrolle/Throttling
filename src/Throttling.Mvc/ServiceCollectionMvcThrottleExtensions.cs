@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNet.Mvc.ApplicationModels;
 using Microsoft.Framework.Internal;
+using Microsoft.Framework.DependencyInjection.Extensions;
 using Throttling;
 using Throttling.Mvc;
 
@@ -11,10 +12,16 @@ namespace Microsoft.Framework.DependencyInjection
     /// </summary>
     public static class ServiceCollectionMvcThrottleExtensions
     {
-        public static IThrottleServiceBuilder AddMvcThrottling([NotNull] this IThrottleServiceBuilder builder, Action<ThrottleOptions> configure = null)
+        public static IMvcBuilder AddThrottling(this IMvcBuilder builder, Action<ThrottleOptions> configure = null)
         {
-            builder.TryAddTransient<IThrottleFilter, ThrottleFilter>();
-            builder.TryAddEnumerable(ServiceDescriptor.Transient<IApplicationModelProvider, ThrottleApplicationModelProvider>());
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            builder.Services.AddThrottlingCore();
+            builder.Services.TryAddTransient<IThrottleFilter, ThrottleFilter>();
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IApplicationModelProvider, ThrottleApplicationModelProvider>());
 
             if (configure == null)
             {
@@ -22,7 +29,7 @@ namespace Microsoft.Framework.DependencyInjection
                 {
                 };
             }
-            builder.Configure(configure);
+            builder.Services.Configure(configure);
 
             return builder;
         }

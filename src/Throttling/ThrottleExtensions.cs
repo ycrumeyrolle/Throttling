@@ -11,8 +11,13 @@ namespace Throttling
         /// Enable throttling.
         /// </summary>
         /// <returns></returns>
-        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app)
+        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             return app.UseThrottling(configureRoutes => { });
         }
 
@@ -20,8 +25,18 @@ namespace Throttling
         /// Enable throttling.
         /// </summary>
         /// <returns></returns>
-        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app, [NotNull] Action<IThrottleRouteBuilder> configureRoutes)
+        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app, Action<IThrottleRouteBuilder> configureRoutes)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (configureRoutes == null)
+            {
+                throw new ArgumentNullException(nameof(configureRoutes));
+            }
+
             var builder = new ThrottleRouteBuilder();
 
             configureRoutes(builder);
@@ -31,11 +46,7 @@ namespace Throttling
                 o.Routes = builder.Build();
             };
 
-            return app.UseMiddleware<ThrottleMiddleware>(
-                new ConfigureOptions<ThrottleOptions>(configure)
-                {
-                    Name = string.Empty
-                });
+            return app.UseMiddleware<ThrottleMiddleware>(new ConfigureOptions<ThrottleOptions>(configure));
         }
     }
 }

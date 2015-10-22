@@ -2,8 +2,7 @@
     "version": "1.0.0-*",
     "description": "ASP.NET 5 throttling implementation on Redis.",
     "dependencies": {
-        "Throttling.Core": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" },
+        "Throttling": "1.0.0-*",
         "StackExchange.Redis": "1.0.450"
     },
 

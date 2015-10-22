@@ -11,10 +11,9 @@ namespace MvcThrottling
         // Set up application services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
-                    .AddThrottling()
-                    .AddMvcThrottling()
-                    .AddCaching();
+            services.AddCaching()
+                    .AddMvc()
+                    .AddThrottling();
 
             services.ConfigureThrottling(options =>
             {

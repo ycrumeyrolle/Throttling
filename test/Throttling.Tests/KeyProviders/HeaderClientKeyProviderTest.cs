@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Internal;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Throttling.Tests
             // Arrange
             var keyProvider = new HeaderApiKeyProvider("apikey");
             var context = new DefaultHttpContext();
-            context.Request.Headers.SetValues("apikey", values);
+            context.Request.Headers.Add("apikey", values);
 
             // Act
             var result = keyProvider.GetApiKey(context);

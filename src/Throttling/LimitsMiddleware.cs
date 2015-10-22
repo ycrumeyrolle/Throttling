@@ -10,7 +10,7 @@ namespace Throttling
         private readonly RequestDelegate _next;
         private readonly IRateStore _store;
 
-        public LimitsMiddleware([NotNull] RequestDelegate next, IRateStore store)
+        public LimitsMiddleware(RequestDelegate next, IRateStore store)
         {
             _next = next;
             _store = store;
