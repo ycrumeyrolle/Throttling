@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
@@ -18,16 +19,38 @@ namespace Throttling.Mvc
         private readonly ThrottleOptions _options;
         private readonly ISystemClock _clock;
 
+        private ThrottleContext _throttleContext;
+
         /// <summary>
         /// Creates a new instace of <see cref="ThrottleFilter"/>.
         /// </summary>
         /// <param name="throttleService">The <see cref="IThrottleService"/>.</param>
         /// <param name="strategyProvider">The <see cref="IThrottleStrategyProvider"/>.</param>
-        public ThrottleFilter(IOptions<ThrottleOptions> optionsAccessor, IThrottleService throttleService, IThrottleStrategyProvider strategyProvider, ISystemClock clock)
+        public ThrottleFilter(IOptions<ThrottleOptions> options, IThrottleService throttleService, IThrottleStrategyProvider strategyProvider, ISystemClock clock)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (throttleService == null)
+            {
+                throw new ArgumentNullException(nameof(throttleService));
+            }
+
+            if (strategyProvider == null)
+            {
+                throw new ArgumentNullException(nameof(strategyProvider));
+            }
+
+            if (clock == null)
+            {
+                throw new ArgumentNullException(nameof(clock));
+            }
+
             _throttleService = throttleService;
             _strategyProvider = strategyProvider;
-            _options = optionsAccessor.Options;
+            _options = options.Value;
             _clock = clock;
         }
 
@@ -42,59 +65,65 @@ namespace Throttling.Mvc
 
         public string PolicyName { get; set; }
 
-        public ThrottleRoute Route { get; set; }
+        public ThrottleRouteCollection Routes { get; set; }
 
         /// <inheritdoc />
-        public async Task OnAuthorizationAsync([NotNull] AuthorizationContext context)
+        public async Task OnAuthorizationAsync(AuthorizationContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             var httpContext = context.HttpContext;
 
-            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, PolicyName);
-            if (strategy == null && Route.Match(httpContext.Request))
-            {
-                strategy = new ThrottleStrategy
-                {
-                    Policy = Route.GetPolicy(httpContext.Request, _options),
-                    RouteTemplate = Route.RouteTemplate
-                };
-            }
+            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, PolicyName, Routes);
 
             if (strategy == null)
             {
                 return;
             }
 
-            var throttleContext = await _throttleService.EvaluateAsync(httpContext, strategy);
-            if (throttleContext.HasAborted)
+            _throttleContext = await _throttleService.EvaluateAsync(httpContext, strategy);
+            if (_throttleContext.HasAborted)
             {
                 return;
             }
 
             if (_options.SendThrottleHeaders)
             {
-                foreach (var header in throttleContext.Headers.OrderBy(h => h.Key))
+                foreach (var header in _throttleContext.ResponseHeaders.OrderBy(h => h.Key))
                 {
-                    httpContext.Response.Headers.SetValues(header.Key, header.Value);
+                    httpContext.Response.Headers[header.Key] = header.Value;
                 }
             }
 
-            if (throttleContext.HasTooManyRequest)
+            if (_throttleContext.HasTooManyRequest)
             {
-                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, throttleContext.RetryAfter);
-                context.Result = new TooManyRequestResult(throttleContext.Headers, retryAfter);
+                string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, _throttleContext.RetryAfter);
+                context.Result = new TooManyRequestResult(_throttleContext.ResponseHeaders, retryAfter);
             }
-
-            context.HttpContext.Items[ThrottleContextKey] = throttleContext;
         }
 
-        public async Task OnResultExecutionAsync([NotNull]ResultExecutingContext context, [NotNull]ResultExecutionDelegate next)
+        public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
             if (!context.Cancel)
             {
                 var resultExecutedContext = await next();
-                var throttleContext = (ThrottleContext)resultExecutedContext.HttpContext.Items[ThrottleContextKey];
-
-                await _throttleService.PostEvaluateAsync(throttleContext);
+                if (_throttleContext != null)
+                {
+                    await _throttleService.PostEvaluateAsync(_throttleContext);
+                }
             }
         }
     }

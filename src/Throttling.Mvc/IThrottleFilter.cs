@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNet.Mvc.Filters;
 
 namespace Throttling.Mvc
 {
@@ -7,6 +7,6 @@ namespace Throttling.Mvc
     /// </summary>
     public interface IThrottleFilter : IAsyncAuthorizationFilter, IOrderedFilter, IAsyncResultFilter
     {
-        ThrottleRoute Route { get; set; }
+        ThrottleRouteCollection Routes { get; set; }
     }
 }

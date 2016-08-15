@@ -10,8 +10,6 @@
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
         "xunit.runner.aspnet": "2.0.0-aspnet-*",
         "Microsoft.AspNet.WebUtilities": "1.0.0-*",
-        "MvcThrottling": "1.0.0-*",
-        "SimpleThrottling": "1.0.0-*",
         "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-*", "type": "build" },
         "Moq": "4.2.1312.1622"
     },
@@ -21,8 +19,9 @@
     "frameworks": {
         "dnx451": {
             "dependencies": {
-            },
-            "frameworkAssemblies": {
+                "MvcThrottling": "1.0.0-*",
+                "SimpleThrottling": "1.0.0-*",
+                "RedisThrottling": "1.0.0-*"
             }
         }
     }

@@ -1,29 +1,52 @@
-﻿using Microsoft.AspNet.Builder;
+﻿using System;
+using Microsoft.AspNet.Builder;
 using Microsoft.Framework.Internal;
+using Microsoft.Framework.OptionsModel;
 
 namespace Throttling
 {
     public static class ThrottleExtensions
     {
         /// <summary>
-        /// Enable throttling on the current path
+        /// Enable throttling.
         /// </summary>
-        /// <param name="builder"></param>
         /// <returns></returns>
-        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app, string policyName)
+        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app)
         {
-            return app.UseMiddleware<ThrottleMiddleware>(policyName);
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            return app.UseThrottling(configureRoutes => { });
         }
 
         /// <summary>
-        /// Enable directory browsing with the given options
+        /// Enable throttling.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="options"></param>
         /// <returns></returns>
-        public static IApplicationBuilder UseThrottling([NotNull] this IApplicationBuilder app)
+        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app, Action<IThrottleRouteBuilder> configureRoutes)
         {
-            return app.UseMiddleware<ThrottleMiddleware>();
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (configureRoutes == null)
+            {
+                throw new ArgumentNullException(nameof(configureRoutes));
+            }
+
+            var builder = new ThrottleRouteBuilder();
+
+            configureRoutes(builder);
+            Action<ThrottleOptions> configure;
+            configure = o =>
+            {
+                o.Routes = builder.Build();
+            };
+
+            return app.UseMiddleware<ThrottleMiddleware>(new ConfigureOptions<ThrottleOptions>(configure));
         }
     }
 }

@@ -4,11 +4,10 @@ using System.Runtime.Versioning;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.TestHost;
+using Microsoft.Dnx.Runtime;
+using Microsoft.Dnx.Runtime.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Infrastructure;
-using Moq;
 
 namespace Throttling.Tests
 {
@@ -117,13 +116,13 @@ namespace Throttling.Tests
             hostingEnvironment.Initialize(applicationBasePath, environmentName: null);
             services.AddInstance<IHostingEnvironment>(hostingEnvironment);
 
-            var clock = CreateClock();
-            services.AddInstance(clock);
 
             if (configureServices != null)
             {
                 configureServices(services);
             }
+            var clock = CreateClock();
+            services.AddInstance(clock);
         }
 
         // Calculate the path relative to the application base path.
@@ -139,11 +138,18 @@ namespace Throttling.Tests
 
         private static ISystemClock CreateClock()
         {
-            Mock<ISystemClock> clock = new Mock<ISystemClock>();
-            clock.Setup(c => c.UtcNow)
-                .Returns(new DateTimeOffset(2000, 01, 01, 00, 00, 00, TimeSpan.Zero));
+            return new TestClock();
+        }
 
-            return clock.Object;
+        private class TestClock : ISystemClock
+        {
+            public DateTimeOffset UtcNow
+            {
+                get
+                {
+                    return new DateTimeOffset(3000, 01, 01, 00, 00, 00, TimeSpan.Zero);
+                }
+            }
         }
     }
 
@@ -169,9 +175,9 @@ namespace Throttling.Tests
             get { return _applicationName; }
         }
 
-        public string Version
+        public string ApplicationVersion
         {
-            get { return _originalAppEnvironment.Version; }
+            get { return _originalAppEnvironment.ApplicationVersion; }
         }
 
         public string ApplicationBasePath
@@ -190,6 +196,16 @@ namespace Throttling.Tests
         public FrameworkName RuntimeFramework
         {
             get { return _originalAppEnvironment.RuntimeFramework; }
+        }
+
+        public object GetData(string name)
+        {
+            return _originalAppEnvironment.GetData(name);
+        }
+
+        public void SetData(string name, object value)
+        {
+            _originalAppEnvironment.SetData(name, value);
         }
     }
 }

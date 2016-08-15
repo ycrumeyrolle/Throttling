@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
@@ -27,25 +28,61 @@ namespace Throttling
         /// <param name="throttleService">An instance of <see cref="T:IThrottleService" />.</param>
         /// <param name="policy">An instance of the <see cref="T:ThrottlePolicy" /> which can be applied.</param>
         public ThrottleMiddleware(
-            [NotNull] RequestDelegate next,
-            [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IThrottleService throttleService,
-            [NotNull] IThrottleStrategyProvider strategyProvider,
-            [NotNull] ISystemClock clock,
-            [NotNull] IOptions<ThrottleOptions> options)
+           RequestDelegate next,
+           ILoggerFactory loggerFactory,
+           IThrottleService throttleService,
+           IThrottleStrategyProvider strategyProvider,
+           ISystemClock clock,
+           IOptions<ThrottleOptions> options,
+            ConfigureOptions<ThrottleOptions> configureOptions)
         {
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            if (throttleService == null)
+            {
+                throw new ArgumentNullException(nameof(throttleService));
+            }
+
+            if (strategyProvider == null)
+            {
+                throw new ArgumentNullException(nameof(strategyProvider));
+            }
+
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (clock == null)
+            {
+                throw new ArgumentNullException(nameof(clock));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             _next = next;
             _logger = loggerFactory.CreateLogger<ThrottleMiddleware>();
             _throttleService = throttleService;
             _strategyProvider = strategyProvider;
             _clock = clock;
-            _options = options.Options;
+            _options = options.Value;
+
+            if (configureOptions != null)
+            {
+                configureOptions.Configure(_options);
+            }
         }
 
         /// <inheritdoc />
         public async Task Invoke(HttpContext httpContext)
         {
-            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, null);
+            var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, null, null);
             if (strategy == null)
             {
                 _logger.LogVerbose("No strategy for current request.");
@@ -64,9 +101,9 @@ namespace Throttling
             var response = httpContext.Response;
             if (_options.SendThrottleHeaders)
             {
-                foreach (var header in throttleContext.Headers.OrderBy(h => h.Key))
+                foreach (var header in throttleContext.ResponseHeaders.OrderBy(h => h.Key))
                 {
-                    response.Headers.SetValues(header.Key, header.Value);
+                    response.Headers[header.Key] = header.Value;
                 }
             }
 
@@ -78,13 +115,13 @@ namespace Throttling
                 response.StatusCode = Constants.Status429TooManyRequests;
 
                 // rfc6585 section 4 : Responses with the 429 status code MUST NOT be stored by a cache.
-                response.Headers.SetValues("Cache-Control", "no-store", "no-cache");
-                response.Headers.Set("Pragma", "no-cache");
+                response.Headers.SetCommaSeparatedValues("Cache-Control", "no-store", "no-cache");
+                response.Headers["Pragma"] = "no-cache";
 
                 // rfc6585 section 4 : The response [...] MAY include a Retry-After header indicating how long to wait before making a new request.
                 if (retryAfter != null)
                 {
-                    response.Headers.Set("Retry-After", retryAfter);
+                    response.Headers["Retry-After"] = retryAfter;
                 }
             }
             else
@@ -92,7 +129,7 @@ namespace Throttling
                 _logger.LogVerbose("No throttling applied.");
                 await _next(httpContext);
             }
-            
+
             await _throttleService.PostEvaluateAsync(throttleContext);
         }
     }

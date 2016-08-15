@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.Framework.Caching.Memory;
 using Microsoft.Framework.DependencyInjection;
 using Throttling;
 using Throttling.Tests.Common;
@@ -13,38 +12,19 @@ namespace SimpleThrottling
         // Set up application services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IMemoryCache, MemoryCache>();
-            services.AddThrottling();
+            services.AddThrottlingCore();
+            services.AddCaching();
 
-            services.AddInstance(new RouteApiKeyProvider("{apikey}/{*remaining}", "apikey"));
             services.ConfigureThrottling(options =>
             {
-                //System.Threading.Thread.Sleep(10000);
-                options.AddPolicy("10 requests per hour, sliding reset", builder =>
-                {
-                    builder
-                        .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1), true)
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
-                });
-                options.AddPolicy("10 requests per hour, fixed reset", builder =>
-                {
-                    builder
-                        .LimitAuthenticatedUserRate(10, TimeSpan.FromHours(1))
-                        .LimitIPRate(10, TimeSpan.FromDays(1));
-                });
-                options.AddPolicy("10 requests per hour by API key", builder =>
-                {
-                    builder
-                        .LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 10, TimeSpan.FromDays(1), true);
-                });
-                options.AddPolicy("Limited bandwidth", builder =>
-                {
-                    builder.LimitIPBandwidth(160, TimeSpan.FromDays(1));
-                });
-                options.Routes.ApplyPolicy("{apikey}/test/action/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
-                options.Routes.ApplyPolicy("{apikey}/test/action3/{id?}", "Limited bandwidth");
-                options.Routes.ApplyPolicy("{apikey}/test/action4/{id?}", "10 requests per hour by API key");
+                options.AddPolicy("10 requests per hour, sliding reset")
+                         .LimitIPRate(10, TimeSpan.FromHours(1), true);
+                options.AddPolicy("10 requests per hour, fixed reset")
+                        .LimitIPRate(10, TimeSpan.FromHours(1));
+                options.AddPolicy("160 bytes per hour by API key")
+                    .LimitClientBandwidthByRoute("{apikey}/{*any}", "apikey", 160, TimeSpan.FromHours(1));
+                options.AddPolicy("160 bytes per hour by IP")
+                    .LimitIPBandwidth(160, TimeSpan.FromHours(1));
             });
         }
 
@@ -52,18 +32,19 @@ namespace SimpleThrottling
         {
             app.UseMiddleware<IPEnforcerMiddleware>();
 
-            app.UseThrottling();
+            app.UseThrottling(routes => 
+            {
+                routes.ApplyPolicy("{apikey}/test/action1/{id?}", "10 requests per hour, fixed reset");
+                routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
+                routes.ApplyPolicy("{apikey}/test/action3/{id?}", "160 bytes per hour by IP");
+                routes.ApplyPolicy("{apikey}/test/action4/{id?}", "160 bytes per hour by API key");
+            });
 
             app.Use(next =>
             {
                 return context =>
                 {
-                    context.Response.ContentType = "application/json";
-
-                    context.Response.Body.WriteByte(123);
-                    var buffer = System.Text.Encoding.UTF8.GetBytes("test");
-                    context.Response.Body.Write(buffer, 1, buffer.Length-1);
-
+                    context.Response.ContentType = "application/json";                    
                     return context.Response.WriteAsync("{text: \"Hello!\"}");
                 };
             });

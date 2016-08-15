@@ -1,0 +1,12 @@
+﻿{
+    "version": "1.0.0-*",
+    "description": "ASP.NET 5 throttling implementation on Redis.",
+    "dependencies": {
+        "Throttling": "1.0.0-*",
+        "StackExchange.Redis": "1.0.450"
+    },
+
+    "frameworks": {
+        "dnx451": { }
+    }
+}
