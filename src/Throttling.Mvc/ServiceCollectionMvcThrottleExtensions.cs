@@ -1,11 +1,10 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc.ApplicationModels;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Throttling;
 using Throttling.Mvc;
 
-namespace Microsoft.Framework.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// The <see cref="IThrottleServiceBuilder"/> extensions for enabling Throttling support on MVC.
@@ -19,7 +18,7 @@ namespace Microsoft.Framework.DependencyInjection
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            builder.Services.AddThrottlingCore();
+            builder.Services.AddInMemoryThrottling();
             builder.Services.TryAddTransient<IThrottleFilter, ThrottleFilter>();
             builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IApplicationModelProvider, ThrottleApplicationModelProvider>());
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.Primitives;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Primitives;
 
 namespace Throttling
 {

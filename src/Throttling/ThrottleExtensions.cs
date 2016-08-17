@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.AspNet.Builder;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Options;
 
 namespace Throttling
 {
@@ -25,7 +25,7 @@ namespace Throttling
         /// Enable throttling.
         /// </summary>
         /// <returns></returns>
-        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app, Action<IThrottleRouteBuilder> configureRoutes)
+        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app, Action<ThrottleRouteBuilder> configureRoutes)
         {
             if (app == null)
             {

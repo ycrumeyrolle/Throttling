@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace Throttling
 {
@@ -32,7 +30,6 @@ namespace Throttling
             {
                 throw new ArgumentNullException(nameof(httpContext));
             }
-
 
             ThrottlePolicy policy;
             if (policyName != null)

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Routing;
-using Microsoft.AspNet.Routing.Template;
-using Microsoft.Framework.Internal;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.Extensions.Internal;
 
 namespace Throttling
 {
     public class RouteApiKeyProvider : IApiKeyProvider
     {
-        private static readonly IReadOnlyDictionary<string, object> EmptyRouteValues = new RouteValueDictionary();
+        private static readonly RouteValueDictionary EmptyRouteValues = new RouteValueDictionary();
 
         private readonly string _apiKeyName;
         private TemplateMatcher _matcher;
@@ -48,18 +48,18 @@ namespace Throttling
 
             var requestPath = httpContext.Request.Path.Value;
 
-            if (!string.IsNullOrEmpty(requestPath) && requestPath[0] == '/')
-            {
-                requestPath = requestPath.Substring(1);
-            }
+            //if (!string.IsNullOrEmpty(requestPath) && requestPath[0] == '/')
+            //{
+            //    requestPath = requestPath.Substring(1);
+            //}
 
-            var match = _matcher.Match(requestPath);
-            if (match == null)
+            var values = new RouteValueDictionary();
+            if (!_matcher.TryMatch(requestPath, values))
             {
                 return null;
             }
 
-            return (string)match[_apiKeyName];
+            return (string)values[_apiKeyName];
         }
     }
 }

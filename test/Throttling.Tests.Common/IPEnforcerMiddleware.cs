@@ -1,8 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Features;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Throttling.Tests.Common
 {
@@ -34,6 +33,8 @@ namespace Throttling.Tests.Common
             public int RemotePort { get; set; }
             public int LocalPort { get; set; }
             public bool IsLocal { get; set; }
+
+            public string ConnectionId { get; set; }
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Throttling;
 using Throttling.Tests.Common;
 
@@ -12,10 +12,7 @@ namespace SimpleThrottling
         // Set up application services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddThrottlingCore();
-            services.AddCaching();
-
-            services.ConfigureThrottling(options =>
+            services.AddInMemoryThrottling(options =>
             {
                 options.AddPolicy("10 requests per hour, sliding reset")
                          .LimitIPRate(10, TimeSpan.FromHours(1), true);
@@ -34,10 +31,10 @@ namespace SimpleThrottling
 
             app.UseThrottling(routes => 
             {
-                routes.ApplyPolicy("{apikey}/test/action1/{id?}", "10 requests per hour, fixed reset");
-                routes.ApplyPolicy("{apikey}/test/action2/{id?}", "10 requests per hour, fixed reset");
-                routes.ApplyPolicy("{apikey}/test/action3/{id?}", "160 bytes per hour by IP");
-                routes.ApplyPolicy("{apikey}/test/action4/{id?}", "160 bytes per hour by API key");
+                routes.ApplyPolicy("{apikey}/test/RateLimit10PerHour/{id?}", "10 requests per hour, fixed reset");
+                routes.ApplyPolicy("{apikey}/test/RateLimit10PerHour2/{id?}", "10 requests per hour, fixed reset");
+                routes.ApplyPolicy("{apikey}/test/Quota160BPerHourByIP/{id?}", "160 bytes per hour by IP");
+                routes.ApplyPolicy("{apikey}/test/Quota160BPerHourByApiKey/{id?}", "160 bytes per hour by API key");
             });
 
             app.Use(next =>

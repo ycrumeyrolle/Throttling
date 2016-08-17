@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Internal;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Xunit;
 
 namespace Throttling.Tests

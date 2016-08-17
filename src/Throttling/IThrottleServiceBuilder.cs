@@ -1,8 +1,8 @@
-﻿using Microsoft.Framework.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Throttling
 {
-    public interface IThrottleServiceBuilder : IServiceCollection
-    {
-    }
+    //public interface IThrottleServiceBuilder : IServiceCollection
+    //{
+    //}
 }

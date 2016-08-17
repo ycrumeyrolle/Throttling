@@ -1,9 +1,10 @@
 ﻿using System;
-using Microsoft.AspNet.Builder;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Logging;
+using System.IO;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Throttling;
-using Throttling.Mvc;
 using Throttling.Tests.Common;
 
 namespace ThrottlingSample
@@ -14,9 +15,7 @@ namespace ThrottlingSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-                    .AddThrottling();
-
-            services.ConfigureThrottling(options =>
+                    .AddThrottling(options =>
             {
                 options.AddPolicy("Empty")
                     .LimitIPRate(10, TimeSpan.FromDays(1));
@@ -45,6 +44,18 @@ namespace ThrottlingSample
                     name: "default",
                     template: "{controller}/{action}/{id?}");
             });
+        }
+
+        public static void Main(string[] args)
+        {
+            var host = new WebHostBuilder()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseIISIntegration()
+                .UseKestrel()
+                .UseStartup<Startup>()
+                .Build();
+
+            host.Run();
         }
     }
 }

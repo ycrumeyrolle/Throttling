@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Options;
 
 namespace Throttling.Mvc
 {
@@ -68,7 +68,7 @@ namespace Throttling.Mvc
         public ThrottleRouteCollection Routes { get; set; }
 
         /// <inheritdoc />
-        public async Task OnAuthorizationAsync(AuthorizationContext context)
+        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             if (context == null)
             {
@@ -101,7 +101,9 @@ namespace Throttling.Mvc
             if (_throttleContext.HasTooManyRequest)
             {
                 string retryAfter = RetryAfterHelper.GetRetryAfterValue(_clock, _options.RetryAfterMode, _throttleContext.RetryAfter);
-                context.Result = new TooManyRequestResult(_throttleContext.ResponseHeaders, retryAfter);
+
+                // TODO : the <TooManyRequestResult> should wrtite itself the response headers
+                context.Result = new TooManyRequestResult(retryAfter);
             }
         }
 

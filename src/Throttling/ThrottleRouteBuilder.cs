@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Throttling
 {
-    public class ThrottleRouteBuilder : IThrottleRouteBuilder
+    public class ThrottleRouteBuilder
     {
         private readonly List<ThrottleRoute> _routes = new List<ThrottleRoute>();
+
         public void Add(ThrottleRoute route)
         {
             if (route == null)

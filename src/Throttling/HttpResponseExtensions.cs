@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 using Throttling.Internal;
 
 namespace Throttling

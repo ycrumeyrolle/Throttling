@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace Throttling
 {
@@ -32,7 +32,7 @@ namespace Throttling
 
             foreach (var route in _routes)
             {
-                if (route.Match(httpContext.Request))
+                if (route.TryMatch(httpContext.Request))
                 {
                     return new ThrottleStrategy
                     {

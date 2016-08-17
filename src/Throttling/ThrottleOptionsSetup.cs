@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.Options;
 
 namespace Throttling
 {

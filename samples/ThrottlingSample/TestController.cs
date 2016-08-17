@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Throttling.Mvc;
-using Microsoft.AspNet.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace ThrottlingSample
 {
@@ -14,14 +14,14 @@ namespace ThrottlingSample
 
         [HttpGet("test/action/{value}")]
         [EnableThrottling("5 requests per 10 seconds, sliding reset")]
-        public string Action1(int value)
+        public string RateLimit10PerHour(int value)
         {
             return "OK " + value;
         }
 
-        [HttpGet("test/action2")]
+        [HttpGet("test/RateLimit10PerHour2")]
         [EnableThrottling("5 requests per 10 seconds, fixed reset")]
-        public string Action2()
+        public string RateLimit10PerHour2()
         {
             return "OK";
         }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Throttling
 {
@@ -85,7 +85,7 @@ namespace Throttling
             var strategy = await _strategyProvider?.GetThrottleStrategyAsync(httpContext, null, null);
             if (strategy == null)
             {
-                _logger.LogVerbose("No strategy for current request.");
+                _logger.LogDebug("No strategy for current request.");
                 await _next(httpContext);
                 return;
             }
@@ -93,7 +93,7 @@ namespace Throttling
             var throttleContext = await _throttleService.EvaluateAsync(httpContext, strategy);
             if (throttleContext.HasAborted)
             {
-                _logger.LogVerbose("Throttling aborted. No throttling applied.");
+                _logger.LogDebug("Throttling aborted. No throttling applied.");
                 await _next(httpContext);
                 return;
             }
@@ -126,7 +126,7 @@ namespace Throttling
             }
             else
             {
-                _logger.LogVerbose("No throttling applied.");
+                _logger.LogDebug("No throttling applied.");
                 await _next(httpContext);
             }
 

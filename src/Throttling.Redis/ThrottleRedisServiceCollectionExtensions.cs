@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.Framework.Configuration;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Internal;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Throttling.Redis
 {
@@ -18,26 +17,33 @@ namespace Throttling.Redis
             {
                 services.ConfigureThrottlingRedis(configureOptions);
             }
-            
-            services.AddSingleton<IRateStore, RedisRateStore>();
-            return services;
-        }
 
-        public static IServiceCollection AddThrottlingRedis(this IServiceCollection services, IConfiguration configuration)
-        {
-            if (services == null)
+            services.AddThrottlingCore();
+
+            if (configureOptions != null)
             {
-                throw new ArgumentNullException(nameof(services));
-            }
-            
-            if (configuration != null)
-            {
-                services.ConfigureThrottlingRedis(configuration);
+                services.Configure(configureOptions);
             }
 
             services.AddSingleton<IRateStore, RedisRateStore>();
             return services;
         }
+
+        //public static IServiceCollection AddThrottlingRedis(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    if (services == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(services));
+        //    }
+            
+        //    if (configuration != null)
+        //    {
+        //        services.ConfigureThrottlingRedis(configuration);
+        //    }
+
+        //    services.AddSingleton<IRateStore, RedisRateStore>();
+        //    return services;
+        //}
 
         public static IServiceCollection ConfigureThrottlingRedis(this IServiceCollection services, Action<ThrottleRedisOptions> configureOptions)
         {
@@ -49,14 +55,14 @@ namespace Throttling.Redis
             return services.Configure(configureOptions);
         }
 
-        public static IServiceCollection ConfigureThrottlingRedis(this IServiceCollection services, IConfiguration configuration)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
+        //public static IServiceCollection ConfigureThrottlingRedis(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    if (services == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(services));
+        //    }
 
-            return services.Configure<ThrottleRedisOptions>(configuration);
-        }
+        //    return services.Configure<ThrottleRedisOptions>(configuration);
+        //}
     }
 }

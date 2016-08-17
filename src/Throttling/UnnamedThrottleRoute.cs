@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace Throttling
 {
@@ -21,15 +21,26 @@ namespace Throttling
             _policyBuilder = policyBuilder;
         }
 
-        public UnnamedThrottleRoute(string routeTemplate, IThrottlePolicyBuilder policyBuilder)
-            : base(routeTemplate)
+        public UnnamedThrottleRoute(IEnumerable<string> httpMethods, string routeTemplate, ThrottlePolicy policy)
+            : base(routeTemplate, httpMethods)
         {
-            if (policyBuilder == null)
+            if (policy == null)
             {
-                throw new ArgumentNullException(nameof(policyBuilder));
+                throw new ArgumentNullException(nameof(policy));
             }
 
-            _policyBuilder = policyBuilder;
+            _policy = policy;
+        }
+
+        public UnnamedThrottleRoute(string routeTemplate, ThrottlePolicy policy)
+            : base(routeTemplate)
+        {
+            if (policy == null)
+            {
+                throw new ArgumentNullException(nameof(policy));
+            }
+
+            _policy = policy;
         }
 
         public override ThrottlePolicy GetPolicy(HttpRequest httpContext, ThrottleOptions options)

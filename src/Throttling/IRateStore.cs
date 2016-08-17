@@ -8,4 +8,11 @@ namespace Throttling
 
         Task<RemainingRate> GetRemainingRateAsync(string key, ThrottleRequirement requirement);
     }
+
+    public interface IRemainingRateStore
+    {
+        Task<RemainingRate> IncrementAsync(RemainingRateKey key, ThrottleRequirement requirement, long incrementValue = 1, bool reachLimitAtMax = false);
+
+        Task<RemainingRate> GetAsync(string key, ThrottleRequirement requirement);
+    }
 }

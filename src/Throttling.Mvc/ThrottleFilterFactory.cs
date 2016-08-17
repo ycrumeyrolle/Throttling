@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.AspNet.Mvc.ApplicationModels;
-using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Throttling.Mvc
 {
@@ -18,7 +18,7 @@ namespace Throttling.Mvc
         private readonly ReadOnlyCollection<AttributeRouteModel> _controllerTemplates;
         private readonly AttributeRouteModel _actionTemplate;
 
-        public ThrottleFilterFactory(IList<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, string policyName)
+        public ThrottleFilterFactory(IEnumerable<string> httpMethods, AttributeRouteModel actionTemplate, IEnumerable<AttributeRouteModel> controllerTemplates, string policyName)
         {
             if (httpMethods == null)
             {
@@ -53,6 +53,14 @@ namespace Throttling.Mvc
             get
             {
                 return -1;
+            }
+        }
+
+        public bool IsReusable
+        {
+            get
+            {
+                return true;
             }
         }
 

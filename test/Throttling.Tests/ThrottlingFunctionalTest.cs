@@ -1,27 +1,103 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Testing;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
 
 namespace Throttling.Tests
 {
-    public abstract class ThrottleFunctionalTest
+    public class MvcTestFixture<TStartup> : IDisposable
     {
-        protected ThrottleFunctionalTest(string siteName, Action<IApplicationBuilder> app, Action<IServiceCollection> configureServices)
+        private readonly TestServer _server;
+
+        public MvcTestFixture()
+            : this(Path.Combine("test", "WebSites"))
         {
-            SiteName = siteName;
-            App = app;
-            ConfigureServices = configureServices;
         }
 
-        public string SiteName { get; set; }
+        protected MvcTestFixture(string solutionRelativePath)
+        {
+            // RequestLocalizationOptions saves the current culture when constructed, potentially changing response
+            // localization i.e. RequestLocalizationMiddleware behavior. Ensure the saved culture
+            // (DefaultRequestCulture) is consistent regardless of system configuration or personal preferences.
+            using (new CultureReplacer())
+            {
+                var startupAssembly = typeof(TStartup).GetTypeInfo().Assembly;
+                var contentRoot = GetProjectPath(solutionRelativePath, startupAssembly);
 
-        public Action<IApplicationBuilder> App { get; }
+                var builder = new WebHostBuilder()
+                    .UseContentRoot(contentRoot)
+                    .ConfigureServices(InitializeServices)
+                    .UseStartup(typeof(TStartup));
 
-        public Action<IServiceCollection> ConfigureServices { get; }
+                _server = new TestServer(builder);
+            }
+
+            Client = _server.CreateClient();
+            Client.BaseAddress = new Uri("http://localhost");
+        }
+
+        public HttpClient Client { get; }
+
+        public void Dispose()
+        {
+            Client.Dispose();
+            _server.Dispose();
+        }
+
+        protected virtual void InitializeServices(IServiceCollection services)
+        {
+            services.AddSingleton(new InMemoryRateStore(new MemoryCache(Options.Create(new MemoryCacheOptions())), new SystemClock()));
+        }
+
+        public static string GetProjectPath(string solutionRelativePath, Assembly assembly)
+        {
+            var projectName = assembly.GetName().Name;
+            var applicationBasePath = PlatformServices.Default.Application.ApplicationBasePath;
+
+            var directoryInfo = new DirectoryInfo(applicationBasePath);
+            do
+            {
+                var solutionFileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, "Throttling.sln"));
+                if (solutionFileInfo.Exists)
+                {
+                    return Path.GetFullPath(Path.Combine(directoryInfo.FullName, solutionRelativePath, projectName));
+                }
+
+                directoryInfo = directoryInfo.Parent;
+            }
+            while (directoryInfo.Parent != null);
+
+            throw new Exception($"Solution root could not be located using application root {applicationBasePath}.");
+        }
+    }
+
+    public class MvcSampleFixture<TStartup> : MvcTestFixture<TStartup>
+    {
+        public MvcSampleFixture()
+            : base()
+        {
+        }
+    }
+
+    public abstract class ThrottleFunctionalTest<TStartup> : IClassFixture<MvcSampleFixture<TStartup>>
+    {
+        protected ThrottleFunctionalTest(HttpClient client)
+        {
+            Client = client;
+        }
+
+        public HttpClient Client { get; }
 
         [Theory]
         [InlineData(1, "9")]
@@ -29,16 +105,13 @@ namespace Throttling.Tests
         public async Task ResourceWithSimplePolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
+            //var server = CreateServer(App, ConfigureServices);
+            //var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder = server
-                    .CreateRequest("http://localhost/apikey/test/action1/" + i);
-
                 // Act
-                response = await requestBuilder.SendAsync("GET");
+                response = await Client.GetAsync("http://localhost/apikey/test/RateLimit10PerHour/" + i);
             }
 
             // Assert
@@ -51,21 +124,17 @@ namespace Throttling.Tests
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-IPReset").First());
         }
 
+
         [Theory]
         [InlineData(11, "0")]
         public async Task ResourceWithSimplePolicy_BeyondLimits_Returns429(int tries, string userRemaining)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder = server
-                    .CreateRequest("http://localhost/apikey/test/action1/" + i);
-
                 // Act
-                response = await requestBuilder.SendAsync("GET");
+                response = await Client.GetAsync("http://localhost/apikey/test/RateLimit10PerHour/" + i);
             }
 
             // Assert
@@ -88,19 +157,12 @@ namespace Throttling.Tests
         public async Task TwoResourcesWithSamePolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder1 = server
-                    .CreateRequest("http://localhost/apikey/test/action1/" + i);
-                var requestBuilder2 = server
-                    .CreateRequest("http://localhost/apikey/test/action2/" + i);
-
                 // Act
-                await requestBuilder1.SendAsync("GET");
-                response = await requestBuilder2.SendAsync("GET");
+                await Client.GetAsync("http://localhost/apikey/test/RateLimit10PerHour/" + i);
+                response = await Client.GetAsync("http://localhost/apikey/test/RateLimit10PerHour2/" + i);
             }
 
             // Assert
@@ -118,19 +180,12 @@ namespace Throttling.Tests
         public async Task TwoResourcesWithSamePolicy_BeyondLimits_Returns429(int tries, string userRemaining)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder1 = server
-                    .CreateRequest("http://localhost/apikey/test/action1/" + i);
-                var requestBuilder2 = server
-                    .CreateRequest("http://localhost/apikey/test/action2/" + i);
-
                 // Act
-                response = await requestBuilder1.SendAsync("GET");
-                response = await requestBuilder2.SendAsync("GET");
+                response = await Client.GetAsync("http://localhost/apikey/test/RateLimit10PerHour/" + i);
+                response = await Client.GetAsync("http://localhost/apikey/test/RateLimit10PerHour2/" + i);
             }
 
             // Assert
@@ -155,16 +210,11 @@ namespace Throttling.Tests
         public async Task BandwidthPolicy_BellowLimits_Returns200(int tries, string userRemaining)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder = server
-                    .CreateRequest("http://localhost/apikey/test/action4/" + i);
-
                 // Act
-                response = await requestBuilder.SendAsync("GET");
+                response = await Client.GetAsync("http://localhost/apikey/test/Quota160BPerHourByApiKey/" + i);
             }
 
             // Assert
@@ -179,16 +229,11 @@ namespace Throttling.Tests
         public async Task BandwidthPolicy_BeyondLimits_Returns429(int tries, string userRemaining)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder = server
-                    .CreateRequest("http://localhost/apikey/test/action3/" + i);
-
                 // Act
-                response = await requestBuilder.SendAsync("GET");
+                response = await Client.GetAsync("http://localhost/apikey/test/Quota160BPerHourByIP/" + i);
             }
 
             // Assert
@@ -213,21 +258,16 @@ namespace Throttling.Tests
         public async Task ApiKeyPolicy_BellowLimits_Returns200(int tries)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder = server
-                    .CreateRequest("http://localhost/apikey/test/action4/" + i);
-
                 // Act
-                response = await requestBuilder.SendAsync("GET");
-            }
+                response = await Client.GetAsync("http://localhost/apikey/test/Quota160BPerHourByApiKey/" + i);
+             }
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            
+
             // TODO : Fix the ISystemClock
             // Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-UserReset").First());
         }
@@ -237,16 +277,11 @@ namespace Throttling.Tests
         public async Task ApiKeyPolicy_BeyondLimits_Returns429(int tries)
         {
             // Arrange
-            var server = TestHelper.CreateServer(App, SiteName, ConfigureServices);
-            var client = server.CreateClient();
             HttpResponseMessage response = null;
             for (int i = 0; i < tries; i++)
             {
-                var requestBuilder = server
-                    .CreateRequest("http://localhost/apikey/test/action4/" + i);
-
                 // Act
-                response = await requestBuilder.SendAsync("GET");
+                response = await Client.GetAsync("http://localhost/apikey/test/Quota160BPerHourByApiKey/" + i);
             }
 
             // Assert
@@ -265,25 +300,16 @@ namespace Throttling.Tests
         }
     }
 
-    public class SimpleThrottlingFunctionalTest : ThrottleFunctionalTest
+    public class SimpleThrottlingFunctionalTest : ThrottleFunctionalTest<SimpleThrottling.Startup>
     {
-        public SimpleThrottlingFunctionalTest()
-            : base(nameof(SimpleThrottling), new SimpleThrottling.Startup().Configure, new SimpleThrottling.Startup().ConfigureServices)
+        public SimpleThrottlingFunctionalTest(MvcSampleFixture<SimpleThrottling.Startup> fixture) : base(fixture.Client)
         {
         }
     }
 
-    public class MvcThrottlingFunctionalTest : ThrottleFunctionalTest
+    public class MvcThrottlingFunctionalTest : ThrottleFunctionalTest<MvcThrottling.Startup>
     {
-        public MvcThrottlingFunctionalTest()
-            : base(nameof(MvcThrottling), new MvcThrottling.Startup().Configure, new MvcThrottling.Startup().ConfigureServices)
-        {
-        }
-    }
-    public class RedisThrottlingFunctionalTest : ThrottleFunctionalTest
-    {
-        public RedisThrottlingFunctionalTest()
-            : base(nameof(RedisThrottling), new RedisThrottling.Startup().Configure, new RedisThrottling.Startup().ConfigureServices)
+        public MvcThrottlingFunctionalTest(MvcSampleFixture<MvcThrottling.Startup> fixture) : base(fixture.Client)
         {
         }
     }
@@ -294,7 +320,7 @@ namespace Throttling.Tests
         private readonly Action<IApplicationBuilder> _app = new SimpleThrottling.Startup().Configure;
         private readonly Action<IServiceCollection> _configureServices = new SimpleThrottling.Startup().ConfigureServices;
 
-     //   [Theory]
+        //   [Theory]
         //[InlineData(1, "9")]
         //[InlineData(10, "0")]
         //public async Task ResourceWithSimplePolicy_BellowLimits_Returns200(int tries, string userRemaining)
@@ -306,7 +332,7 @@ namespace Throttling.Tests
         //    for (int i = 0; i < tries; i++)
         //    {
         //        var requestBuilder = server
-        //            .CreateRequest("http://localhost/apikey/test/action1/" + i);
+        //            .CreateRequest("http://localhost/apikey/test/RateLimit10PerHour/" + i);
 
         //        // Act
         //        response = await requestBuilder.SendAsync("GET");
@@ -321,6 +347,6 @@ namespace Throttling.Tests
         //    // TODO : Fix the ISystemClock
         // //   Assert.Equal("1428964312", response.Headers.GetValues("X-RateLimit-IPReset").First());
         //}
-    
+
     }
 }

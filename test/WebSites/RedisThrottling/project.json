@@ -1,18 +1,23 @@
 ﻿{
-    "version": "1.0.0-*",
-    "dependencies": {
-        "Throttling": "1.0.0-*",
-        "Throttling.Redis": "1.0.0-*",
-        "Throttling.Tests.Common": "1.0.0-*",
-        "Microsoft.AspNet.Server.IIS": "1.0.0-*",
-        "Microsoft.AspNet.Server.WebListener": "1.0.0-*",
-        "Microsoft.Framework.Logging.Console": "1.0.0-*",
-        "Microsoft.Framework.Logging.Abstractions": "1.0.0-*"
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Throttling": "1.0.0-*",
+    "Throttling.Redis": "1.0.0-*",
+    "Throttling.Tests.Common": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Abstractions": "1.1.0-*"
+  },
+  "testRunner": "xunit",
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        },
+        "System.Diagnostics.TraceSource": "4.0.0-*"
+      }
     },
-    "commands": {
-        "web": "Microsoft.AspNet.Hosting server=Microsoft.AspNet.Server.WebListener server.urls=http://localhost:5000"
-    },
-      "frameworks": {
-        "dnx451": { }
-    }
+    "net451": {}
+  }
 }

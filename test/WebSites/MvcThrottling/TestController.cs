@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Throttling.Mvc;
 
 namespace MvcThrottling
@@ -7,30 +7,30 @@ namespace MvcThrottling
     [Route("{apikey}/test2")]
     public class TestController : Controller
     {
-        [HttpGet("Action1/{value}")]
+        [HttpGet("RateLimit10PerHour/{value}")]
         [EnableThrottling("10 requests per hour, fixed reset")]
-        public string Action1(int value)
+        public string RateLimit10PerHour(int value)
         {
-            return "Action1 : " + value;
+            return "RateLimit10PerHour : " + value;
         }
         
-        [HttpGet("Action2/{value}")]
+        [HttpGet("RateLimit10PerHour2/{value}")]
         [EnableThrottling("10 requests per hour, fixed reset")]
-        public string Action2(int value)
+        public string RateLimit10PerHour2(int value)
         {
-            return "Action1 : " + value;
+            return "RateLimit10PerHour : " + value;
         }
 
-        [HttpGet("Action3/{value}")]
+        [HttpGet("Quota160BPerHourByIP/{value}")]
         [EnableThrottling("160 bytes per hour by IP")]
-        public string Action3(int value)
+        public string Quota160BPerHourByIP(int value)
         {
             return "0123456789012345";
         }
 
-        [HttpGet("Action4/{value}")]
+        [HttpGet("Quota160BPerHourByApiKey/{value}")]
         [EnableThrottling("160 bytes per hour by API key")]
-        public string Action4(int value)
+        public string Quota160BPerHourByApiKey(int value)
         {
             return "0123456789012345";
         }

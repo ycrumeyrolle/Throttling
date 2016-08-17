@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using Microsoft.Framework.Internal;
+using Microsoft.Extensions.Internal;
 
 namespace Throttling
 {

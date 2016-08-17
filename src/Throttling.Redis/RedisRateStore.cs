@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace Throttling.Redis
@@ -98,7 +97,7 @@ namespace Throttling.Redis
             }
             else
             {
-                var remainingTime = keyWithExpiry.Expiry ?? requirement.RenewalPeriod;
+                var remainingTime = keyWithExpiry.Expiry ?? requirement.RenewalPeriod;  
                 rate.Reset = _clock.UtcNow.Add(remainingTime);
             }
 

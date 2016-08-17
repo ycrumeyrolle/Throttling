@@ -1,27 +1,20 @@
 ﻿using System;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Throttling.Mvc
 {
     public class TooManyRequestResult : ActionResult
     {
-        private readonly IReadableStringCollection _headers;
         private readonly string _retryAfter;
 
-        public TooManyRequestResult(IReadableStringCollection headers, string retryAfter)
+        public TooManyRequestResult(string retryAfter)
         {
-            if (headers == null)
-            {
-                throw new ArgumentNullException(nameof(headers));
-            }
-
             if (retryAfter == null)
             {
                 throw new ArgumentNullException(nameof(retryAfter));
             }
 
-            _headers = headers;
             _retryAfter = retryAfter;
         }
 

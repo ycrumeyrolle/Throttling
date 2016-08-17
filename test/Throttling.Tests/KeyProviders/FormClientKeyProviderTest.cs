@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.Http.Features.Internal;
-using Microsoft.AspNet.Http.Internal;
-using Microsoft.Framework.Primitives;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Primitives;
 using Xunit;
 
 namespace Throttling.Tests
