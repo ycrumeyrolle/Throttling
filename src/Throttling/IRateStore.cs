@@ -2,17 +2,10 @@
 
 namespace Throttling
 {
-    public interface IRateStore
+    public interface IThrottleCounterStore
     {
-        Task<RemainingRate> DecrementRemainingRateAsync(string key, ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false);
+        Task<ThrottleCounter> IncrementAsync(string key, ThrottleRequirement requirement, long incrementValue = 1, bool reachLimitAtMax = false);
 
-        Task<RemainingRate> GetRemainingRateAsync(string key, ThrottleRequirement requirement);
-    }
-
-    public interface IRemainingRateStore
-    {
-        Task<RemainingRate> IncrementAsync(RemainingRateKey key, ThrottleRequirement requirement, long incrementValue = 1, bool reachLimitAtMax = false);
-
-        Task<RemainingRate> GetAsync(string key, ThrottleRequirement requirement);
+        Task<ThrottleCounter> GetAsync(string key, ThrottleRequirement requirement);
     }
 }

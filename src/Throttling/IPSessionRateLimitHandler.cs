@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Internal;
 
 namespace Throttling
 {
     public class IPSessionRateLimitHandler : InboundRequirementHandler<IPSessionRateLimitRequirement>
     {
-        public IPSessionRateLimitHandler(IRateStore store)
-            : base(store)
+        public override void AddRateLimitHeaders(ThrottleCounter counter, ThrottleContext throttleContext, IPSessionRateLimitRequirement requirement)
         {
-        }
-
-        public override void AddRateLimitHeaders(RemainingRate rate, ThrottleContext throttleContext, IPSessionRateLimitRequirement requirement)
-        {
-            if (rate == null)
+            if (counter == null)
             {
-                throw new ArgumentNullException(nameof(rate));
+                throw new ArgumentNullException(nameof(counter));
             }
 
             if (throttleContext == null)
@@ -30,7 +24,7 @@ namespace Throttling
             }
 
             throttleContext.ResponseHeaders["X-RateLimit-IPLimit"] = requirement.MaxValue.ToString();
-            throttleContext.ResponseHeaders["X-RateLimit-IPRemaining"] = rate.RemainingCalls.ToString();
+            throttleContext.ResponseHeaders["X-RateLimit-IPRemaining"] = counter.Remaining(requirement).ToString();
         }
 
         public override string GetKey(HttpContext httpContext, IPSessionRateLimitRequirement requirement)

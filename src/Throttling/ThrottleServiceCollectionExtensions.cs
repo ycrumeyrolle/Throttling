@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddThrottlingCore();
             serviceCollection.AddMemoryCache();
-            serviceCollection.TryAddTransient<IRateStore, InMemoryRateStore>();
+            serviceCollection.TryAddTransient<IThrottleCounterStore, MemoryThrottlingCounterStore>();
 
             return serviceCollection;
         }
@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddThrottlingCore(configureOptions);
             serviceCollection.AddMemoryCache();
-            serviceCollection.TryAddTransient<IRateStore, InMemoryRateStore>();
+            serviceCollection.TryAddTransient<IThrottleCounterStore, MemoryThrottlingCounterStore>();
 
             return serviceCollection;
         }
@@ -150,15 +150,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
     public class ApiKeyRateLimitHandler : InboundRequirementHandler<ApiKeyRateLimitRequirement>
     {
-        public ApiKeyRateLimitHandler(IRateStore store)
-            : base(store)
-        {
-        }
-
-        public override void AddRateLimitHeaders(RemainingRate rate, ThrottleContext throttleContext, ApiKeyRateLimitRequirement requirement)
+        public override void AddRateLimitHeaders(ThrottleCounter counter, ThrottleContext throttleContext, ApiKeyRateLimitRequirement requirement)
         {
             throttleContext.ResponseHeaders["X-RateLimit-ClientLimit"] = requirement.MaxValue.ToString(CultureInfo.InvariantCulture);
-            throttleContext.ResponseHeaders["X-RateLimit-ClientRemaining"] = rate.RemainingCalls.ToString(CultureInfo.InvariantCulture);
+            throttleContext.ResponseHeaders["X-RateLimit-ClientRemaining"] = counter.Remaining(requirement).ToString(CultureInfo.InvariantCulture);
         }
 
         public override string GetKey(HttpContext httpContext, ApiKeyRateLimitRequirement requirement)
@@ -169,15 +164,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
     public class IPRateLimitHandler : InboundRequirementHandler<IPRateLimitRequirement>
     {
-        public IPRateLimitHandler(IRateStore store)
-            : base(store)
-        {
-        }
-
-        public override void AddRateLimitHeaders(RemainingRate rate, ThrottleContext throttleContext, IPRateLimitRequirement requirement)
+        public override void AddRateLimitHeaders(ThrottleCounter counter, ThrottleContext throttleContext, IPRateLimitRequirement requirement)
         {
             throttleContext.ResponseHeaders["X-RateLimit-IPLimit"] = requirement.MaxValue.ToString();
-            throttleContext.ResponseHeaders["X-RateLimit-IPRemaining"] = rate.RemainingCalls.ToString();
+            throttleContext.ResponseHeaders["X-RateLimit-IPRemaining"] = counter.Remaining(requirement).ToString();
         }
 
         public override string GetKey(HttpContext httpContext, IPRateLimitRequirement requirement)
@@ -189,16 +179,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
     public class AuthenticatedUserRateLimitHandler : InboundRequirementHandler<AuthenticatedUserRateLimitRequirement>
     {
-        public AuthenticatedUserRateLimitHandler(IRateStore store)
-            : base(store)
-        {
-        }
-
-        public override void AddRateLimitHeaders(RemainingRate rate, ThrottleContext throttleContext, AuthenticatedUserRateLimitRequirement requirement)
+        public override void AddRateLimitHeaders(ThrottleCounter counter, ThrottleContext throttleContext, AuthenticatedUserRateLimitRequirement requirement)
         {
             throttleContext.ResponseHeaders["X-RateLimit-UserLimit"] = requirement.MaxValue.ToString(CultureInfo.InvariantCulture);
-            throttleContext.ResponseHeaders["X-RateLimit-UserRemaining"] = rate.RemainingCalls.ToString(CultureInfo.InvariantCulture);
-            throttleContext.ResponseHeaders["X -RateLimit-UserReset"] = rate.Reset.ToEpoch().ToString(CultureInfo.InvariantCulture);
+            throttleContext.ResponseHeaders["X-RateLimit-UserRemaining"] = counter.Remaining(requirement).ToString(CultureInfo.InvariantCulture);
+            throttleContext.ResponseHeaders["X -RateLimit-UserReset"] = counter.Reset.ToEpoch().ToString(CultureInfo.InvariantCulture);
         }
 
         public override string GetKey(HttpContext httpContext, AuthenticatedUserRateLimitRequirement requirement)

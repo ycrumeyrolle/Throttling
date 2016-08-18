@@ -14,7 +14,7 @@ namespace Throttling
         private bool _succeedCalled;
         private bool _abortCalled;
 
-        public ThrottleContext(HttpContext httpContext, ThrottleStrategy strategy)
+        public ThrottleContext(HttpContext httpContext, ThrottleStrategy strategy, IThrottleCounterStore store)
         {
             if (httpContext == null)
             {
@@ -31,6 +31,7 @@ namespace Throttling
             Exclusions = strategy.Policy.Exclusions;
             RouteTemplate = strategy.RouteTemplate;
             _pendingRequirements = new HashSet<IThrottleRequirement>(Requirements);
+            Store = store;
         }
         
         public HttpContext HttpContext { get; }
@@ -46,6 +47,8 @@ namespace Throttling
         public IHeaderDictionary ResponseHeaders { get; } = new HeaderDictionary();
 
         public ContentLengthTracker ContentLengthTracker { get; set; }
+
+        public IThrottleCounterStore Store { get; }
 
         public IEnumerable<IThrottleRequirement> PendingRequirements
         {

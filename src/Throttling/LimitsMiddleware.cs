@@ -8,9 +8,9 @@ namespace Throttling
     public class LimitsMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IRateStore _store;
+        private readonly IThrottleCounterStore _store;
 
-        public LimitsMiddleware(RequestDelegate next, IRateStore store)
+        public LimitsMiddleware(RequestDelegate next, IThrottleCounterStore store)
         {
             _next = next;
             _store = store;

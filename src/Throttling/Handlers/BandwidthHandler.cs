@@ -4,12 +4,7 @@ namespace Throttling
 {
     public abstract class BandwidthHandler<TRequirement> : OutboundRequirementHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
-        public BandwidthHandler(IRateStore store)
-            : base(store)
-        {
-        }
-
-        public override long GetDecrementValue(ThrottleContext throttleContext, TRequirement requirement)
+        public override long GetIncrementValue(ThrottleContext throttleContext, TRequirement requirement)
         {
             if (throttleContext == null)
             {

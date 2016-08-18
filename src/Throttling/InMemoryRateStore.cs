@@ -1,188 +1,83 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Internal;
 
 namespace Throttling
 {
-    //public class MemoryRemainingRateStore : IRemainingRateStore
-    //{
-    //    private readonly IMemoryCache _cache;
-
-    //    private readonly ISystemClock _clock;
-
-    //    public Task<RemainingRate> GetAsync(string key, ThrottleRequirement requirement)
-    //    {
-    //        RemainingRate rate;
-    //        RemainingRateItem item = _cache.Get<RemainingRateItem>(key);
-    //        if (item == null)
-    //        {
-    //            item = new RemainingRateItem
-    //            {
-    //                Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
-    //                RemainingCalls = requirement.MaxValue
-    //            };
-    //        }
-    //        else if (requirement.Sliding)
-    //        {
-    //            inMemoryRate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
-    //        }
-
-    //        rate = new RemainingRate(true)
-    //        {
-    //            Reset = inMemoryRate.Reset,
-    //            RemainingCalls = inMemoryRate.RemainingCalls
-    //        };
-
-    //        return rate;
-    //    }
-
-    //    public Task<RemainingRate> IncrementAsync(RemainingRateKey key, ThrottleRequirement requirement, long incrementValue = 1, bool reachLimitAtMax = false)
-    //    {
-         
-    //    }
-
-    //    private class RemainingRateItem
-    //    {
-
-    //    }
-    //}
-
-    public class InMemoryRateStore : IRateStore
+    public class MemoryThrottlingCounterStore : IThrottleCounterStore
     {
         private readonly IMemoryCache _cache;
+
         private readonly ISystemClock _clock;
 
-        public InMemoryRateStore(IMemoryCache cache, ISystemClock clock)
+        public MemoryThrottlingCounterStore(IMemoryCache cache, ISystemClock clock)
         {
-            if (cache == null)
-            {
-                throw new ArgumentNullException(nameof(cache));
-            }
-
-            if (clock == null)
-            {
-                throw new ArgumentNullException(nameof(clock));
-            }
-
             _cache = cache;
             _clock = clock;
         }
 
-        public Task<RemainingRate> DecrementRemainingRateAsync(string key, ThrottleRequirement requirement, long decrementValue, bool reachLimitAtZero = false)
+        public Task<ThrottleCounter> GetAsync(string key, ThrottleRequirement requirement)
         {
-            if (key == null)
+            ThrottleCounter counter;
+            ThrottleCounterEntry item = _cache.Get<ThrottleCounterEntry>(key);
+            if (item == null)
             {
-                throw new ArgumentNullException(nameof(key));
+                counter = new ThrottleCounter(_clock.UtcNow.Add(requirement.RenewalPeriod));
+            }
+            else
+            {
+                bool limitReached = false;
+                if (item.Value >= requirement.MaxValue)
+                {
+                    limitReached = true;
+                }
+
+                counter = new ThrottleCounter(item.Reset, item.Value, limitReached);
             }
 
-            if (requirement == null)
-            {
-                throw new ArgumentNullException(nameof(requirement));
-            }
+            return Task.FromResult(counter);
+        }
 
-            RemainingRate rate;
-            InMemoryRemainingRate inMemoryRate = _cache.Get<InMemoryRemainingRate>(key);
-            if (inMemoryRate == null)
+        public Task<ThrottleCounter> IncrementAsync(string key, ThrottleRequirement requirement, long incrementValue = 1, bool reachLimitAtMax = false)
+        {
+            bool limitReached = false;
+            ThrottleCounterEntry entry = _cache.Get<ThrottleCounterEntry>(key);
+            if (entry == null)
             {
-                inMemoryRate = new InMemoryRemainingRate
+                entry = new ThrottleCounterEntry
                 {
                     Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
-                    RemainingCalls = requirement.MaxValue
+                    Value = incrementValue
                 };
             }
-            else if (requirement.Sliding)
+            else
             {
-                inMemoryRate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
-            }
-
-            rate = new RemainingRate(reachLimitAtZero)
-            {
-                Reset = inMemoryRate.Reset,
-                RemainingCalls = inMemoryRate.RemainingCalls - decrementValue
-            };
-
-            inMemoryRate.RemainingCalls = rate.RemainingCalls;
-
-            _cache.Set(key, inMemoryRate, new MemoryCacheEntryOptions { AbsoluteExpiration = inMemoryRate.Reset });
-
-            return Task.FromResult(rate);
-        }
-
-        public Task<RemainingRate> GetRemainingRateAsync(string key, ThrottleRequirement requirement)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (requirement == null)
-            {
-                throw new ArgumentNullException(nameof(requirement));
-            }
-
-            return Task.FromResult(GetRemainingRate(key, requirement));
-        }
-
-        private RemainingRate GetRemainingRate(string key, ThrottleRequirement requirement)
-        {
-            RemainingRate rate;
-            InMemoryRemainingRate inMemoryRate = _cache.Get<InMemoryRemainingRate>(key);
-            if (inMemoryRate == null)
-            {
-                inMemoryRate = new InMemoryRemainingRate
+                var value = entry.Value + incrementValue;
+                if (value > requirement.MaxValue || (reachLimitAtMax && value == requirement.MaxValue))
                 {
-                    Reset = _clock.UtcNow.Add(requirement.RenewalPeriod),
-                    RemainingCalls = requirement.MaxValue
-                };
-            }
-            else if (requirement.Sliding)
-            {
-                inMemoryRate.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+                    limitReached = true;
+                }
+
+                entry.Value = value;
+
+                if (requirement.Sliding)
+                {
+                    entry.Reset = _clock.UtcNow.Add(requirement.RenewalPeriod);
+                }
             }
 
-            rate = new RemainingRate(true)
-            {
-                Reset = inMemoryRate.Reset,
-                RemainingCalls = inMemoryRate.RemainingCalls
-            };
+            _cache.Set(key, entry, entry.Reset);
 
-            return rate;
+            var counter = new ThrottleCounter(entry.Reset, entry.Value, limitReached);
+
+            return Task.FromResult(counter);
         }
 
-        private class InMemoryRemainingRate
+        private class ThrottleCounterEntry
         {
-            public long RemainingCalls { get; internal set; }
-            public DateTimeOffset Reset { get; internal set; }
+            public DateTimeOffset Reset { get; set; }
+
+            public long Value { get; set; }
         }
     }
-
-        public struct RemainingRateKey : IEquatable<RemainingRateKey>
-        {
-            public RemainingRateKey(Type requirementType)
-            {
-                RequirementType = requirementType;
-            }
-
-            public Type RequirementType { get; }
-
-            public bool Equals(RemainingRateKey other)
-            {
-                return RequirementType.Equals(other.RequirementType);
-            }
-
-            public override bool Equals(object obj)
-            {
-                return Equals((RemainingRateKey)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                var hashCodeCombiner = HashCodeCombiner.Start();
-
-                hashCodeCombiner.Add(RequirementType);
-
-                return hashCodeCombiner;
-            }
-        }
 }

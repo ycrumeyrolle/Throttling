@@ -6,18 +6,6 @@ namespace Throttling
 {
     public abstract class OutboundRequirementHandler<TRequirement> : RequirementHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
-        private readonly IRateStore _store;
-
-        public OutboundRequirementHandler( IRateStore store)
-        {
-            if (store == null)
-            {
-                throw new ArgumentNullException(nameof(store));
-            }
-
-            _store = store;
-        }
-
         public override async Task HandleRequirementAsync(ThrottleContext throttleContext, TRequirement requirement)
         {
             if (throttleContext == null)
@@ -38,10 +26,10 @@ namespace Throttling
             }
 
             key = typeof(TRequirement) + key;
-            var rate = await _store.GetRemainingRateAsync(key, requirement);
-            if (rate.LimitReached)
+            var counter = await throttleContext.Store.GetAsync(key, requirement);
+            if (counter.LimitReached)
             {
-                throttleContext.TooManyRequest(requirement, rate.Reset);
+                throttleContext.TooManyRequest(requirement, counter.Reset);
             }
             else
             {
@@ -70,12 +58,12 @@ namespace Throttling
             }
             
             key = typeof(TRequirement) + key;
-            var decrementValue = GetDecrementValue(throttleContext, requirement);
-            await _store.DecrementRemainingRateAsync(key, requirement, decrementValue, reachLimitAtZero: true);
+            var incrementValue = GetIncrementValue(throttleContext, requirement);
+            await throttleContext.Store.IncrementAsync(key, requirement, incrementValue, reachLimitAtMax: true);
         }
 
         public abstract string GetKey(HttpContext httpContext, TRequirement requirement);
 
-        public abstract long GetDecrementValue(ThrottleContext throttleContext, TRequirement requirement);
+        public abstract long GetIncrementValue(ThrottleContext throttleContext, TRequirement requirement);
     }
 }

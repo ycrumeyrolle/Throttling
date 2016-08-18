@@ -6,13 +6,6 @@ namespace Throttling
 {
     public abstract class InboundRequirementHandler<TRequirement> : RequirementHandler<TRequirement> where TRequirement : ThrottleRequirement
     {
-        private readonly IRateStore _store;
-
-        public InboundRequirementHandler(IRateStore store)
-        {
-            _store = store;
-        }
-
         public override async Task HandleRequirementAsync(ThrottleContext throttleContext, TRequirement requirement)
         {
             if (throttleContext == null)
@@ -24,8 +17,7 @@ namespace Throttling
             {
                 throw new ArgumentNullException(nameof(requirement));
             }
-
-
+            
             var key = GetKey(throttleContext.HttpContext, requirement);
             if (key == null)
             {
@@ -34,20 +26,20 @@ namespace Throttling
             }
 
             key = typeof(TRequirement) + key;
-            var rate = await _store.DecrementRemainingRateAsync(key, requirement, 1);
-            if (rate.LimitReached)
+            var counter = await throttleContext.Store.IncrementAsync(key, requirement, 1);
+            if (counter.LimitReached)
             {
-                throttleContext.TooManyRequest(requirement, rate.Reset);
+                throttleContext.TooManyRequest(requirement, counter.Reset);
             }
             else
             {
                 throttleContext.Succeed(requirement);
             }
 
-            AddRateLimitHeaders(rate, throttleContext, requirement);
+            AddRateLimitHeaders(counter, throttleContext, requirement);
         }
 
-        public abstract void AddRateLimitHeaders(RemainingRate rate, ThrottleContext throttleContext, TRequirement requirement);
+        public abstract void AddRateLimitHeaders(ThrottleCounter counter, ThrottleContext throttleContext, TRequirement requirement);
 
         public abstract string GetKey(HttpContext httpContext, TRequirement requirement);
     }

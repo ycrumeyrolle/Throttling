@@ -16,16 +16,16 @@ using Xunit;
 
 namespace Throttling.Tests
 {
-    public class MvcTestFixture<TStartup> : IDisposable
+    public class ThrottleTest<TStartup> : IDisposable
     {
         private readonly TestServer _server;
 
-        public MvcTestFixture()
+        public ThrottleTest()
             : this(Path.Combine("test", "WebSites"))
         {
         }
 
-        protected MvcTestFixture(string solutionRelativePath)
+        protected ThrottleTest(string solutionRelativePath)
         {
             // RequestLocalizationOptions saves the current culture when constructed, potentially changing response
             // localization i.e. RequestLocalizationMiddleware behavior. Ensure the saved culture
@@ -57,7 +57,6 @@ namespace Throttling.Tests
 
         protected virtual void InitializeServices(IServiceCollection services)
         {
-            services.AddSingleton(new InMemoryRateStore(new MemoryCache(Options.Create(new MemoryCacheOptions())), new SystemClock()));
         }
 
         public static string GetProjectPath(string solutionRelativePath, Assembly assembly)
@@ -81,24 +80,9 @@ namespace Throttling.Tests
             throw new Exception($"Solution root could not be located using application root {applicationBasePath}.");
         }
     }
-
-    public class MvcSampleFixture<TStartup> : MvcTestFixture<TStartup>
+    
+    public abstract class ThrottleFunctionalTest<TStartup> : ThrottleTest<TStartup>
     {
-        public MvcSampleFixture()
-            : base()
-        {
-        }
-    }
-
-    public abstract class ThrottleFunctionalTest<TStartup> : IClassFixture<MvcSampleFixture<TStartup>>
-    {
-        protected ThrottleFunctionalTest(HttpClient client)
-        {
-            Client = client;
-        }
-
-        public HttpClient Client { get; }
-
         [Theory]
         [InlineData(1, "9")]
         [InlineData(10, "0")]
@@ -148,7 +132,7 @@ namespace Throttling.Tests
 
             Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
             Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
-            Assert.Single(response.Headers.GetValues("Retry-After"), "3600");
+            Assert.Single(response.Headers.GetValues("Retry-After"));
         }
 
         [Theory]
@@ -200,7 +184,7 @@ namespace Throttling.Tests
 
             Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
             Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
-            Assert.Single(response.Headers.GetValues("Retry-After"), "3600");
+            Assert.Single(response.Headers.GetValues("Retry-After"));
         }
 
         [Theory]
@@ -248,7 +232,7 @@ namespace Throttling.Tests
 
             Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
             Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
-            Assert.Single(response.Headers.GetValues("Retry-After"), "3600");
+            Assert.Single(response.Headers.GetValues("Retry-After"));
         }
 
         [Theory]
@@ -296,22 +280,16 @@ namespace Throttling.Tests
 
             Assert.Single(response.Headers.GetValues("Cache-Control"), "no-store, no-cache");
             Assert.Single(response.Headers.GetValues("Pragma"), "no-cache");
-            Assert.Single(response.Headers.GetValues("Retry-After"), "3600");
+            Assert.Single(response.Headers.GetValues("Retry-After"));
         }
     }
 
     public class SimpleThrottlingFunctionalTest : ThrottleFunctionalTest<SimpleThrottling.Startup>
     {
-        public SimpleThrottlingFunctionalTest(MvcSampleFixture<SimpleThrottling.Startup> fixture) : base(fixture.Client)
-        {
-        }
     }
 
     public class MvcThrottlingFunctionalTest : ThrottleFunctionalTest<MvcThrottling.Startup>
     {
-        public MvcThrottlingFunctionalTest(MvcSampleFixture<MvcThrottling.Startup> fixture) : base(fixture.Client)
-        {
-        }
     }
 
     public class ThrottlingFunctionalTest2

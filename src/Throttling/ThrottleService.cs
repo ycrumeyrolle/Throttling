@@ -15,12 +15,14 @@ namespace Throttling
         private readonly ISystemClock _clock;
         private readonly IList<IRequirementHandler> _handlers;
         private readonly IList<IExclusionHandler> _exclusionHandlers;
+        private readonly IThrottleCounterStore _store;
 
         public ThrottleService(
             ILoggerFactory loggerFactory,
             IEnumerable<IRequirementHandler> handlers,
             IEnumerable<IExclusionHandler> exclusionHandlers,
             ISystemClock clock,
+            IThrottleCounterStore store,
             IOptions<ThrottleOptions> options,
             ConfigureOptions<ThrottleOptions> configureOptions = null)
         {
@@ -43,6 +45,12 @@ namespace Throttling
             {
                 throw new ArgumentNullException(nameof(clock));
             }
+
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
@@ -60,6 +68,7 @@ namespace Throttling
             _exclusionHandlers = exclusionHandlers.ToArray();
             _logger = loggerFactory.CreateLogger<ThrottleService>();
             _clock = clock;
+            _store = store;
         }
 
         public virtual async Task<ThrottleContext> EvaluateAsync(HttpContext httpContext, ThrottleStrategy strategy)
@@ -74,7 +83,7 @@ namespace Throttling
                 throw new ArgumentNullException(nameof(strategy));
             }
 
-            var throttleContext = new ThrottleContext(httpContext, strategy);
+            var throttleContext = new ThrottleContext(httpContext, strategy, _store);
 
             foreach (var exclusion in _exclusionHandlers)
             {

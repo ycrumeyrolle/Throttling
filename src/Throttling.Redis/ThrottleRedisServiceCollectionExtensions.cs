@@ -25,7 +25,7 @@ namespace Throttling.Redis
                 services.Configure(configureOptions);
             }
 
-            services.AddSingleton<IRateStore, RedisRateStore>();
+            services.AddSingleton<IThrottleCounterStore, RedisThrottleCounterStore>();
             return services;
         }
 

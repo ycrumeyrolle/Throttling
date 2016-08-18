@@ -5,11 +5,6 @@ namespace Throttling
 {
     public class ApiKeyBandwidthHandler : BandwidthHandler<ApiKeyBandwidthRequirement>
     {
-        public ApiKeyBandwidthHandler(IRateStore store)
-            : base(store)
-        {
-        }
-
         public override string GetKey(HttpContext httpContext, ApiKeyBandwidthRequirement requirement)
         {
             if (httpContext == null)
